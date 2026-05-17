@@ -1,7 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Home, Wifi, ShieldCheck, Zap, LucideIcon, ArrowRight, CheckCircle2 } from "lucide-react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Home, Wifi, ShieldCheck, Zap, LucideIcon, ArrowRight, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useModal } from "@/lib/modal-context";
 
@@ -12,6 +13,7 @@ interface FixedCostItem {
   category?: string;
   paymentMethod?: string;
   isPaid?: boolean;
+  icon?: string;
 }
 
 interface FixedCostCardProps {
@@ -24,7 +26,12 @@ export default function FixedCostCard({
   currency = "THB" 
 }: FixedCostCardProps) {
   const { openExpenseModal } = useModal();
+  const [currentPage, setCurrentPage] = useState(0);
   const total = items.reduce((sum, item) => sum + item.amount, 0);
+  
+  const ITEMS_PER_PAGE = 5;
+  const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
+  const currentItems = items.slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1) * ITEMS_PER_PAGE);
 
   return (
     <motion.div
@@ -61,43 +68,80 @@ export default function FixedCostCard({
           </div>
         </div>
       ) : (
-        <div className="space-y-4">
-          {items.map((item, index) => {
-            return (
-              <motion.div 
-                key={item.id || index}
+        <div>
+          <div className="min-h-[280px]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentPage}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + index * 0.1 }}
-                onClick={() => {
-                  if (!item.isPaid) {
-                    openExpenseModal(() => {
-                      window.location.reload();
-                    }, {
-                      name: item.name,
-                      amount: item.amount,
-                      category: item.category,
-                      paymentMethod: item.paymentMethod,
-                    });
-                  }
-                }}
-                className={`flex items-center justify-between group ${!item.isPaid ? 'cursor-pointer' : 'opacity-60'}`}
+                exit={{ opacity: 0, x: 10 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-4"
               >
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-colors text-xl ${item.isPaid ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-black/5 group-hover:bg-[#FF9D00]/10 group-hover:border-[#FF9D00]/20'}`}>
-                    {item.isPaid ? <CheckCircle2 className="w-5 h-5 text-emerald-500" /> : '🧾'}
-                  </div>
-                  <div>
-                    <span className={`text-sm font-bold tracking-tight ${item.isPaid ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{item.name}</span>
-                    {!item.isPaid && <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Not Paid</p>}
-                  </div>
-                </div>
-                <div className={`text-sm font-black italic ${item.isPaid ? 'text-slate-400' : 'text-slate-900'}`}>
-                  {currency} {item.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                </div>
+                {currentItems.map((item, index) => {
+                  return (
+                    <div 
+                      key={item.id || index}
+                      onClick={() => {
+                        if (!item.isPaid) {
+                          openExpenseModal(() => {
+                            window.location.reload();
+                          }, {
+                            name: item.name,
+                            amount: item.amount,
+                            category: item.category,
+                            paymentMethod: item.paymentMethod,
+                          });
+                        }
+                      }}
+                      className={`flex items-center justify-between group ${!item.isPaid ? 'cursor-pointer' : 'opacity-60'}`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-colors relative ${item.isPaid ? 'bg-emerald-50/50 border-emerald-100' : 'bg-slate-50 border-black/5 group-hover:bg-[#FF9D00]/10 group-hover:border-[#FF9D00]/20'}`}>
+                          <span className={`text-xl ${item.isPaid ? 'opacity-45' : ''}`}>{item.icon || '🧾'}</span>
+                          {item.isPaid && (
+                            <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-[0_1px_3px_rgba(0,0,0,0.1)] border border-emerald-100 flex items-center justify-center">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-500 fill-emerald-50" />
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <span className={`text-sm font-bold tracking-tight ${item.isPaid ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{item.name}</span>
+                          {!item.isPaid && <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Not Paid</p>}
+                        </div>
+                      </div>
+                      <div className={`text-sm font-black italic ${item.isPaid ? 'text-slate-400' : 'text-slate-900'}`}>
+                        {currency} {item.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </div>
+                    </div>
+                  );
+                })}
               </motion.div>
-            );
-          })}
+            </AnimatePresence>
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-6 pt-4 border-t border-black/5">
+              <button 
+                onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+                disabled={currentPage === 0}
+                className="w-8 h-8 flex items-center justify-center rounded-xl border border-black/5 text-slate-400 hover:text-slate-900 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                Page {currentPage + 1} of {totalPages}
+              </span>
+              <button 
+                onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+                disabled={currentPage === totalPages - 1}
+                className="w-8 h-8 flex items-center justify-center rounded-xl border border-black/5 text-slate-400 hover:text-slate-900 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       )}
 

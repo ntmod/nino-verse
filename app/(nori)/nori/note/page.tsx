@@ -75,6 +75,42 @@ export default function NotePage() {
     });
   }, [transactions, searchQuery, selectedCategory, selectedPayment, dateFilter]);
 
+  const groupedTransactions = useMemo(() => {
+    // Sort transactions descending by date first
+    const sorted = [...filteredTransactions].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+
+    const groups: Record<string, Transaction[]> = {};
+    sorted.forEach(tx => {
+      const dateObj = new Date(tx.date);
+      const today = new Date();
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1);
+
+      let groupKey = "";
+      if (dateObj.toDateString() === today.toDateString()) {
+        groupKey = "Today";
+      } else if (dateObj.toDateString() === yesterday.toDateString()) {
+        groupKey = "Yesterday";
+      } else {
+        groupKey = dateObj.toLocaleDateString('en-US', { 
+          weekday: 'long', 
+          month: 'short', 
+          day: 'numeric',
+          year: dateObj.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+        });
+      }
+
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
+      }
+      groups[groupKey].push(tx);
+    });
+
+    return Object.entries(groups);
+  }, [filteredTransactions]);
+
   const resetFilters = () => {
     setSearchQuery("");
     setSelectedCategory("All");
@@ -178,93 +214,106 @@ export default function NotePage() {
         </div>
 
         {/* Minimal Transaction List */}
-        <div className="divide-y divide-gray-50">
+        <div className="space-y-8">
           <AnimatePresence mode="popLayout">
-            {filteredTransactions.length > 0 ? (
-              filteredTransactions.map((tx) => {
-                const categoryData = categories.find(c => c.name === tx.category);
-                const categoryIcon = categoryData?.icon || "🏷️";
-                const subCategoryObj = categoryData?.subcategories?.find((s: any) => s._id === tx.subCategory);
-                const subCategoryName = subCategoryObj ? subCategoryObj.name : "";
+            {groupedTransactions.length > 0 ? (
+              groupedTransactions.map(([dateGroup, txList]) => (
+                <div key={dateGroup} className="space-y-2">
+                  {/* Sticky Date Header */}
+                  <div className="sticky top-[56px] md:top-[80px] bg-white md:bg-gray-50/95 backdrop-blur-md py-2.5 z-10 flex items-center justify-between border-b border-gray-100">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">{dateGroup}</span>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded-full">
+                      {txList.length} {txList.length === 1 ? 'record' : 'records'}
+                    </span>
+                  </div>
+                  
+                  {/* Inner list of items */}
+                  <div className="divide-y divide-gray-50">
+                    {txList.map((tx) => {
+                      const categoryData = categories.find(c => c.name === tx.category);
+                      const categoryIcon = categoryData?.icon || "🏷️";
+                      const subCategoryObj = categoryData?.subcategories?.find((s: any) => s._id === tx.subCategory);
+                      const subCategoryName = subCategoryObj ? subCategoryObj.name : "";
 
-                return (
-                  <motion.div
-                    key={tx._id}
-                    layout
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="flex items-center justify-between py-5 group"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100 group-hover:bg-black group-hover:border-black transition-all duration-300">
-                        <span className="text-xl group-hover:scale-110 transition-transform">{categoryIcon}</span>
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-bold text-black tracking-tight line-clamp-1">{tx.name}</h3>
-                        <div className="flex flex-col gap-0.5 mt-1">
-                          <p className="text-[10px] font-bold text-[#FF9D00] uppercase tracking-widest flex items-center gap-1 flex-wrap">
-                            <span>{tx.category}</span>
-                            {subCategoryName && (
-                              <>
-                                <span className="text-gray-300">/</span>
-                                <span className="text-gray-400 lowercase font-medium">{subCategoryName}</span>
-                              </>
-                            )}
-                          </p>
-                          <div className="flex items-center gap-2 text-[9px] font-medium text-gray-400 uppercase tracking-wider">
-                            <span>{tx.paymentMethod}</span>
-                            <span className="w-1 h-1 bg-gray-200 rounded-full" />
-                            <span>{tx.displayDate}</span>
+                      return (
+                        <motion.div
+                          key={tx._id}
+                          layout
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="flex items-center justify-between py-4 group"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100 group-hover:bg-black group-hover:border-black transition-all duration-300">
+                              <span className="text-xl group-hover:scale-110 transition-transform">{categoryIcon}</span>
+                            </div>
+                            <div>
+                              <h3 className="text-sm font-bold text-black tracking-tight line-clamp-1">{tx.name}</h3>
+                              <div className="flex flex-col gap-0.5 mt-1">
+                                <p className="text-[10px] font-bold text-[#FF9D00] uppercase tracking-widest flex items-center gap-1 flex-wrap">
+                                  <span>{tx.category}</span>
+                                  {subCategoryName && (
+                                    <>
+                                      <span className="text-gray-300">/</span>
+                                      <span className="text-gray-400 lowercase font-medium">{subCategoryName}</span>
+                                    </>
+                                  )}
+                                </p>
+                                <div className="flex items-center gap-2 text-[9px] font-medium text-gray-400 uppercase tracking-wider">
+                                  <span>{tx.paymentMethod}</span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className={`text-base font-black tracking-tighter ${tx.amount < 0 ? "text-red-500" : "text-emerald-500"}`}>
-                          {tx.amount > 0 ? "+" : ""}{tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                        </p>
-                        <p className="text-[9px] font-bold text-gray-300 uppercase">THB</p>
-                      </div>
-                      <button 
-                        onClick={() => openExpenseModal(undefined, tx)}
-                        className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100 text-gray-300 hover:text-[#FF9D00] hover:border-[#FF9D00]/20 transition-all"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </button>
-                      <button 
-                        onClick={() => {
-                          openGlobalModal({
-                            header: "Delete Record?",
-                            message: `Are you sure you want to delete "${tx.name}"? This action cannot be undone.`,
-                            type: "delete",
-                            mainButton: {
-                              label: "Delete Now",
-                              color: "bg-rose-500 text-white hover:bg-rose-600",
-                              onClick: async () => {
-                                try {
-                                  await transactionService.delete(tx._id);
-                                  window.location.reload();
-                                } catch (error) {
-                                  console.error("Delete error:", error);
-                                }
-                              }
-                            },
-                            subButton: {
-                              label: "Go Back",
-                              onClick: () => {}
-                            }
-                          });
-                        }}
-                        className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100 text-gray-300 hover:text-rose-500 hover:border-rose-500/20 transition-all"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </motion.div>
-                );
-              })
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                              <p className={`text-base font-black tracking-tighter ${tx.amount < 0 ? "text-red-500" : "text-emerald-500"}`}>
+                                {tx.amount > 0 ? "+" : ""}{tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                              </p>
+                              <p className="text-[9px] font-bold text-gray-300 uppercase">THB</p>
+                            </div>
+                            <button 
+                              onClick={() => openExpenseModal(undefined, tx)}
+                              className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100 text-gray-300 hover:text-[#FF9D00] hover:border-[#FF9D00]/20 transition-all"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button 
+                              onClick={() => {
+                                openGlobalModal({
+                                  header: "Delete Record?",
+                                  message: `Are you sure you want to delete "${tx.name}"? This action cannot be undone.`,
+                                  type: "delete",
+                                  mainButton: {
+                                    label: "Delete Now",
+                                    color: "bg-rose-500 text-white hover:bg-rose-600",
+                                    onClick: async () => {
+                                      try {
+                                        await transactionService.delete(tx._id);
+                                        window.location.reload();
+                                      } catch (error) {
+                                        console.error("Delete error:", error);
+                                      }
+                                    }
+                                  },
+                                  subButton: {
+                                    label: "Go Back",
+                                    onClick: () => {}
+                                  }
+                                });
+                              }}
+                              className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100 text-gray-300 hover:text-rose-500 hover:border-rose-500/20 transition-all"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))
             ) : (
               <div className="py-20 text-center">
                 <p className="text-sm font-bold text-gray-300 uppercase tracking-widest">Empty Note</p>

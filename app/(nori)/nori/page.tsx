@@ -158,10 +158,15 @@ export default function Noripage() {
         tx.name.toLowerCase() === fc.name.toLowerCase() && 
         new Date(tx.date).getTime() >= startOfMonth
       );
+      const cat = categories.find(c => c.name === fc.category);
       
-      return { ...fc, isPaid };
+      return { 
+        ...fc, 
+        isPaid,
+        icon: cat?.icon || "🏷️"
+      };
     });
-  }, [fixedCosts, transactions]);
+  }, [fixedCosts, transactions, categories]);
 
   const handleGetStarted = () => {
     setShowExitWipe(true);
