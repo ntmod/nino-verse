@@ -75,12 +75,22 @@ export default function FixedCostSettings() {
         setEditingCost(null);
         setNewCost({ name: "", amount: "", category: "", paymentMethod: "" });
         fetchFixedCosts();
+        
+        openGlobalModal({
+          header: "Save Completed",
+          message: "The fixed cost bill has been saved successfully.",
+          type: "success",
+          mainButton: {
+            label: "Close",
+            onClick: () => {}
+          }
+        });
       }
     } catch (err) {
       console.error("Failed to save fixed cost:", err);
     }
   };
-
+ 
   const handleDeleteFixedCost = (id: string) => {
     openGlobalModal({
       header: "Delete Bill?",
@@ -95,6 +105,17 @@ export default function FixedCostSettings() {
             });
             if (res.ok) {
               fetchFixedCosts();
+              setTimeout(() => {
+                openGlobalModal({
+                  header: "Delete Completed",
+                  message: "The fixed cost bill has been removed successfully.",
+                  type: "success",
+                  mainButton: {
+                    label: "Close",
+                    onClick: () => {}
+                  }
+                });
+              }, 300);
             }
           } catch (err) {
             console.error("Failed to delete fixed cost:", err);

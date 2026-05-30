@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Wifi, ShieldCheck, Zap, LucideIcon, ArrowRight, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Home, Wifi, ShieldCheck, Zap, LucideIcon, ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useModal } from "@/lib/modal-context";
 
@@ -19,12 +19,45 @@ interface FixedCostItem {
 interface FixedCostCardProps {
   items: FixedCostItem[];
   currency?: string;
+  isLoading?: boolean;
+  onReset?: () => void;
 }
 
 export default function FixedCostCard({ 
   items = [], 
-  currency = "THB" 
+  currency = "THB",
+  isLoading = false,
+  onReset
 }: FixedCostCardProps) {
+  if (isLoading) {
+    return (
+      <div className="p-5 md:p-8 rounded-3xl bg-white border border-black/5 shadow-[0_20px_50px_rgba(0,0,0,0.05)] min-h-[380px] flex flex-col justify-between">
+        <div>
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <div className="h-4 bg-slate-100 rounded-full w-24 mb-2 animate-pulse" />
+              <div className="h-3 bg-slate-100 rounded-full w-32 animate-pulse" />
+            </div>
+          </div>
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-center justify-between animate-pulse">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 border border-black/5 shrink-0" />
+                  <div className="space-y-2">
+                    <div className="h-4 bg-slate-100 rounded-full w-24 md:w-32" />
+                    <div className="h-2.5 bg-slate-100 rounded-full w-16" />
+                  </div>
+                </div>
+                <div className="h-4 bg-slate-100 rounded-full w-16" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const { openExpenseModal } = useModal();
   const [currentPage, setCurrentPage] = useState(0);
   const total = items.reduce((sum, item) => sum + item.amount, 0);
@@ -47,14 +80,26 @@ export default function FixedCostCard({
             Total: <span className="text-slate-900">{currency} {total.toLocaleString()}</span>
           </p>
         </div>
-        <Link href="/nori/settings/fixed-cost">
-          <motion.button 
-            whileHover={{ x: 3 }}
-            className="flex items-center gap-1 text-[10px] font-black text-[#FF9D00] uppercase tracking-widest cursor-pointer"
-          >
-            Manage <ArrowRight className="w-3 h-3" />
-          </motion.button>
-        </Link>
+        <div className="flex items-center gap-4">
+          {onReset && items.some(item => item.isPaid) && (
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onReset}
+              className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 hover:text-[#FF9D00] uppercase tracking-widest cursor-pointer transition-colors"
+            >
+              <RotateCcw className="w-3 h-3" /> Reset
+            </motion.button>
+          )}
+          <Link href="/nori/settings/fixed-cost">
+            <motion.button 
+              whileHover={{ x: 3 }}
+              className="flex items-center gap-1 text-[10px] font-black text-[#FF9D00] uppercase tracking-widest cursor-pointer"
+            >
+              Manage <ArrowRight className="w-3 h-3" />
+            </motion.button>
+          </Link>
+        </div>
       </div>
 
       {items.length === 0 ? (

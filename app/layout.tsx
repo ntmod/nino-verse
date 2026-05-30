@@ -39,7 +39,7 @@ export default function RootLayout({
         </ModalProvider>
         <div className="fixed bottom-4 right-6 pointer-events-none select-none z-[10000]">
           <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] italic">
-            Build v0.1.0
+            Build v0.1.3
           </span>
         </div>
       </body>

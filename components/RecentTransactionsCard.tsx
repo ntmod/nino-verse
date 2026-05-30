@@ -17,12 +17,40 @@ interface Transaction {
 interface RecentTransactionsCardProps {
   transactions: Transaction[];
   currency?: string;
+  isLoading?: boolean;
 }
 
 export default function RecentTransactionsCard({ 
   transactions = [], 
-  currency = "THB" 
+  currency = "THB",
+  isLoading = false
 }: RecentTransactionsCardProps) {
+  if (isLoading) {
+    return (
+      <div className="p-5 md:p-8 rounded-3xl bg-white border border-black/5 shadow-[0_20px_50px_rgba(0,0,0,0.05)] min-h-[380px] flex flex-col justify-between">
+        <div>
+          <div className="flex items-center justify-between mb-8">
+            <div className="h-4 bg-slate-100 rounded-full w-32 animate-pulse" />
+          </div>
+          <div className="space-y-4 md:space-y-6">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-center justify-between animate-pulse">
+                <div className="flex items-center gap-4">
+                  <div className="w-11 h-11 rounded-2xl bg-slate-50 border border-black/5 shrink-0" />
+                  <div className="space-y-2">
+                    <div className="h-4 bg-slate-100 rounded-full w-24 md:w-32" />
+                    <div className="h-3 bg-slate-100 rounded-full w-36 md:w-48" />
+                  </div>
+                </div>
+                <div className="h-4 bg-slate-100 rounded-full w-12" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

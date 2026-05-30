@@ -8,7 +8,7 @@ import { useState, useEffect, useMemo } from "react";
 import TotalSpentCard from "@/components/TotalSpentCard";
 import Image from "next/image";
 import FixedCostCard from "@/components/FixedCostCard";
-import { Home, Zap, Wifi, ShieldCheck, Coffee, ShoppingBag, Utensils, Car, Smartphone, Music, CreditCard, Banknote, Wallet as WalletIcon } from "lucide-react";
+import { Home, Zap, Wifi, ShieldCheck, Coffee, ShoppingBag, Utensils, Car, Smartphone, Music, CreditCard, Banknote, Wallet as WalletIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import ExpensePieChart from "@/components/ExpensePieChart";
 import RecentTransactionsCard from "@/components/RecentTransactionsCard";
 import PaymentMethodsCard from "@/components/PaymentMethodsCard";
@@ -19,48 +19,168 @@ import { transactionService } from "@/lib/services/transactionService";
 import { categoryService } from "@/lib/services/categoryService";
 import { paymentService } from "@/lib/services/paymentService";
 import { budgetService, fixedCostService } from "@/lib/services/dashboardService";
+import { useModal } from "@/lib/modal-context";
 
 export default function Noripage() {
   const router = useRouter();
+  const { openGlobalModal } = useModal();
   const [showExitWipe, setShowExitWipe] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [budgets, setBudgets] = useState<any[]>([]);
   const [fixedCosts, setFixedCosts] = useState<any[]>([]);
+  const [lastResetTime, setLastResetTime] = useState<number | null>(null);
+  const [cycleOffset, setCycleOffset] = useState(0);
+
+  // --- Billing Cycle Calculation ---
+  const billingCycle = useMemo(() => {
+    const today = new Date();
+    const todayYear = today.getFullYear();
+    const todayMonth = today.getMonth();
+    const todayDate = today.getDate();
+
+    // Determine the base reference month index
+    const baseRefMonthIndex = todayDate < 30 ? todayMonth : todayMonth + 1;
+    
+    // Shift reference month index by the cycleOffset
+    const refMonthIndex = baseRefMonthIndex + cycleOffset;
+    
+    // Middle of month is safe from rollover issues when shifting months
+    const refDate = new Date(todayYear, refMonthIndex, 15);
+    const year = refDate.getFullYear();
+    const month = refDate.getMonth();
+
+    let startDate: Date;
+    let endDate: Date;
+
+    const getSafe30th = (y: number, m: number): Date => {
+      const lastDay = new Date(y, m + 1, 0).getDate();
+      const targetDay = Math.min(30, lastDay);
+      return new Date(y, m, targetDay, 0, 0, 0, 0);
+    };
+
+    const getSafe29th = (y: number, m: number): Date => {
+      const lastDay = new Date(y, m + 1, 0).getDate();
+      const targetDay = Math.min(29, lastDay);
+      return new Date(y, m, targetDay, 23, 59, 59, 999);
+    };
+
+    startDate = getSafe30th(year, month - 1);
+    endDate = getSafe29th(year, month);
+
+    return { startDate, endDate };
+  }, [cycleOffset]);
+
+  const billingCycleStr = useMemo(() => {
+    const start = billingCycle.startDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+    const end = billingCycle.endDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+    return `${start} - ${end}`;
+  }, [billingCycle]);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    const resetDateStr = localStorage.getItem("fixedCostsResetDate");
+    if (resetDateStr) {
+      setLastResetTime(new Date(resetDateStr).getTime());
+    }
+  }, []);
+
+  const handleResetFixedCosts = () => {
+    openGlobalModal({
+      header: "Reset Fixed Costs",
+      message: "Are you sure you want to reset the payment status of all fixed costs for this month?",
+      type: "warning",
+      mainButton: {
+        label: "Confirm Reset",
+        onClick: () => {
+          const nowStr = new Date().toISOString();
+          localStorage.setItem("fixedCostsResetDate", nowStr);
+          setLastResetTime(new Date(nowStr).getTime());
+          
+          // Show "resetting completed" success modal
+          setTimeout(() => {
+            openGlobalModal({
+              header: "Reset Completed",
+              message: "Payment status of all fixed costs has been successfully reset.",
+              type: "success",
+              mainButton: {
+                label: "Close",
+                onClick: () => {}
+              }
+            });
+          }, 300);
+        }
+      },
+      subButton: {
+        label: "Cancel",
+        onClick: () => {}
+      }
+    });
+  };
+
+  // Fetch static configuration once on mount
+  useEffect(() => {
+    const fetchStaticData = async () => {
       try {
-        const [txData, catData, payData, budData, fixedData] = await Promise.all([
-          transactionService.getAll(),
+        const [catData, payData, budData, fixedData] = await Promise.all([
           categoryService.getAll(),
           paymentService.getAll(),
           budgetService.getAll(),
           fixedCostService.getAll()
         ]);
 
-        setTransactions(txData);
         setCategories(catData);
         setPaymentMethods(payData);
         setBudgets(budData);
         setFixedCosts(fixedData);
       } catch (error) {
-        console.error("Failed to fetch dashboard data:", error);
+        console.error("Failed to fetch static dashboard data:", error);
       }
     };
-    fetchDashboardData();
+    fetchStaticData();
   }, []);
+
+  // Fetch transactions dynamically whenever billing cycle range changes
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        setIsLoading(true);
+        const startISO = billingCycle.startDate.toISOString();
+        const endISO = billingCycle.endDate.toISOString();
+        
+        const txData = await transactionService.getAll(startISO, endISO);
+        setTransactions(txData);
+      } catch (error) {
+        console.error("Failed to fetch transactions:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchTransactions();
+  }, [billingCycle]);
+
+
+
+  // Filter transactions for the current billing cycle
+  const currentPeriodTransactions = useMemo(() => {
+    const start = billingCycle.startDate.getTime();
+    const end = billingCycle.endDate.getTime();
+    return transactions.filter(tx => {
+      const txTime = new Date(tx.date).getTime();
+      return txTime >= start && txTime <= end;
+    });
+  }, [transactions, billingCycle]);
 
   // --- Derived Data ---
   const totalSpent = useMemo(() => {
-    return Math.abs(transactions
+    return Math.abs(currentPeriodTransactions
       .filter(tx => tx.amount < 0)
       .reduce((sum, tx) => sum + tx.amount, 0));
-  }, [transactions]);
+  }, [currentPeriodTransactions]);
 
   const recentTransactions = useMemo(() => {
-    return transactions
+    return currentPeriodTransactions
       .slice()
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5)
@@ -73,11 +193,11 @@ export default function Noripage() {
           subCategory: sub ? sub.name : tx.subCategory
         };
       });
-  }, [transactions, categories]);
+  }, [currentPeriodTransactions, categories]);
 
   const categoryBreakdown = useMemo(() => {
     const groups: Record<string, number> = {};
-    transactions.forEach(tx => {
+    currentPeriodTransactions.forEach(tx => {
       if (tx.amount < 0) {
         groups[tx.category] = (groups[tx.category] || 0) + Math.abs(tx.amount);
       }
@@ -113,33 +233,31 @@ export default function Noripage() {
         amount,
         color: CHART_COLORS[index % CHART_COLORS.length]
       }));
-  }, [transactions]);
+  }, [currentPeriodTransactions]);
+
+  const elapsedDays = useMemo(() => {
+    const today = new Date();
+    const endLimit = new Date(Math.min(billingCycle.endDate.getTime(), today.getTime()));
+    const diffTime = Math.max(0, endLimit.getTime() - billingCycle.startDate.getTime());
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+  }, [billingCycle]);
 
   const dailyAverage = useMemo(() => {
-    if (transactions.length === 0) return 0;
-    
-    const dates = transactions.map(tx => new Date(tx.date).getTime());
-    const minDate = Math.min(...dates);
-    const maxDate = Math.max(...dates);
-    
-    const diffTime = Math.abs(maxDate - minDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
-    
-    return totalSpent / diffDays;
-  }, [totalSpent, transactions]);
+    return totalSpent / elapsedDays;
+  }, [totalSpent, elapsedDays]);
 
   const savingsMet = useMemo(() => {
-    const totalIncome = transactions
+    const totalIncome = currentPeriodTransactions
       .filter(tx => tx.amount > 0)
       .reduce((sum, tx) => sum + tx.amount, 0);
     if (totalIncome === 0) return 0;
     const savings = totalIncome - totalSpent;
     return Math.max(0, Math.round((savings / totalIncome) * 100));
-  }, [transactions, totalSpent]);
+  }, [currentPeriodTransactions, totalSpent]);
 
   const paymentMethodBreakdown = useMemo(() => {
     return paymentMethods.map(pm => {
-      const spent = transactions
+      const spent = currentPeriodTransactions
         .filter(tx => tx.paymentMethod === pm.name && tx.amount < 0)
         .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
       return {
@@ -147,16 +265,15 @@ export default function Noripage() {
         amount: spent
       };
     });
-  }, [transactions, paymentMethods]);
+  }, [currentPeriodTransactions, paymentMethods]);
 
   const fixedCostsWithStatus = useMemo(() => {
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    const filterSinceTime = lastResetTime ? Math.max(billingCycle.startDate.getTime(), lastResetTime) : billingCycle.startDate.getTime();
     
     return fixedCosts.map(fc => {
-      const isPaid = transactions.some(tx => 
+      const isPaid = currentPeriodTransactions.some(tx => 
         tx.name.toLowerCase() === fc.name.toLowerCase() && 
-        new Date(tx.date).getTime() >= startOfMonth
+        new Date(tx.date).getTime() >= filterSinceTime
       );
       const cat = categories.find(c => c.name === fc.category);
       
@@ -166,7 +283,7 @@ export default function Noripage() {
         icon: cat?.icon || "🏷️"
       };
     });
-  }, [fixedCosts, transactions, categories]);
+  }, [fixedCosts, currentPeriodTransactions, categories, lastResetTime, billingCycle]);
 
   const handleGetStarted = () => {
     setShowExitWipe(true);
@@ -188,9 +305,25 @@ export default function Noripage() {
               <Image src="/animations/nori/cat-idle.gif" alt="Nori" width={56} height={56} className="relative z-10" />
               <div className="absolute inset-0 bg-slate-100 rounded-full scale-110 -z-10" />
             </div>
-            <div>
-              <h1 className="text-lg font-black text-slate-900 italic tracking-tighter">Nori's Dashboard</h1>
-              {/* <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">April 2026 Overview</p> */}
+            <div className="flex flex-col">
+              <h1 className="text-lg font-black text-slate-900 italic tracking-tighter mb-0.5 leading-none">Nori's Dashboard</h1>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => setCycleOffset(prev => prev - 1)}
+                  className="w-5 h-5 rounded-lg border border-black/5 flex items-center justify-center hover:bg-slate-50 transition-all cursor-pointer"
+                  title="Previous month cycle"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+                <span className="text-[10px] font-bold text-[#FF9D00] uppercase tracking-widest">{billingCycleStr}</span>
+                <button 
+                  onClick={() => setCycleOffset(prev => prev + 1)}
+                  className="w-5 h-5 rounded-lg border border-black/5 flex items-center justify-center hover:bg-slate-50 transition-all cursor-pointer"
+                  title="Next month cycle"
+                >
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+              </div>
             </div>
           </div>
           <div className="hidden md:flex items-center gap-4">
@@ -209,18 +342,19 @@ export default function Noripage() {
           <TotalSpentCard
             amount={totalSpent}
             currency="THB"
+            isLoading={isLoading}
           />
           
-          <MetricsCard dailyAverage={dailyAverage} savingsMet={savingsMet} />
+          <MetricsCard dailyAverage={dailyAverage} savingsMet={savingsMet} isLoading={isLoading} />
 
-          <RecentTransactionsCard transactions={recentTransactions} />
-          <BudgetListCard budgets={budgets} />
+          <RecentTransactionsCard transactions={recentTransactions} isLoading={isLoading} />
+          <BudgetListCard budgets={budgets} isLoading={isLoading} />
         </div>
 
         <div className="lg:col-span-3 space-y-4 lg:space-y-8">
-          <ExpensePieChart data={categoryBreakdown} />
-          <PaymentMethodsCard methods={paymentMethodBreakdown} />
-          <FixedCostCard items={fixedCostsWithStatus} />
+          <ExpensePieChart data={categoryBreakdown} isLoading={isLoading} />
+          <PaymentMethodsCard methods={paymentMethodBreakdown} isLoading={isLoading} />
+          <FixedCostCard items={fixedCostsWithStatus} isLoading={isLoading} onReset={handleResetFixedCosts} />
         </div>
       </div>
     </main>

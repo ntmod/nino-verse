@@ -1,8 +1,12 @@
 import { Transaction } from "@/lib/types";
 
 export const transactionService = {
-  async getAll(): Promise<Transaction[]> {
-    const res = await fetch('/api/nori/transaction');
+  async getAll(startDate?: string, endDate?: string): Promise<Transaction[]> {
+    let url = '/api/nori/transaction';
+    if (startDate && endDate) {
+      url += `?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`;
+    }
+    const res = await fetch(url);
     if (!res.ok) throw new Error('Failed to fetch transactions');
     return res.json();
   },

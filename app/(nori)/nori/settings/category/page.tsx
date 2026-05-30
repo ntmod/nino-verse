@@ -236,6 +236,16 @@ export default function CategorySettings() {
         setNewCat({ name: "", icon: "🍴", type: "expense" });
         setEditingCategory(null);
         fetchCategories();
+        
+        openGlobalModal({
+          header: "Save Completed",
+          message: "The category has been saved successfully.",
+          type: "success",
+          mainButton: {
+            label: "Close",
+            onClick: () => {}
+          }
+        });
       }
     } catch (err) {
       console.error("Failed to save category:", err);
@@ -256,6 +266,17 @@ export default function CategorySettings() {
             });
             if (res.ok) {
               fetchCategories();
+              setTimeout(() => {
+                openGlobalModal({
+                  header: "Delete Completed",
+                  message: "The category has been deleted successfully.",
+                  type: "success",
+                  mainButton: {
+                    label: "Close",
+                    onClick: () => {}
+                  }
+                });
+              }, 300);
             }
           } catch (err) {
             console.error("Failed to delete category:", err);
@@ -282,6 +303,16 @@ export default function CategorySettings() {
         setSelectedCategoryForSub(null);
         setNewSubName("");
         fetchCategories();
+        
+        openGlobalModal({
+          header: "Save Completed",
+          message: "The subcategory has been created successfully.",
+          type: "success",
+          mainButton: {
+            label: "Close",
+            onClick: () => {}
+          }
+        });
       }
     } catch (err) {
       console.error("Failed to save subcategory:", err);
@@ -302,6 +333,17 @@ export default function CategorySettings() {
             });
             if (res.ok) {
               fetchCategories();
+              setTimeout(() => {
+                openGlobalModal({
+                  header: "Delete Completed",
+                  message: "The subcategory has been deleted successfully.",
+                  type: "success",
+                  mainButton: {
+                    label: "Close",
+                    onClick: () => {}
+                  }
+                });
+              }, 300);
             }
           } catch (err) {
             console.error("Failed to delete subcategory:", err);
@@ -328,6 +370,16 @@ export default function CategorySettings() {
         setSelectedSubForEdit(null);
         setEditSubName("");
         fetchCategories();
+        
+        openGlobalModal({
+          header: "Save Completed",
+          message: "The subcategory has been updated successfully.",
+          type: "success",
+          mainButton: {
+            label: "Close",
+            onClick: () => {}
+          }
+        });
       }
     } catch (err) {
       console.error("Failed to update subcategory:", err);

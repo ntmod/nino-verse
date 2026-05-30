@@ -2,10 +2,22 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Transaction from "@/models/Transaction";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const startDateStr = searchParams.get("startDate");
+    const endDateStr = searchParams.get("endDate");
+
+    let query: any = {};
+    if (startDateStr && endDateStr) {
+      query.date = {
+        $gte: new Date(startDateStr),
+        $lte: new Date(endDateStr),
+      };
+    }
+
     await dbConnect();
-    const transactions = await Transaction.find({}).sort({ date: -1, createdAt: -1 });
+    const transactions = await Transaction.find(query).sort({ date: -1, createdAt: -1 });
     return NextResponse.json(transactions);
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch transactions" }, { status: 500 });

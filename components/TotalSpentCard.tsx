@@ -4,18 +4,42 @@ import { motion } from "framer-motion";
 import { Wallet, TrendingUp, ArrowUpRight } from "lucide-react";
 
 interface TotalSpentCardProps {
-  amount: number;
+  amount?: number;
   currency?: string;
   percentageChange?: number;
   progress?: number;
+  isLoading?: boolean;
 }
 
 export default function TotalSpentCard({
   amount = 0,
   currency = "THB",
   percentageChange = 0,
-  progress = 0
+  progress = 0,
+  isLoading = false
 }: TotalSpentCardProps) {
+  if (isLoading) {
+    return (
+      <div className="relative overflow-hidden p-5 md:p-8 rounded-3xl bg-white border border-black/5 shadow-[0_20px_50px_rgba(0,0,0,0.05)] min-h-[160px] flex flex-col justify-between animate-pulse">
+        <div className="absolute top-4 right-4 md:top-6 md:right-6">
+          <svg className="animate-spin h-5 w-5 text-[#FF9D00]" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+        </div>
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <div className="h-4 bg-slate-100 rounded-full w-24" />
+            <div className="flex items-baseline gap-2 mt-2">
+              <div className="h-6 bg-slate-100 rounded-full w-10" />
+              <div className="h-12 bg-slate-100 rounded-full w-48" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

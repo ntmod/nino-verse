@@ -13,11 +13,13 @@ interface CategoryData {
 interface ExpensePieChartProps {
   data: CategoryData[];
   currency?: string;
+  isLoading?: boolean;
 }
 
 export default function ExpensePieChart({ 
   data = [], 
-  currency = "THB" 
+  currency = "THB",
+  isLoading = false
 }: ExpensePieChartProps) {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -37,6 +39,38 @@ export default function ExpensePieChart({
   const currentSegments = segments.slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1) * ITEMS_PER_PAGE);
 
   const activeSegment = hoveredCategory ? segments.find(s => s.name === hoveredCategory) : null;
+
+  if (isLoading) {
+    return (
+      <div className="p-5 md:p-8 rounded-3xl bg-white border border-black/5 shadow-[0_20px_50px_rgba(0,0,0,0.05)] min-h-[480px] flex flex-col justify-between">
+        <div>
+          <div className="flex items-center justify-between mb-8">
+            <div className="h-4 bg-slate-100 rounded-full w-40 animate-pulse" />
+          </div>
+          <div className="flex flex-col items-center gap-8 md:gap-16">
+            {/* Donut Chart Skeleton */}
+            <div className="relative w-64 h-64 flex items-center justify-center animate-pulse">
+              <div className="w-48 h-48 rounded-full border-[16px] border-slate-50 flex items-center justify-center">
+                <div className="w-16 h-4 bg-slate-100 rounded-full" />
+              </div>
+            </div>
+            {/* Legend Skeleton */}
+            <div className="w-full space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex items-center justify-between animate-pulse">
+                  <div className="flex items-center gap-4">
+                    <div className="w-4 h-4 rounded-full bg-slate-100 shrink-0" />
+                    <div className="h-4 bg-slate-100 rounded-full w-24 md:w-32" />
+                  </div>
+                  <div className="h-4 bg-slate-100 rounded-full w-8" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div

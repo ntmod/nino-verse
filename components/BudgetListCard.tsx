@@ -15,12 +15,43 @@ interface Budget {
 interface BudgetListCardProps {
   budgets: Budget[];
   currency?: string;
+  isLoading?: boolean;
 }
 
 export default function BudgetListCard({ 
   budgets = [], 
-  currency = "THB" 
+  currency = "THB",
+  isLoading = false
 }: BudgetListCardProps) {
+  if (isLoading) {
+    return (
+      <div className="p-5 md:p-8 rounded-3xl bg-white border border-black/5 shadow-[0_20px_50px_rgba(0,0,0,0.05)] min-h-[300px] flex flex-col justify-between">
+        <div>
+          <div className="flex items-center justify-between mb-8">
+            <div className="h-4 bg-slate-100 rounded-full w-28 animate-pulse" />
+          </div>
+          <div className="space-y-6 md:space-y-8">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="space-y-3 animate-pulse">
+                <div className="flex justify-between items-end">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-slate-50 border border-black/5 shrink-0" />
+                    <div className="space-y-2">
+                      <div className="h-4 bg-slate-100 rounded-full w-20 md:w-28" />
+                      <div className="h-2.5 bg-slate-100 rounded-full w-32 md:w-40" />
+                    </div>
+                  </div>
+                  <div className="h-4 bg-slate-100 rounded-full w-16" />
+                </div>
+                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

@@ -14,12 +14,37 @@ interface PaymentMethod {
 interface PaymentMethodsCardProps {
   methods: PaymentMethod[];
   currency?: string;
+  isLoading?: boolean;
 }
 
 export default function PaymentMethodsCard({ 
   methods = [], 
-  currency = "THB" 
+  currency = "THB",
+  isLoading = false
 }: PaymentMethodsCardProps) {
+  if (isLoading) {
+    return (
+      <div className="p-5 md:p-8 rounded-3xl bg-white border border-black/5 shadow-[0_20px_50px_rgba(0,0,0,0.05)] min-h-[250px] flex flex-col justify-between">
+        <div>
+          <div className="flex items-center justify-between mb-8">
+            <div className="h-4 bg-slate-100 rounded-full w-36 animate-pulse" />
+          </div>
+          <div className="grid grid-cols-1 gap-2 md:gap-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="p-3 md:p-4 rounded-2xl bg-slate-50 border border-black/5 flex items-center justify-between animate-pulse">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-slate-100 border border-black/5 shrink-0" />
+                  <div className="h-3 bg-slate-100 rounded-full w-20 md:w-28" />
+                </div>
+                <div className="h-4 bg-slate-100 rounded-full w-16" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

@@ -62,12 +62,22 @@ export default function MethodSettings() {
         setEditingMethod(null);
         setNewMethod({ name: "", icon: "💳", color: "#6366f1", desc: "" });
         fetchMethods();
+        
+        openGlobalModal({
+          header: "Save Completed",
+          message: "The payment method has been saved successfully.",
+          type: "success",
+          mainButton: {
+            label: "Close",
+            onClick: () => {}
+          }
+        });
       }
     } catch (err) {
       console.error("Failed to save method:", err);
     }
   };
-
+ 
   const handleDeleteMethod = (id: string) => {
     openGlobalModal({
       header: "Delete Method?",
@@ -82,6 +92,17 @@ export default function MethodSettings() {
             });
             if (res.ok) {
               fetchMethods();
+              setTimeout(() => {
+                openGlobalModal({
+                  header: "Delete Completed",
+                  message: "The payment method has been removed successfully.",
+                  type: "success",
+                  mainButton: {
+                    label: "Close",
+                    onClick: () => {}
+                  }
+                });
+              }, 300);
             }
           } catch (err) {
             console.error("Failed to delete method:", err);

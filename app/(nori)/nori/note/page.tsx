@@ -291,7 +291,19 @@ export default function NotePage() {
                                     onClick: async () => {
                                       try {
                                         await transactionService.delete(tx._id);
-                                        window.location.reload();
+                                        setTimeout(() => {
+                                          openGlobalModal({
+                                            header: "Delete Completed",
+                                            message: `"${tx.name}" has been deleted successfully.`,
+                                            type: "success",
+                                            mainButton: {
+                                              label: "Close",
+                                              onClick: () => {
+                                                window.location.reload();
+                                              }
+                                            }
+                                          });
+                                        }, 300);
                                       } catch (error) {
                                         console.error("Delete error:", error);
                                       }

@@ -114,7 +114,7 @@ export default function Home() {
                   exit={{ opacity: 0, y: 20, scale: 0.8 }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
                 >
-                  <Image src="/animations/ninjin-intro.gif" alt="Ninjin" width={280} height={280} priority className="mb-[-40px] mix-blend-multiply drop-shadow-2xl pointer-events-none" />
+                  <img src="/animations/ninjin-intro.gif" alt="Ninjin" width={280} height={280} className="mb-[-40px] mix-blend-multiply drop-shadow-2xl pointer-events-none" />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -243,7 +243,7 @@ export default function Home() {
                   exit={{ opacity: 0, y: 20, scale: 0.8 }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
                 >
-                  <Image src="/animations/nori-intro.gif" alt="Nori" width={280} height={280} priority className="rounded-3xl mix-blend-lighten drop-shadow-[0_0_20px_rgba(255,157,0,0.2)] pointer-events-none" />
+                  <img src="/animations/nori-intro.gif" alt="Nori" width={280} height={280} className="rounded-3xl mix-blend-lighten drop-shadow-[0_0_20px_rgba(255,157,0,0.2)] pointer-events-none" />
                 </motion.div>
               )}
             </AnimatePresence>

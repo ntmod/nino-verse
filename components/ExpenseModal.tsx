@@ -10,7 +10,7 @@ import { transactionService } from "@/lib/services/transactionService";
 import { categoryService } from "@/lib/services/categoryService";
 import { paymentService } from "@/lib/services/paymentService";
 export default function ExpenseModal() {
-  const { isExpenseModalOpen, closeExpenseModal, onSuccess, editingTransaction } = useModal();
+  const { isExpenseModalOpen, closeExpenseModal, onSuccess, editingTransaction, openGlobalModal } = useModal();
   const router = useRouter();
   
   const [categories, setCategories] = useState<any[]>([]);
@@ -162,6 +162,15 @@ export default function ExpenseModal() {
       if (closeAfter) {
         closeExpenseModal();
         router.refresh();
+        openGlobalModal({
+          header: "Save Completed",
+          message: "The transaction has been successfully recorded.",
+          type: "success",
+          mainButton: {
+            label: "Close",
+            onClick: () => {}
+          }
+        });
       }
       
       // Reset Form
@@ -171,7 +180,15 @@ export default function ExpenseModal() {
       setAmountError(false);
     } catch (error) {
       console.error("Save transaction error:", error);
-      alert("Failed to save transaction");
+      openGlobalModal({
+        header: "Error",
+        message: "Failed to save the transaction.",
+        type: "error",
+        mainButton: {
+          label: "Close",
+          onClick: () => {}
+        }
+      });
     }
   };
 
