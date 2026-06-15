@@ -11,7 +11,8 @@ import {
   CreditCard, 
   Target, 
   CalendarClock, 
-  ChevronRight 
+  ChevronRight,
+  Calculator
 } from "lucide-react";
 
 const SETTINGS_OPTIONS = [
@@ -42,6 +43,13 @@ const SETTINGS_OPTIONS = [
     path: "/nori/settings/fixed-cost", 
     icon: CalendarClock,
     color: "#f43f5e"
+  },
+  { 
+    name: "Daily Average", 
+    desc: "Select categories to calculate daily average", 
+    path: "/nori/settings/daily-average", 
+    icon: Calculator,
+    color: "#a855f7"
   },
 ];
 

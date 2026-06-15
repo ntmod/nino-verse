@@ -59,10 +59,17 @@ export default function ExpenseModal() {
         
         if (Array.isArray(catData) && catData.length > 0) {
           setCategories(catData);
-          if (!editingTransaction) {
+          if (editingTransaction) {
+            const foundCat = catData.find(c => c._id === editingTransaction.category || c.name === editingTransaction.category);
+            if (foundCat) {
+              setNewCategory(foundCat._id);
+            } else {
+              setNewCategory(editingTransaction.category);
+            }
+          } else {
             setNewCategory(prev => {
-              if (prev && catData.some(c => c.name === prev)) return prev;
-              return catData[0].name;
+              if (prev && catData.some(c => c._id === prev)) return prev;
+              return catData[0]._id;
             });
           }
         } else {
@@ -72,10 +79,17 @@ export default function ExpenseModal() {
         
         if (Array.isArray(payData) && payData.length > 0) {
           setPaymentMethods(payData);
-          if (!editingTransaction) {
+          if (editingTransaction) {
+            const foundPay = payData.find(p => p._id === editingTransaction.paymentMethod || p.name === editingTransaction.paymentMethod);
+            if (foundPay) {
+              setNewPayment(foundPay._id);
+            } else {
+              setNewPayment(editingTransaction.paymentMethod);
+            }
+          } else {
             setNewPayment(prev => {
-              if (prev && payData.some(p => p.name === prev)) return prev;
-              return payData[0].name;
+              if (prev && payData.some(p => p._id === prev)) return prev;
+              return payData[0]._id;
             });
           }
         } else {
@@ -92,9 +106,12 @@ export default function ExpenseModal() {
 
   // Automatically select the first subcategory (or empty) when category changes
   useEffect(() => {
-    const selectedCat = categories.find(c => c.name === newCategory);
+    const selectedCat = categories.find(c => c._id === newCategory);
     if (selectedCat && selectedCat.subcategories && selectedCat.subcategories.length > 0) {
-      if (editingTransaction && editingTransaction.category === newCategory) {
+      const isSameCategory = editingTransaction && 
+        (editingTransaction.category === newCategory || 
+         categories.find(c => c.name === editingTransaction.category)?._id === newCategory);
+      if (isSameCategory) {
         setNewSubCategory(editingTransaction.subCategory || "");
       } else {
         setNewSubCategory(selectedCat.subcategories[0]._id || "");
@@ -135,12 +152,12 @@ export default function ExpenseModal() {
     const amountNum = parseFloat(newAmount.replace(/,/g, ''));
     
     // Find the selected category to check its type
-    const selectedCat = categories.find(c => c.name === newCategory);
-    const isIncome = selectedCat ? selectedCat.type === "income" : newCategory === "Income";
+    const selectedCat = categories.find(c => c._id === newCategory);
+    const isIncome = selectedCat ? selectedCat.type === "income" : false;
 
     try {
       const data = {
-        name: newName || newCategory,
+        name: newName || selectedCat?.name || "General",
         category: newCategory,
         subCategory: newSubCategory || "",
         amount: isIncome ? Math.abs(amountNum) : -Math.abs(amountNum),
@@ -250,7 +267,7 @@ export default function ExpenseModal() {
                           className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl text-xs font-bold text-black appearance-none focus:ring-2 focus:ring-[#FF9D00]/20 transition-all"
                         >
                           {categories.length > 0 && 
-                            categories.map(cat => <option key={cat._id || cat.name} value={cat.name}>{cat.icon} {cat.name}</option>)
+                            categories.map(cat => <option key={cat._id || cat.name} value={cat._id}>{cat.icon} {cat.name}</option>)
                           }
                         </select>
                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 pointer-events-none" />
@@ -266,7 +283,7 @@ export default function ExpenseModal() {
                           className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl text-xs font-bold text-black appearance-none focus:ring-2 focus:ring-[#FF9D00]/20 transition-all"
                         >
                           {paymentMethods.length > 0 &&
-                            paymentMethods.map(pm => <option key={pm._id || pm.name} value={pm.name}>💰 {pm.name}</option>)
+                            paymentMethods.map(pm => <option key={pm._id || pm.name} value={pm._id}>💰 {pm.name}</option>)
                           }
                         </select>
                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 pointer-events-none" />
@@ -276,7 +293,7 @@ export default function ExpenseModal() {
 
                   {/* Subcategory selection if the selected category has any */}
                   {(() => {
-                    const selectedCat = categories.find(c => c.name === newCategory);
+                    const selectedCat = categories.find(c => c._id === newCategory);
                     const currentSubcategories = selectedCat?.subcategories || [];
                     const selectedCatHasSubcategories = currentSubcategories.length > 0;
                     
@@ -319,7 +336,7 @@ export default function ExpenseModal() {
                     <label className="text-[10px] font-black text-black uppercase tracking-widest">Description</label>
                     <input
                       type="text"
-                      placeholder={`e.g. ${newCategory || 'Lunch at Siam'}`}
+                      placeholder={`e.g. ${categories.find(c => c._id === newCategory)?.name || 'Lunch at Siam'}`}
                       maxLength={50}
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}

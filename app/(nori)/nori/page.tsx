@@ -33,6 +33,8 @@ export default function Noripage() {
   const [fixedCosts, setFixedCosts] = useState<any[]>([]);
   const [lastResetTime, setLastResetTime] = useState<number | null>(null);
   const [cycleOffset, setCycleOffset] = useState(0);
+  const [dailyAverage, setDailyAverage] = useState<number>(0);
+  const [dailyAverageBreakdown, setDailyAverageBreakdown] = useState<any[]>([]);
 
   // --- Billing Cycle Calculation ---
   const billingCycle = useMemo(() => {
@@ -143,21 +145,30 @@ export default function Noripage() {
 
   // Fetch transactions dynamically whenever billing cycle range changes
   useEffect(() => {
-    const fetchTransactions = async () => {
+    const fetchTransactionsAndAverage = async () => {
       try {
         setIsLoading(true);
         const startISO = billingCycle.startDate.toISOString();
         const endISO = billingCycle.endDate.toISOString();
         
-        const txData = await transactionService.getAll(startISO, endISO);
+        const [txData, avgRes] = await Promise.all([
+          transactionService.getAll(startISO, endISO),
+          fetch(`/api/nori/daily-average?startDate=${encodeURIComponent(startISO)}&endDate=${encodeURIComponent(endISO)}`)
+        ]);
+        
         setTransactions(txData);
+        if (avgRes.ok) {
+          const avgData = await avgRes.json();
+          setDailyAverage(avgData.dailyAverage || 0);
+          setDailyAverageBreakdown(avgData.breakdown || []);
+        }
       } catch (error) {
-        console.error("Failed to fetch transactions:", error);
+        console.error("Failed to fetch transactions or daily average:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchTransactions();
+    fetchTransactionsAndAverage();
   }, [billingCycle]);
 
 
@@ -185,11 +196,12 @@ export default function Noripage() {
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5)
       .map(tx => {
-        const cat = categories.find(c => c.name === tx.category);
+        const cat = categories.find(c => c._id === tx.category || c.name === tx.category);
         const sub = cat?.subcategories?.find((s: any) => s._id === tx.subCategory);
         return {
           ...tx,
           icon: cat?.icon || "🏷️",
+          category: cat ? cat.name : tx.category,
           subCategory: sub ? sub.name : tx.subCategory
         };
       });
@@ -199,7 +211,9 @@ export default function Noripage() {
     const groups: Record<string, number> = {};
     currentPeriodTransactions.forEach(tx => {
       if (tx.amount < 0) {
-        groups[tx.category] = (groups[tx.category] || 0) + Math.abs(tx.amount);
+        const cat = categories.find(c => c._id === tx.category || c.name === tx.category);
+        const catName = cat ? cat.name : tx.category;
+        groups[catName] = (groups[catName] || 0) + Math.abs(tx.amount);
       }
     });
 
@@ -233,7 +247,7 @@ export default function Noripage() {
         amount,
         color: CHART_COLORS[index % CHART_COLORS.length]
       }));
-  }, [currentPeriodTransactions]);
+  }, [currentPeriodTransactions, categories]);
 
   const elapsedDays = useMemo(() => {
     const today = new Date();
@@ -241,10 +255,6 @@ export default function Noripage() {
     const diffTime = Math.max(0, endLimit.getTime() - billingCycle.startDate.getTime());
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
   }, [billingCycle]);
-
-  const dailyAverage = useMemo(() => {
-    return totalSpent / elapsedDays;
-  }, [totalSpent, elapsedDays]);
 
   const savingsMet = useMemo(() => {
     const totalIncome = currentPeriodTransactions
@@ -258,7 +268,7 @@ export default function Noripage() {
   const paymentMethodBreakdown = useMemo(() => {
     return paymentMethods.map(pm => {
       const spent = currentPeriodTransactions
-        .filter(tx => tx.paymentMethod === pm.name && tx.amount < 0)
+        .filter(tx => (tx.paymentMethod === pm._id || tx.paymentMethod === pm.name) && tx.amount < 0)
         .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
       return {
         ...pm,
@@ -345,7 +355,7 @@ export default function Noripage() {
             isLoading={isLoading}
           />
           
-          <MetricsCard dailyAverage={dailyAverage} savingsMet={savingsMet} isLoading={isLoading} />
+          <MetricsCard dailyAverage={dailyAverage} breakdown={dailyAverageBreakdown} isLoading={isLoading} />
 
           <RecentTransactionsCard transactions={recentTransactions} isLoading={isLoading} />
           <BudgetListCard budgets={budgets} isLoading={isLoading} />

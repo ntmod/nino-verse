@@ -65,15 +65,21 @@ export default function NotePage() {
   const filteredTransactions = useMemo(() => {
     return transactions.filter((tx) => {
       const matchesSearch = tx.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === "All" || tx.category === selectedCategory;
-      const matchesPayment = selectedPayment === "All" || tx.paymentMethod === selectedPayment;
+      const selectedCatObj = categories.find(c => c._id === selectedCategory || c.name === selectedCategory);
+      const matchesCategory = selectedCategory === "All" || 
+        tx.category === selectedCategory || 
+        (selectedCatObj && (tx.category === selectedCatObj._id || tx.category === selectedCatObj.name));
+      const selectedPayObj = paymentMethods.find(p => p._id === selectedPayment || p.name === selectedPayment);
+      const matchesPayment = selectedPayment === "All" || 
+        tx.paymentMethod === selectedPayment ||
+        (selectedPayObj && (tx.paymentMethod === selectedPayObj._id || tx.paymentMethod === selectedPayObj.name));
       
       const txDateStr = tx.date ? new Date(tx.date).toISOString().split('T')[0] : "";
       const matchesDate = !dateFilter || txDateStr === dateFilter;
       
       return matchesSearch && matchesCategory && matchesPayment && matchesDate;
     });
-  }, [transactions, searchQuery, selectedCategory, selectedPayment, dateFilter]);
+  }, [transactions, searchQuery, selectedCategory, selectedPayment, dateFilter, categories, paymentMethods]);
 
   const groupedTransactions = useMemo(() => {
     // Sort transactions descending by date first
@@ -162,7 +168,7 @@ export default function NotePage() {
             <div className="relative">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
                 {(() => {
-                  const categoryData = categories.find(c => c.name === selectedCategory);
+                  const categoryData = categories.find(c => c._id === selectedCategory || c.name === selectedCategory);
                   const icon = categoryData?.icon || "🏷️";
                   return <span className="text-sm">{selectedCategory === "All" ? "🏷️" : icon}</span>;
                 })()}
@@ -173,7 +179,7 @@ export default function NotePage() {
                 className="w-full pl-9 pr-8 py-2.5 bg-gray-50 border-none rounded-lg text-[11px] font-bold text-gray-600 appearance-none focus:ring-1 focus:ring-[#FF9D00]/20 transition-all"
               >
                 <option value="All">All Categories</option>
-                {categories.map(cat => <option key={cat._id} value={cat.name}>{cat.name}</option>)}
+                {categories.map(cat => <option key={cat._id} value={cat._id}>{cat.name}</option>)}
               </select>
               <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-300 pointer-events-none" />
             </div>
@@ -188,7 +194,7 @@ export default function NotePage() {
                 className="w-full pl-9 pr-8 py-2.5 bg-gray-50 border-none rounded-lg text-[11px] font-bold text-gray-600 appearance-none focus:ring-1 focus:ring-[#FF9D00]/20 transition-all"
               >
                 <option value="All">All Payments</option>
-                {paymentMethods.map(pm => <option key={pm._id} value={pm.name}>{pm.name}</option>)}
+                {paymentMethods.map(pm => <option key={pm._id} value={pm._id}>{pm.name}</option>)}
               </select>
               <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-300 pointer-events-none" />
             </div>
@@ -230,7 +236,7 @@ export default function NotePage() {
                   {/* Inner list of items */}
                   <div className="divide-y divide-gray-50">
                     {txList.map((tx) => {
-                      const categoryData = categories.find(c => c.name === tx.category);
+                      const categoryData = categories.find(c => c._id === tx.category || c.name === tx.category);
                       const categoryIcon = categoryData?.icon || "🏷️";
                       const subCategoryObj = categoryData?.subcategories?.find((s: any) => s._id === tx.subCategory);
                       const subCategoryName = subCategoryObj ? subCategoryObj.name : "";
@@ -252,7 +258,7 @@ export default function NotePage() {
                               <h3 className="text-sm font-bold text-black tracking-tight line-clamp-1">{tx.name}</h3>
                               <div className="flex flex-col gap-0.5 mt-1">
                                 <p className="text-[10px] font-bold text-[#FF9D00] uppercase tracking-widest flex items-center gap-1 flex-wrap">
-                                  <span>{tx.category}</span>
+                                  <span>{categoryData ? categoryData.name : tx.category}</span>
                                   {subCategoryName && (
                                     <>
                                       <span className="text-gray-300">/</span>
@@ -261,7 +267,10 @@ export default function NotePage() {
                                   )}
                                 </p>
                                 <div className="flex items-center gap-2 text-[9px] font-medium text-gray-400 uppercase tracking-wider">
-                                  <span>{tx.paymentMethod}</span>
+                                  <span>{(() => {
+                                    const payData = paymentMethods.find(p => p._id === tx.paymentMethod || p.name === tx.paymentMethod);
+                                    return payData ? payData.name : tx.paymentMethod;
+                                  })()}</span>
                                 </div>
                               </div>
                             </div>
