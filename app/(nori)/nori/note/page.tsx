@@ -9,12 +9,12 @@ import {
   ChevronDown, 
   X,
   ArrowLeft,
-  Plus,
   Pencil,
   Trash2
 } from "lucide-react";
 import Link from "next/link";
 import LoadingScreen from "@/components/LoadingScreen";
+import FloatingActionButton from "@/components/FloatingActionButton";
 import { useModal } from "@/lib/modal-context";
 import { Transaction } from "@/lib/types";
 import { transactionService } from "@/lib/services/transactionService";
@@ -345,16 +345,7 @@ export default function NotePage() {
       </div>
 
       {/* Floating Action Button */}
-      <motion.button
-        onClick={() => openExpenseModal(handleAddSuccess)}
-        initial={{ opacity: 0, scale: 0.5, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        whileHover={{ scale: 1.1, rotate: 90 }}
-        whileTap={{ scale: 0.9 }}
-        className="fixed bottom-6 right-6 md:bottom-10 md:right-10 w-12 h-12 md:w-16 md:h-16 bg-[#FF9D00] text-white rounded-full flex items-center justify-center z-50 group"
-      >
-        <Plus className="w-6 h-6 md:w-8 md:h-8 transition-transform group-hover:scale-110" />
-      </motion.button>
+      <FloatingActionButton onSuccess={handleAddSuccess} />
     </main>
   );
 }

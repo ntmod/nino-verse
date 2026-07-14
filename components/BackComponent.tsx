@@ -44,8 +44,8 @@ export default function BackComponent({ variant = "dark" }: { variant?: "light" 
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.5 }}
         onClick={handleBack}
-        className={`fixed top-2 left-4 z-[100] flex items-center gap-2 transition-colors group cursor-pointer ${
-          isLight ? "text-white/70 hover:text-white" : "text-slate-400 hover:text-slate-900"
+        className={`fixed top-2 left-4 z-[20000] flex items-center gap-2 transition-colors group cursor-pointer ${
+          isLight ? "text-white/70 hover:text-white" : "text-slate-400 hover:text-slate-950"
         }`}
       >
         <div className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all ${

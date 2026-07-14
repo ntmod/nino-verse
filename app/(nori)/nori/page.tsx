@@ -13,6 +13,7 @@ import RecentTransactionsCard from "@/components/RecentTransactionsCard";
 import PaymentMethodsCard from "@/components/PaymentMethodsCard";
 import BudgetListCard from "@/components/BudgetListCard";
 import MetricsCard from "@/components/MetricsCard";
+import FloatingActionButton from "@/components/FloatingActionButton";
 
 import { transactionService } from "@/lib/services/transactionService";
 import { categoryService } from "@/lib/services/categoryService";
@@ -34,6 +35,7 @@ export default function Noripage() {
   const [cycleOffset, setCycleOffset] = useState(0);
   const [dailyAverage, setDailyAverage] = useState<number>(0);
   const [dailyAverageBreakdown, setDailyAverageBreakdown] = useState<any[]>([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // --- Billing Cycle Calculation ---
   const billingCycle = useMemo(() => {
@@ -142,7 +144,7 @@ export default function Noripage() {
     fetchStaticData();
   }, []);
 
-  // Fetch transactions dynamically whenever billing cycle range changes
+  // Fetch transactions dynamically whenever billing cycle range changes or a new one is added
   useEffect(() => {
     const fetchTransactionsAndAverage = async () => {
       try {
@@ -168,7 +170,7 @@ export default function Noripage() {
       }
     };
     fetchTransactionsAndAverage();
-  }, [billingCycle]);
+  }, [billingCycle, refreshTrigger]);
 
 
 
@@ -302,6 +304,10 @@ export default function Noripage() {
     }, 800);
   };
 
+  const handleExpenseAdded = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
   return (
     <main className="relative min-h-screen bg-[#F8F9FA] flex flex-col items-center p-4 md:p-8 pt-20 pb-20">
       <LoadingScreen mode="in" />
@@ -366,6 +372,9 @@ export default function Noripage() {
           <FixedCostCard items={fixedCostsWithStatus} isLoading={isLoading} onReset={handleResetFixedCosts} />
         </div>
       </div>
+
+      {/* Floating Action Button */}
+      <FloatingActionButton onSuccess={handleExpenseAdded} />
     </main>
   );
 }
