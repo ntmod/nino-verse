@@ -14,7 +14,7 @@ import {
   Trash2
 } from "lucide-react";
 import Link from "next/link";
-import LoadingScreenIn from "@/components/LoadingScreenIn";
+import LoadingScreen from "@/components/LoadingScreen";
 import { useModal } from "@/lib/modal-context";
 import { Transaction } from "@/lib/types";
 import { transactionService } from "@/lib/services/transactionService";
@@ -130,7 +130,7 @@ export default function NotePage() {
 
   return (
     <main className="min-h-screen bg-white md:bg-gray-50 flex flex-col items-center p-0 md:p-6 pt-16 md:pt-24 pb-20">
-      <LoadingScreenIn />
+      <LoadingScreen mode="in" />
 
       <div className="w-full max-w-2xl px-4 md:px-0 space-y-6 md:space-y-8">
         {/* Compact Header */}

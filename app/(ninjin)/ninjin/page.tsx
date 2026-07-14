@@ -1,12 +1,12 @@
 "use client"
-import LoadingScreenIn from "@/components/LoadingScreenIn";
+import LoadingScreen from "@/components/LoadingScreen";
 import BackComponent from "@/components/BackComponent";
 import { motion } from "framer-motion";
 
 export default function Ninjinpage() {
   return (
     <main className="relative min-h-screen bg-[#FF9D00] flex flex-col items-center justify-center p-8 overflow-hidden">
-      <LoadingScreenIn />
+      <LoadingScreen mode="in" />
       <BackComponent variant="light" />
       
       <div className="relative z-10 text-center">

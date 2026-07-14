@@ -3,12 +3,12 @@
 import { motion } from "framer-motion";
 import { ArrowLeft, BarChart3 } from "lucide-react";
 import Link from "next/link";
-import LoadingScreenIn from "@/components/LoadingScreenIn";
+import LoadingScreen from "@/components/LoadingScreen";
 
 export default function AnalyticsPage() {
   return (
     <main className="min-h-screen bg-white md:bg-gray-50 flex flex-col items-center justify-center p-6 pt-16 md:pt-24 pb-20">
-      <LoadingScreenIn />
+      <LoadingScreen mode="in" />
 
       <div className="w-full max-w-2xl flex flex-col items-center text-center space-y-8">
         <motion.div 

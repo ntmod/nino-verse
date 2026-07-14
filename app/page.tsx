@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Sword, NotebookPen } from "lucide-react";
 import { useRouter } from "next/navigation";
-import LoadingScreenOut from "@/components/LoadingScreenOut";
+import LoadingScreen from "@/components/LoadingScreen";
 import Image from 'next/image';
 export default function Home() {
   const router = useRouter();
@@ -41,7 +41,7 @@ export default function Home() {
 
   return (
     <main className="relative w-full h-screen bg-gray-100 overflow-hidden flex flex-col lg:flex-row font-sans">
-      {showExitWipe && <LoadingScreenOut />}
+      {showExitWipe && <LoadingScreen mode="out" />}
       {/* Ninjin Button (Left/Top side, orange) */}
       <motion.div
         onClick={() => {

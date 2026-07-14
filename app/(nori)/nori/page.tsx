@@ -1,7 +1,6 @@
 'use client'
 
-import LoadingScreenIn from "@/components/LoadingScreenIn";
-import LoadingScreenOut from "@/components/LoadingScreenOut";
+import LoadingScreen from "@/components/LoadingScreen";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
@@ -305,8 +304,8 @@ export default function Noripage() {
 
   return (
     <main className="relative min-h-screen bg-[#F8F9FA] flex flex-col items-center p-4 md:p-8 pt-20 pb-20">
-      <LoadingScreenIn />
-      {showExitWipe && <LoadingScreenOut />}
+      <LoadingScreen mode="in" />
+      {showExitWipe && <LoadingScreen mode="out" />}
 
       <div id="nori-page" className="max-w-7xl w-full relative z-10 grid grid-cols-1 lg:grid-cols-6 gap-4 lg:gap-8 items-start">
         <header className="lg:col-span-6 rounded-3xl bg-white border border-black/5 p-4 flex items-center justify-between shadow-[0_10px_40px_rgba(0,0,0,0.03)]">

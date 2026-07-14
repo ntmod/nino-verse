@@ -1,7 +1,6 @@
 "use client";
 
-import LoadingScreenIn from "@/components/LoadingScreenIn";
-import LoadingScreenOut from "@/components/LoadingScreenOut";
+import LoadingScreen from "@/components/LoadingScreen";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -438,8 +437,8 @@ export default function CategorySettings() {
 
   return (
     <main className="relative min-h-screen bg-[#F8F9FA] flex flex-col items-center p-8 pt-24 pb-20">
-      <LoadingScreenIn />
-      {showExitWipe && <LoadingScreenOut />}
+      <LoadingScreen mode="in" />
+      {showExitWipe && <LoadingScreen mode="out" />}
 
       <div className="max-w-5xl w-full space-y-10">
         <header className="flex flex-col gap-6 mb-8">

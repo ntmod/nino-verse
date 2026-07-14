@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import LoadingScreenOut from "./LoadingScreenOut";
+import LoadingScreen from "./LoadingScreen";
 
 export default function BackComponent({ variant = "dark" }: { variant?: "light" | "dark" }) {
   const router = useRouter();
@@ -15,6 +15,10 @@ export default function BackComponent({ variant = "dark" }: { variant?: "light" 
   useEffect(() => {
     setShowExitWipe(false);
   }, [pathname]);
+
+  if (pathname === "/nori/login") {
+    return null;
+  }
 
   const handleBack = () => {
     setShowExitWipe(true);
@@ -34,7 +38,7 @@ export default function BackComponent({ variant = "dark" }: { variant?: "light" 
 
   return (
     <>
-      {showExitWipe && <LoadingScreenOut />}
+      {showExitWipe && <LoadingScreen mode="out" />}
       <motion.button
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
