@@ -28,17 +28,21 @@ export default function ExpenseModal() {
     if (!isExpenseModalOpen) return;
 
     if (editingTransaction) {
-      setNewName(editingTransaction.name);
-      // Format amount with commas and 2 decimals
-      const absAmount = Math.abs(editingTransaction.amount);
-      const parts = absAmount.toString().split('.');
-      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-      if (parts[1]) parts[1] = parts[1].substring(0, 2);
-      setNewAmount(parts.join('.'));
+      setNewName(editingTransaction.name || "");
+      // Format amount with commas and 2 decimals if defined
+      if (editingTransaction.amount !== undefined && editingTransaction.amount !== null) {
+        const absAmount = Math.abs(editingTransaction.amount);
+        const parts = absAmount.toString().split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        if (parts[1]) parts[1] = parts[1].substring(0, 2);
+        setNewAmount(parts.join('.'));
+      } else {
+        setNewAmount("");
+      }
       
-      setNewCategory(editingTransaction.category);
+      setNewCategory(editingTransaction.category || "");
       setNewSubCategory(editingTransaction.subCategory || "");
-      setNewPayment(editingTransaction.paymentMethod);
+      setNewPayment(editingTransaction.paymentMethod || "");
       setNewDate(editingTransaction.date ? new Date(editingTransaction.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
       setAmountError(false);
     } else {
@@ -59,8 +63,16 @@ export default function ExpenseModal() {
         
         if (Array.isArray(catData) && catData.length > 0) {
           setCategories(catData);
-          if (editingTransaction) {
-            const foundCat = catData.find(c => c._id === editingTransaction.category || c.name === editingTransaction.category);
+          if (editingTransaction && editingTransaction.category) {
+            const searchName = editingTransaction.category.toLowerCase();
+            const foundCat = catData.find(c => {
+              const nameLower = c.name.toLowerCase();
+              if (c._id === editingTransaction.category) return true;
+              if (nameLower === searchName) return true;
+              // Fallback mappings for food
+              if (searchName.includes("food") && (nameLower.includes("food") || nameLower.includes("dining"))) return true;
+              return false;
+            });
             if (foundCat) {
               setNewCategory(foundCat._id);
             } else {
