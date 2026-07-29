@@ -230,29 +230,30 @@ export default function ExpenseModal() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeExpenseModal}
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-900/30 backdrop-blur-md"
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden"
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            transition={{ type: "spring", stiffness: 380, damping: 30 }}
+            className="relative w-full max-w-md bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-100 overflow-hidden"
           >
             <div className="p-6 md:p-8 space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-black text-black tracking-tight uppercase">
+                <h2 className="text-lg font-black text-[#1A1A1A] tracking-tight uppercase font-mono">
                   {editingTransaction && editingTransaction._id ? "Edit Record" : "New Record"}
                 </h2>
-                <button onClick={closeExpenseModal} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                  <X className="w-5 h-5 text-black" />
+                <button onClick={closeExpenseModal} className="w-8 h-8 rounded-full border border-slate-100 hover:border-slate-200 hover:bg-slate-50 flex items-center justify-center transition-colors">
+                  <X className="w-4 h-4 text-slate-600" />
                 </button>
               </div>
 
               <form onSubmit={handleAddTransaction} className="space-y-6">
-                {/* Amount Field - High Prominence */}
-                <div className="py-2 text-center">
-                  <div className="flex items-center justify-center gap-2">
-                    <span className="text-xl font-black text-black uppercase tracking-widest mt-1">THB</span>
+                {/* Amount Field - Wrapped in a clean container */}
+                <div className="py-4 px-6 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-center">
+                  <div className="flex items-center justify-center gap-1.5">
+                    <span className="text-sm font-black text-slate-400 uppercase tracking-widest mt-1.5 font-mono">THB</span>
                     <input
                       required
                       autoFocus
@@ -261,8 +262,8 @@ export default function ExpenseModal() {
                       placeholder="0.00"
                       value={newAmount}
                       onChange={handleAmountChange}
-                      className={`p-2 bg-transparent border-none text-left text-4xl font-black placeholder:text-black/5 focus:ring-0 selection:bg-[#FF9D00]/30 w-[240px] transition-all ${
-                        amountError ? "text-red-500 ring-2 ring-red-500 rounded-xl" : "text-black"
+                      className={`p-1 bg-transparent border-none text-left text-4xl font-black placeholder:text-slate-300 focus:ring-0 selection:bg-[#FF9D00]/30 w-[180px] transition-all font-mono ${
+                        amountError ? "text-red-500" : "text-[#1A1A1A]"
                       }`}
                     />
                   </div>
@@ -271,34 +272,34 @@ export default function ExpenseModal() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-black text-black uppercase tracking-widest">Category</label>
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">Category</label>
                       <div className="relative">
                         <select
                           value={newCategory}
                           onChange={(e) => setNewCategory(e.target.value)}
-                          className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl text-xs font-bold text-black appearance-none focus:ring-2 focus:ring-[#FF9D00]/20 transition-all"
+                          className="w-full px-4 py-3 bg-slate-50/70 border border-slate-100 rounded-xl text-xs font-bold text-[#1A1A1A] appearance-none focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-slate-100/50 transition-all"
                         >
                           {categories.length > 0 && 
                             categories.map(cat => <option key={cat._id || cat.name} value={cat._id}>{cat.icon} {cat.name}</option>)
                           }
                         </select>
-                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 pointer-events-none" />
+                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[10px] font-black text-black uppercase tracking-widest">Payment</label>
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">Payment</label>
                       <div className="relative">
                         <select
                           value={newPayment}
                           onChange={(e) => setNewPayment(e.target.value)}
-                          className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl text-xs font-bold text-black appearance-none focus:ring-2 focus:ring-[#FF9D00]/20 transition-all"
+                          className="w-full px-4 py-3 bg-slate-50/70 border border-slate-100 rounded-xl text-xs font-bold text-[#1A1A1A] appearance-none focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-slate-100/50 transition-all"
                         >
                           {paymentMethods.length > 0 &&
                             paymentMethods.map(pm => <option key={pm._id || pm.name} value={pm._id}>💰 {pm.name}</option>)
                           }
                         </select>
-                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 pointer-events-none" />
+                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                       </div>
                     </div>
                   </div>
@@ -316,43 +317,43 @@ export default function ExpenseModal() {
                         exit={{ opacity: 0, height: 0 }}
                         className="space-y-1 overflow-hidden"
                       >
-                        <label className="text-[10px] font-black text-black uppercase tracking-widest">Subcategory</label>
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">Subcategory</label>
                         <div className="relative">
                           <select
                             value={newSubCategory}
                             onChange={(e) => setNewSubCategory(e.target.value)}
-                            className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl text-xs font-bold text-black appearance-none focus:ring-2 focus:ring-[#FF9D00]/20 transition-all"
+                            className="w-full px-4 py-3 bg-slate-50/70 border border-slate-100 rounded-xl text-xs font-bold text-[#1A1A1A] appearance-none focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-slate-100/50 transition-all"
                           >
                             <option value="">None (General)</option>
                             {currentSubcategories.map((sub: any) => (
                               <option key={sub._id || sub.name} value={sub._id}>🎯 {sub.name}</option>
                             ))}
                           </select>
-                          <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 pointer-events-none" />
+                          <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                         </div>
                       </motion.div>
                     );
                   })()}
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black text-black uppercase tracking-widest">Date</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">Date</label>
                     <input
                       type="date"
                       value={newDate}
                       onChange={(e) => setNewDate(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl text-xs font-bold text-black focus:ring-2 focus:ring-[#FF9D00]/20 transition-all"
+                      className="w-full px-4 py-3 bg-slate-50/70 border border-slate-100 rounded-xl text-xs font-bold text-[#1A1A1A] focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-slate-100/50 transition-all font-mono"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black text-black uppercase tracking-widest">Description</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">Description</label>
                     <input
                       type="text"
                       placeholder={`e.g. ${categories.find(c => c._id === newCategory)?.name || 'Lunch at Siam'}`}
                       maxLength={50}
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl text-sm font-bold text-black focus:ring-2 focus:ring-[#FF9D00]/20 transition-all"
+                      className="w-full px-4 py-3 bg-slate-50/70 border border-slate-100 rounded-xl text-sm font-bold text-[#1A1A1A] placeholder:text-slate-400 focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-slate-100/50 transition-all"
                     />
                   </div>
                 </div>
@@ -360,14 +361,14 @@ export default function ExpenseModal() {
                 <div className="flex gap-3 mt-2">
                   <button
                     type="submit"
-                    className="flex-1 py-4 bg-black text-white rounded-xl font-black text-sm uppercase tracking-widest hover:bg-[#FF9D00] transition-colors"
+                    className="flex-1 py-4 bg-[#1A1A1A] text-white rounded-xl font-black text-sm uppercase tracking-widest hover:bg-[#FF9D00] shadow-md shadow-black/10 transition-colors cursor-pointer"
                   >
                     Confirm Record
                   </button>
                   <button
                     type="button"
                     onClick={() => handleAddTransaction(undefined, false)}
-                    className="w-14 py-4 bg-gray-100 text-black rounded-xl font-black text-xl hover:bg-[#FF9D00] hover:text-white transition-colors flex items-center justify-center group"
+                    className="w-14 py-4 bg-slate-100 border border-slate-200/50 text-[#1A1A1A] rounded-xl font-black text-xl hover:bg-[#FF9D00] hover:text-white transition-all flex items-center justify-center group cursor-pointer"
                     title="Add and keep open"
                   >
                     <Plus className="w-6 h-6 group-hover:scale-110 transition-transform" />

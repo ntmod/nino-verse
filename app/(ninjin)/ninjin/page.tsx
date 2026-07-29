@@ -348,7 +348,7 @@ export default function NinjinQuestPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <Link href="/nori" className="flex items-center gap-1.5 text-slate-500 hover:text-slate-200 transition-colors mb-2 text-[10px] font-bold uppercase tracking-widest">
+            <Link href="/v2/nori" className="flex items-center gap-1.5 text-slate-500 hover:text-slate-200 transition-colors mb-2 text-[10px] font-bold uppercase tracking-widest">
               <ArrowLeft className="w-3 h-3" />
               Nino-Verse Hub
             </Link>

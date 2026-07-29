@@ -5,19 +5,23 @@ export function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const pathname = url.pathname;
 
-  // Handle nori sub-path protection
-  if (pathname.startsWith('/nori')) {
+  // Handle nori sub-path protection (both v1 and v2)
+  if (pathname.startsWith('/nori') || pathname.startsWith('/v2/nori')) {
     const sessionCookie = request.cookies.get('nori_session');
     const isLoggedIn = sessionCookie?.value === 'true';
 
-    if (pathname === '/nori/login') {
+    const isLoginPath = pathname === '/nori/login' || pathname === '/v2/nori/login';
+    const targetDashboard = pathname.startsWith('/v2/nori') ? '/v2/nori' : '/nori';
+    const targetLogin = pathname.startsWith('/v2/nori') ? '/v2/nori/login' : '/nori/login';
+
+    if (isLoginPath) {
       if (isLoggedIn) {
-        url.pathname = '/nori';
+        url.pathname = targetDashboard;
         return NextResponse.redirect(url);
       }
     } else {
       if (!isLoggedIn) {
-        url.pathname = '/nori/login';
+        url.pathname = targetLogin;
         return NextResponse.redirect(url);
       }
     }

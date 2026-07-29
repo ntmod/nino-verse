@@ -88,12 +88,12 @@ export default function DailyAverageSettings() {
   const handleBack = () => {
     setShowExitWipe(true);
     setTimeout(() => {
-      router.push("/v1/nori/settings");
+      router.push("/v2/nori/settings");
     }, 800);
   };
 
   return (
-    <main className="relative min-h-screen bg-[#F8F9FA] flex flex-col items-center p-8 pt-24 pb-20">
+    <main className="relative min-h-screen bg-[#f5f5f7] flex flex-col items-center p-8 pt-24 pb-20">
       <LoadingScreen mode="in" />
       {showExitWipe && <LoadingScreen mode="out" />}
 
@@ -102,13 +102,13 @@ export default function DailyAverageSettings() {
           <div className="flex items-center gap-4">
             <button 
               onClick={handleBack}
-              className="w-10 h-10 rounded-full bg-white border border-black/5 flex items-center justify-center hover:bg-slate-50 transition-colors cursor-pointer"
+              className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors cursor-pointer shadow-sm"
             >
-              <ArrowLeft className="w-5 h-5 text-slate-400" />
+              <ArrowLeft className="w-5 h-5 text-slate-500" />
             </button>
-            <div>
-              <h1 className="text-2xl font-black text-slate-900 italic tracking-tighter uppercase">Daily Average Settings</h1>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Select categories to calculate daily average</p>
+            <div className="text-left font-mono">
+              <h1 className="text-2xl font-black text-[#1A1A1A] italic tracking-tighter uppercase leading-none mb-1.5">Daily Average Config</h1>
+              <p className="text-xs font-bold text-[#777777] uppercase tracking-widest leading-none">Select categories to calculate daily average</p>
             </div>
           </div>
         </header>
@@ -116,12 +116,12 @@ export default function DailyAverageSettings() {
         {isLoading ? (
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-white border border-black/5 rounded-3xl animate-pulse" />
+              <div key={i} className="h-16 bg-white border border-slate-100 rounded-2xl animate-pulse shadow-sm" />
             ))}
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-3 font-mono">
               <button 
                 onClick={handleSelectAll}
                 className="text-[10px] font-black text-[#FF9D00] uppercase tracking-widest cursor-pointer hover:underline"
@@ -131,7 +131,7 @@ export default function DailyAverageSettings() {
               <span className="text-slate-300">|</span>
               <button 
                 onClick={handleClearAll}
-                className="text-[10px] font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:underline"
+                className="text-[10px] font-black text-[#777777] uppercase tracking-widest cursor-pointer hover:underline"
               >
                 Clear All
               </button>
@@ -147,19 +147,19 @@ export default function DailyAverageSettings() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                     onClick={() => handleToggleCategory(category._id)}
-                    className={`p-5 rounded-3xl border transition-all duration-300 flex items-center justify-between cursor-pointer ${
+                    className={`p-5 rounded-2xl border transition-all duration-300 flex items-center justify-between cursor-pointer ${
                       isSelected 
-                        ? "bg-white border-black/10 shadow-[0_10px_30px_rgba(0,0,0,0.02)]" 
-                        : "bg-white/40 border-black/5 opacity-60 hover:opacity-80"
+                        ? "bg-white border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]" 
+                        : "bg-white/40 border-slate-100 opacity-60 hover:opacity-80 shadow-none"
                     }`}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-black/5 flex items-center justify-center text-xl shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-xl shrink-0">
                         {category.icon || "🏷️"}
                       </div>
-                      <div>
-                        <h3 className="text-sm font-black text-slate-900 italic uppercase leading-none mb-1">{category.name}</h3>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      <div className="text-left font-mono">
+                        <h3 className="text-sm font-black text-[#1A1A1A] italic uppercase leading-none mb-1.5">{category.name}</h3>
+                        <p className="text-[10px] font-bold text-[#777777] uppercase tracking-wider leading-none">
                           Type: {category.type || "expense"}
                         </p>
                       </div>
@@ -167,7 +167,7 @@ export default function DailyAverageSettings() {
 
                     <div className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${
                       isSelected 
-                        ? "bg-slate-900 text-white scale-100" 
+                        ? "bg-[#1A1A1A] text-white scale-100" 
                         : "border-2 border-slate-200 scale-95"
                     }`}>
                       {isSelected && <Check className="w-4 h-4" />}
@@ -181,7 +181,7 @@ export default function DailyAverageSettings() {
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-widest rounded-2xl text-center"
+                className="p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-widest rounded-xl text-center font-mono"
               >
                 Configuration Saved Successfully!
               </motion.div>
@@ -190,7 +190,7 @@ export default function DailyAverageSettings() {
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="w-full py-4 rounded-3xl bg-slate-900 text-white text-xs font-black uppercase tracking-widest hover:bg-black disabled:bg-slate-400 transition-all shadow-lg shadow-black/10 cursor-pointer text-center"
+              className="w-full py-4 rounded-xl bg-[#1A1A1A] text-white text-xs font-black uppercase tracking-widest hover:bg-[#FF9D00] disabled:bg-slate-400 transition-all shadow-md shadow-black/10 cursor-pointer text-center font-mono"
             >
               {isSaving ? "Saving..." : "Save Configurations"}
             </button>

@@ -58,12 +58,12 @@ export default function BudgetSettings() {
   const handleBack = () => {
     setShowExitWipe(true);
     setTimeout(() => {
-      router.push("/v1/nori/settings");
+      router.push("/v2/nori/settings");
     }, 800);
   };
 
   return (
-    <main className="relative min-h-screen bg-[#F8F9FA] flex flex-col items-center p-8 pt-24 pb-20">
+    <main className="relative min-h-screen bg-[#f5f5f7] flex flex-col items-center p-8 pt-24 pb-20">
       <LoadingScreen mode="in" />
       {showExitWipe && <LoadingScreen mode="out" />}
 
@@ -72,18 +72,18 @@ export default function BudgetSettings() {
           <div className="flex items-center gap-4">
             <button 
               onClick={handleBack}
-              className="w-10 h-10 rounded-full bg-white border border-black/5 flex items-center justify-center hover:bg-slate-50 transition-colors cursor-pointer"
+              className="w-10 h-10 rounded-xl bg-white flex items-center justify-center hover:bg-slate-50 transition-colors cursor-pointer shadow-sm"
             >
-              <ArrowLeft className="w-5 h-5 text-slate-400" />
+              <ArrowLeft className="w-5 h-5 text-slate-500" />
             </button>
-            <div>
-              <h1 className="text-2xl font-black text-slate-900 italic tracking-tighter uppercase">Monthly Budgets</h1>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Configure your spending limits</p>
+            <div className="text-left font-mono">
+              <h1 className="text-2xl font-black text-[#1A1A1A] italic tracking-tighter uppercase leading-none mb-1.5">Monthly Budgets</h1>
+              <p className="text-xs font-bold text-[#777777] uppercase tracking-widest leading-none">Configure your spending limits</p>
             </div>
           </div>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-slate-900 text-white text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-black/10 cursor-pointer"
+            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#1A1A1A] text-white text-xs font-black uppercase tracking-widest hover:bg-[#FF9D00] transition-colors shadow-md shadow-black/10 cursor-pointer font-mono"
           >
             <Plus className="w-4 h-4" />
             Set Budget
@@ -98,28 +98,28 @@ export default function BudgetSettings() {
                 key={budget._id || budget.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 + index * 0.1 }}
-                className="p-6 rounded-3xl bg-white border border-black/5 flex items-center justify-between group"
+                transition={{ delay: 0.05 + index * 0.05 }}
+                className="p-6 rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] flex items-center justify-between group"
               >
                 <div className="flex items-center gap-6">
                   <div 
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center border border-black/5"
+                    className="w-14 h-14 rounded-2xl flex items-center justify-center"
                     style={{ backgroundColor: `${budget.color}10` }}
                   >
                     <Icon className="w-6 h-6" style={{ color: budget.color }} />
                   </div>
-                  <div>
-                    <h3 className="text-base font-black text-slate-900 italic uppercase">{budget.category}</h3>
-                    <p className="text-sm font-black text-[#FF9D00] italic">LIMIT: {budget.limit.toLocaleString()} THB</p>
+                  <div className="text-left font-mono">
+                    <h3 className="text-base font-black text-[#1A1A1A] italic uppercase leading-none mb-2">{budget.category}</h3>
+                    <p className="text-sm font-black text-[#FF9D00] italic leading-none">LIMIT: {budget.limit.toLocaleString()} THB</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button className="w-10 h-10 rounded-xl bg-slate-50 border border-black/5 flex items-center justify-center hover:bg-white hover:shadow-md transition-all group/btn">
-                    <Pencil className="w-4 h-4 text-slate-400 group-hover/btn:text-[#FF9D00]" />
+                  <button className="w-10 h-10 rounded-xl bg-white flex items-center justify-center hover:bg-slate-50 transition-all cursor-pointer">
+                    <Pencil className="w-4 h-4 text-slate-400 hover:text-[#FF9D00]" />
                   </button>
-                  <button className="w-10 h-10 rounded-xl bg-slate-50 border border-black/5 flex items-center justify-center hover:bg-rose-50 hover:border-rose-100 transition-all group/btn">
-                    <Trash2 className="w-4 h-4 text-slate-400 group-hover/btn:text-rose-500" />
+                  <button className="w-10 h-10 rounded-xl bg-white flex items-center justify-center hover:bg-rose-50 transition-all cursor-pointer">
+                    <Trash2 className="w-4 h-4 text-slate-400 hover:text-rose-500" />
                   </button>
                 </div>
               </motion.div>
@@ -137,63 +137,63 @@ export default function BudgetSettings() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsModalOpen(false)}
-              className="absolute inset-0 bg-black/20 backdrop-blur-md"
+              className="absolute inset-0 bg-slate-900/30 backdrop-blur-md"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-black/5 overflow-hidden"
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="relative w-full max-w-lg bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden"
             >
               <div className="p-8">
                 <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-xl font-black text-slate-900 italic uppercase tracking-tighter">Set Category Budget</h2>
-                  <button onClick={() => setIsModalOpen(false)} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors cursor-pointer">
-                    <X className="w-5 h-5 text-slate-400" />
+                  <h2 className="text-xl font-black text-[#1A1A1A] italic uppercase tracking-tighter font-mono">Set Category Budget</h2>
+                  <button onClick={() => setIsModalOpen(false)} className="w-8 h-8 rounded-full border border-slate-100 hover:border-slate-200 hover:bg-slate-50 flex items-center justify-center transition-colors cursor-pointer">
+                    <X className="w-4 h-4 text-slate-600" />
                   </button>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-6 text-left">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Category</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 font-mono">Category</label>
                     <input
                       type="text"
                       placeholder="e.g. Food & Dining"
                       value={newBudget.category}
                       onChange={(e) => setNewBudget({ ...newBudget, category: e.target.value })}
-                      className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-black/5 focus:outline-none focus:ring-2 focus:ring-[#FF9D00]/20 focus:bg-white transition-all text-sm font-bold text-slate-900"
+                      className="w-full px-5 py-4 bg-slate-50/70 rounded-xl text-sm font-bold text-[#1A1A1A] placeholder:text-slate-400 focus:bg-white focus:ring-4 focus:ring-slate-100/50 transition-all font-mono"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Monthly Limit (THB)</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 font-mono">Monthly Limit (THB)</label>
                     <input
                       type="number"
                       placeholder="e.g. 5000"
                       value={newBudget.limit}
                       onChange={(e) => setNewBudget({ ...newBudget, limit: e.target.value })}
-                      className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-black/5 focus:outline-none focus:ring-2 focus:ring-[#FF9D00]/20 focus:bg-white transition-all text-sm font-bold text-slate-900"
+                      className="w-full px-5 py-4 bg-slate-50/70 rounded-xl text-sm font-bold text-[#1A1A1A] placeholder:text-slate-400 focus:bg-white focus:ring-4 focus:ring-slate-100/50 transition-all font-mono"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Icon</label>
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 font-mono">Icon</label>
                       <select
                         value={newBudget.icon}
                         onChange={(e) => setNewBudget({ ...newBudget, icon: e.target.value })}
-                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-black/5 focus:outline-none focus:ring-2 focus:ring-[#FF9D00]/20 focus:bg-white transition-all text-sm font-bold text-slate-900"
+                        className="w-full px-5 py-4 bg-slate-50/70 border border-slate-100 rounded-xl text-sm font-bold text-[#1A1A1A] focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-slate-100/50 transition-all font-mono"
                       >
                         {Object.keys(ICON_MAP).map(icon => <option key={icon} value={icon}>{icon}</option>)}
                       </select>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Color</label>
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 font-mono">Color</label>
                       <input
                         type="color"
                         value={newBudget.color}
                         onChange={(e) => setNewBudget({ ...newBudget, color: e.target.value })}
-                        className="w-full h-[54px] p-2 rounded-2xl bg-slate-50 border border-black/5 cursor-pointer"
+                        className="w-10 h-10 px-5 py-4 bg-slate-50/70 rounded-xl cursor-pointer"
                       />
                     </div>
                   </div>
@@ -202,13 +202,13 @@ export default function BudgetSettings() {
                 <div className="grid grid-cols-2 gap-4 mt-10">
                   <button
                     onClick={() => setIsModalOpen(false)}
-                    className="py-4 rounded-2xl border border-black/5 text-xs font-black text-slate-400 uppercase tracking-widest hover:bg-slate-50 transition-all cursor-pointer"
+                    className="py-4 rounded-xl bg-slate-50/70 text-xs font-black text-[#777777] uppercase tracking-widest hover:bg-slate-50 transition-all cursor-pointer font-mono"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSaveBudget}
-                    className="py-4 rounded-2xl bg-slate-900 text-white text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-black/10 cursor-pointer"
+                    className="py-4 rounded-xl bg-[#1A1A1A] text-white text-xs font-black uppercase tracking-widest hover:bg-[#FF9D00] shadow-md shadow-black/10 transition-all cursor-pointer font-mono"
                   >
                     Save Budget
                   </button>

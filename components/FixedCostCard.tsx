@@ -91,7 +91,7 @@ export default function FixedCostCard({
               <RotateCcw className="w-3 h-3" /> Reset
             </motion.button>
           )}
-          <Link href="/nori/settings/fixed-cost">
+          <Link href="/v2/nori/settings/fixed-cost">
             <motion.button 
               whileHover={{ x: 3 }}
               className="flex items-center gap-1 text-[10px] font-black text-[#FF9D00] uppercase tracking-widest cursor-pointer"

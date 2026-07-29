@@ -89,13 +89,14 @@ export default function Home() {
 
   // Keyboard navigation support
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") handleNext();
-      if (e.key === "ArrowLeft") handlePrev();
-      if (e.key === "Enter") handleEnter();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    router.replace('/v2')
+    // const handleKeyDown = (e: KeyboardEvent) => {
+    //   if (e.key === "ArrowRight") handleNext();
+    //   if (e.key === "ArrowLeft") handlePrev();
+    //   if (e.key === "Enter") handleEnter();
+    // };
+    // window.addEventListener("keydown", handleKeyDown);
+    // return () => window.removeEventListener("keydown", handleKeyDown);
   }, [currentIndex, isExiting]);
 
   // Framer Motion slide variants

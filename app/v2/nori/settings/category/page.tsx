@@ -30,11 +30,11 @@ function CategoryCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="rounded-2xl bg-white border border-black/5 overflow-hidden group select-none"
+      className="rounded-2xl bg-white overflow-hidden group select-none"
     >
       <div 
         onClick={() => setExpandedId(isExpanded ? null : cat._id)}
-        className="p-3.5 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors"
+        className="p-3.5 flex items-center justify-between cursor-pointer hover:bg-[#ffffff] transition-colors"
       >
         <div className="flex items-center gap-3">
           <div className="flex flex-col gap-0.5 -ml-1">
@@ -43,7 +43,7 @@ function CategoryCard({
                 e.stopPropagation();
                 handleMove(cat, "up");
               }}
-              className="p-0.5 rounded hover:bg-slate-100 text-slate-300 hover:text-slate-600 transition-colors"
+              className="p-0.5 rounded hover:bg-[#ffffff] text-slate-300 hover:text-[#333333] transition-colors"
             >
               <ChevronUp className="w-3.5 h-3.5" />
             </button>
@@ -52,14 +52,14 @@ function CategoryCard({
                 e.stopPropagation();
                 handleMove(cat, "down");
               }}
-              className="p-0.5 rounded hover:bg-slate-100 text-slate-300 hover:text-slate-600 transition-colors"
+              className="p-0.5 rounded hover:bg-[#ffffff] text-slate-300 hover:text-[#333333] transition-colors"
             >
               <ChevronDown className="w-3.5 h-3.5" />
             </button>
           </div>
           <div className="flex items-center gap-4">
             <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl border border-black/5 ${
+              className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl ${
                 cat.type === "income" ? "bg-emerald-50" : "bg-rose-50"
               }`}
             >
@@ -67,10 +67,10 @@ function CategoryCard({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-xs font-black text-slate-900 italic uppercase tracking-tight">{cat.name}</h3>
+                <h3 className="text-xs font-black text-[#000000] italic uppercase tracking-tight">{cat.name}</h3>
               </div>
               {cat.subcategories && cat.subcategories.length > 0 && (
-                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                <p className="text-[8px] font-bold text-[#777777] uppercase tracking-widest mt-0.5">
                   {cat.subcategories.length} subs
                 </p>
               )}
@@ -85,9 +85,9 @@ function CategoryCard({
                 e.stopPropagation();
                 setSelectedCategoryForSub(cat);
               }}
-              className="w-8 h-8 rounded-lg bg-slate-50 border border-black/5 flex items-center justify-center hover:bg-slate-900 hover:border-slate-900 transition-all group/subbtn"
+              className="w-8 h-8 rounded-xl bg-white flex items-center justify-center hover:bg-slate-50/70 transition-all group/subbtn"
             >
-              <Plus className="w-3.5 h-3.5 text-slate-400 group-hover/subbtn:text-white" />
+              <Plus className="w-3.5 h-3.5 text-[#777777] group-hover/subbtn:text-white" />
             </button>
             <button 
               onClick={(e) => {
@@ -96,18 +96,18 @@ function CategoryCard({
                 setNewCat({ name: cat.name, icon: cat.icon, type: cat.type });
                 setIsModalOpen(true);
               }}
-              className="w-8 h-8 rounded-lg bg-slate-50 border border-black/5 flex items-center justify-center hover:bg-white hover:shadow-md transition-all group/btn"
+              className="w-8 h-8 rounded-xl bg-white flex items-center justify-center hover:bg-slate-50/70 transition-all group/btn"
             >
-              <Pencil className="w-3.5 h-3.5 text-slate-400 group-hover/btn:text-[#FF9D00]" />
+              <Pencil className="w-3.5 h-3.5 text-[#777777] group-hover/btn:text-[#FF9D00]" />
             </button>
             <button 
               onClick={(e) => {
                 e.stopPropagation();
                 handleDeleteCategory(cat._id);
               }}
-              className="w-8 h-8 rounded-lg bg-slate-50 border border-black/5 flex items-center justify-center hover:bg-rose-50 hover:border-rose-100 transition-all group/btn"
+              className="w-8 h-8 rounded-xl bg-white flex items-center justify-center hover:bg-rose-50 transition-all group/btn"
             >
-              <Trash2 className="w-3.5 h-3.5 text-slate-400 group-hover/btn:text-rose-500" />
+              <Trash2 className="w-3.5 h-3.5 text-[#777777] group-hover/btn:text-rose-500" />
             </button>
           </div>
           
@@ -130,15 +130,15 @@ function CategoryCard({
             transition={{ duration: 0.3, ease: "circOut" }}
             className="border-t border-black/5"
           >
-            <div className="p-4 pt-1.5 bg-slate-50/30">
+            <div className="p-4 pt-1.5 bg-[#ffffff]/30">
               <div className="flex flex-col gap-1.5 pl-[56px]">
                 {cat.subcategories && cat.subcategories.length > 0 ? (
                   cat.subcategories.map((sub: any, subIndex: number) => (
                     <div 
                       key={sub._id || subIndex}
-                      className="group/sub flex items-center justify-between p-3 rounded-2xl bg-white border border-black/5 transition-all hover:shadow-sm"
+                      className="group/sub flex items-center justify-between p-3 rounded-2xl bg-white transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)]"
                     >
-                      <span className="text-[11px] font-black text-slate-700 uppercase tracking-tight">{sub.name}</span>
+                      <span className="text-[11px] font-black text-[#333333] uppercase tracking-tight">{sub.name}</span>
                       <div className="flex items-center gap-1">
                         <button 
                           onClick={(e) => {
@@ -146,7 +146,7 @@ function CategoryCard({
                             setSelectedSubForEdit({ catId: cat._id, subId: sub._id, name: sub.name });
                             setEditSubName(sub.name);
                           }}
-                          className="p-2 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-[#FF9D00] transition-all cursor-pointer"
+                          className="p-2 rounded-none hover:bg-[#ffffff] text-[#777777] hover:text-[#FF9D00] transition-all cursor-pointer"
                         >
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
@@ -155,7 +155,7 @@ function CategoryCard({
                             e.stopPropagation();
                             handleDeleteSubcategory(cat._id, sub._id);
                           }}
-                          className="p-2 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-all cursor-pointer"
+                          className="p-2 rounded-none hover:bg-rose-50 text-[#777777] hover:text-rose-500 transition-all cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -431,7 +431,7 @@ export default function CategorySettings() {
   const handleBack = () => {
     setShowExitWipe(true);
     setTimeout(() => {
-      router.push("/v1/nori/settings");
+      router.push("/nori/settings");
     }, 800);
   };
 
@@ -446,33 +446,33 @@ export default function CategorySettings() {
             <div className="flex items-center gap-3">
               <button
                 onClick={handleBack}
-                className="w-8 h-8 rounded-full bg-white border border-black/5 flex items-center justify-center hover:bg-slate-50 transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-xl bg-white flex items-center justify-center hover:bg-slate-50/70 transition-colors cursor-pointer"
               >
-                <ArrowLeft className="w-4 h-4 text-slate-400" />
+                <ArrowLeft className="w-4 h-4 text-[#777777]" />
               </button>
               <div>
-                <h1 className="text-xl font-black text-slate-900 italic tracking-tighter uppercase">Category Manager</h1>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Create and edit spending labels</p>
+                <h1 className="text-xl font-black text-[#000000] italic tracking-tighter uppercase">Category Manager</h1>
+                <p className="text-[9px] font-bold text-[#777777] uppercase tracking-widest">Create and edit spending labels</p>
               </div>
             </div>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-black/10 cursor-pointer"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-none bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-none shadow-black/10 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               New Category
             </button>
           </div>
 
-          <div className="flex p-1 rounded-xl bg-slate-100 border border-black/5 w-fit">
+          <div className="flex p-1 rounded-2xl bg-white w-fit">
             {["all", "expense", "income"].map((type) => (
               <button
                 key={type}
                 onClick={() => setFilterType(type as any)}
-                className={`px-5 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer ${
+                className={`px-5 py-2 rounded-none text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer ${
                   filterType === type 
-                    ? "bg-white text-slate-900 shadow-sm" 
-                    : "text-slate-400 hover:text-slate-600"
+                    ? "bg-white text-[#000000] shadow-none" 
+                    : "text-[#777777] hover:text-[#333333]"
                 }`}
               >
                 {type}
@@ -487,12 +487,12 @@ export default function CategorySettings() {
             <div className="space-y-4">
               <div className="flex items-center justify-between px-2">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-1.5 h-6 bg-emerald-500 rounded-full" />
+                  <div className="w-1.5 h-6 bg-emerald-500 rounded-none" />
                   <div>
-                    <h2 className="text-xs font-black text-slate-900 uppercase italic tracking-tight">Income</h2>
+                    <h2 className="text-xs font-black text-[#000000] uppercase italic tracking-tight">Income</h2>
                   </div>
                 </div>
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                <span className="text-[9px] font-bold text-[#777777] uppercase tracking-widest">
                   {categories.filter(c => c.type === "income").length} Items
                 </span>
               </div>
@@ -518,7 +518,7 @@ export default function CategorySettings() {
                   ))}
               </div>
               {categories.filter(c => c.type === "income").length === 0 && (
-                <div className="p-8 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
+                <div className="p-8 rounded-none border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
                   <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest italic">No income categories</p>
                 </div>
               )}
@@ -530,12 +530,12 @@ export default function CategorySettings() {
             <div className="space-y-4">
               <div className="flex items-center justify-between px-2">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-1.5 h-6 bg-rose-500 rounded-full" />
+                  <div className="w-1.5 h-6 bg-rose-500 rounded-none" />
                   <div>
-                    <h2 className="text-xs font-black text-slate-900 uppercase italic tracking-tight">Expense</h2>
+                    <h2 className="text-xs font-black text-[#000000] uppercase italic tracking-tight">Expense</h2>
                   </div>
                 </div>
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                <span className="text-[9px] font-bold text-[#777777] uppercase tracking-widest">
                   {categories.filter(c => c.type === "expense").length} Items
                 </span>
               </div>
@@ -561,7 +561,7 @@ export default function CategorySettings() {
                   ))}
               </div>
               {categories.filter(c => c.type === "expense").length === 0 && (
-                <div className="p-8 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
+                <div className="p-8 rounded-none border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
                   <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest italic">No expense categories</p>
                 </div>
               )}
@@ -585,19 +585,19 @@ export default function CategorySettings() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-lg md:max-w-xl bg-white rounded-3xl shadow-2xl border border-black/5 overflow-hidden"
+              className="relative w-full max-w-lg md:max-w-xl bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden"
             >
               <div className="p-4 md:p-8">
                 <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-xl font-black text-slate-900 italic uppercase tracking-tighter">
+                  <h2 className="text-xl font-black text-[#000000] italic uppercase tracking-tighter">
                     {editingCategory ? "Edit Category" : "Create Category"}
                   </h2>
                   <button onClick={() => {
                     setIsModalOpen(false);
                     setEditingCategory(null);
                     setNewCat({ name: "", icon: "🍴", type: "expense" });
-                  }} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors cursor-pointer">
-                    <X className="w-5 h-5 text-slate-400" />
+                  }} className="w-10 h-10 rounded-none bg-[#ffffff] flex items-center justify-center hover:bg-[#ffffff] transition-colors cursor-pointer">
+                    <X className="w-5 h-5 text-[#777777]" />
                   </button>
                 </div>
 
@@ -605,8 +605,8 @@ export default function CategorySettings() {
                   {/* ICON PICKER */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between ml-1">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select Icon</label>
-                      <div className="rounded-3xl ring-2 ring-slate-100 w-14 h-14 flex items-center justify-center text-[2rem] bg-slate-50">{newCat.icon}</div>
+                      <label className="text-[10px] font-black text-[#777777] uppercase tracking-widest">Select Icon</label>
+                      <div className="rounded-none ring-2 ring-slate-100 w-14 h-14 flex items-center justify-center text-[2rem] bg-[#ffffff]">{newCat.icon}</div>
                     </div>
 
                     <EmojiPicker.Root
@@ -615,25 +615,25 @@ export default function CategorySettings() {
                       className="flex flex-col gap-4"
                     >
                       <div className="relative">
-                        <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#777777]" />
                         <EmojiPicker.Search
                           placeholder="Search emojis..."
-                          className="w-full pl-11 pr-6 py-3 rounded-2xl bg-slate-50 border border-black/5 focus:outline-none focus:ring-2 focus:ring-[#FF9D00]/20 focus:bg-white transition-all text-xs font-bold text-slate-900"
+                          className="w-full pl-11 pr-6 py-3 rounded-xl bg-slate-50/70 focus:outline-none focus:ring-2 focus:ring-[#FF9D00]/20 focus:bg-white transition-all text-xs font-bold text-[#000000]"
                         />
                       </div>
 
-                      <EmojiPicker.Viewport className="w-full h-48  pr-2 custom-scrollbar bg-slate-50/50 rounded-xl border border-black/5 p-2">
+                      <EmojiPicker.Viewport className="w-full h-48 pr-2 custom-scrollbar bg-white/50 rounded-xl p-2">
                         <EmojiPicker.List
                           components={{
                             CategoryHeader: ({ category, ...props }) => (
-                              <div {...props} className="text-[9px] font-black text-slate-400 uppercase py-4 px-2 bg-slate-50/80 backdrop-blur-sm sticky top-0 z-10 -mx-2">
+                              <div {...props} className="text-[9px] font-black text-[#777777] uppercase py-4 px-2 bg-[#ffffff]/80 backdrop-blur-sm sticky top-0 z-10 -mx-2">
                                 {category.label}
                               </div>
                             ),
                             Emoji: ({ emoji, ...props }) => (
                               <button
                                 {...props}
-                                className={`my-2 w-10 h-10 aspect-square rounded-full flex items-center justify-center text-2xl transition-all hover:bg-white ${newCat.icon === emoji.emoji ? "bg-white ring-2 ring-[#FF9D00]/20 scale-110" : "hover:scale-120"
+                                className={`my-2 w-10 h-10 aspect-square rounded-none flex items-center justify-center text-2xl transition-all hover:bg-white ${newCat.icon === emoji.emoji ? "bg-white ring-2 ring-[#FF9D00]/20 scale-110" : "hover:scale-120"
                                   }`}
                               >
                                 {emoji.emoji}
@@ -647,13 +647,13 @@ export default function CategorySettings() {
                           }}
                         />
                         <EmojiPicker.Loading>
-                          <div className="h-full flex items-center justify-center text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                          <div className="h-full flex items-center justify-center text-[10px] font-black text-[#777777] uppercase tracking-widest">
                             Loading Emojis...
                           </div>
                         </EmojiPicker.Loading>
                         <EmojiPicker.Empty>
                           {({ search }) => (
-                            <div className="h-full flex items-center justify-center text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                            <div className="h-full flex items-center justify-center text-[10px] font-black text-[#777777] uppercase tracking-widest">
                               No emoji found for "{search}"
                             </div>
                           )}
@@ -664,16 +664,16 @@ export default function CategorySettings() {
 
                   {/* TYPE SELECTOR */}
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Type</label>
+                    <label className="text-[10px] font-black text-[#777777] uppercase tracking-widest ml-1">Type</label>
                     <div className="grid grid-cols-2 gap-4">
                       {["expense", "income"].map((type) => (
                         <button
                           key={type}
                           onClick={() => setNewCat({ ...newCat, type: type as any })}
-                          className={`py-4 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
+                          className={`py-4 rounded-none border text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
                             newCat.type === type
-                              ? "bg-slate-900 text-white border-slate-900 shadow-lg shadow-black/10"
-                              : "bg-slate-50 text-slate-400 border-black/5 hover:bg-slate-100"
+                              ? "bg-slate-900 text-white border-slate-900 shadow-none shadow-black/10"
+                              : "bg-[#ffffff] text-[#777777] border-black/5 hover:bg-[#ffffff]"
                           }`}
                         >
                           {type}
@@ -684,13 +684,13 @@ export default function CategorySettings() {
 
                   {/* NAME INPUT */}
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Category Name</label>
+                    <label className="text-[10px] font-black text-[#777777] uppercase tracking-widest ml-1">Category Name</label>
                     <input
                       type="text"
                       placeholder="e.g. Groceries"
                       value={newCat.name}
                       onChange={(e) => setNewCat({ ...newCat, name: e.target.value })}
-                      className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-black/5 focus:outline-none focus:ring-2 focus:ring-[#FF9D00]/20 focus:bg-white transition-all text-sm font-bold text-slate-900"
+                      className="w-full px-6 py-4 rounded-xl bg-slate-50/70 focus:outline-none focus:ring-2 focus:ring-[#FF9D00]/20 focus:bg-white transition-all text-sm font-bold text-[#000000]"
                     />
                   </div>
                 </div>
@@ -702,13 +702,13 @@ export default function CategorySettings() {
                       setEditingCategory(null);
                       setNewCat({ name: "", icon: "🍴", type: "expense" });
                     }}
-                    className="py-4 rounded-2xl border border-black/5 text-xs font-black text-slate-400 uppercase tracking-widest hover:bg-slate-50 transition-all cursor-pointer"
+                    className="py-4 rounded-xl bg-slate-50/70 text-xs font-black text-[#777777] uppercase tracking-widest hover:bg-slate-50/70 transition-all cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSaveCategory}
-                    className="py-4 rounded-2xl bg-slate-900 text-white text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-black/10 cursor-pointer"
+                    className="py-4 rounded-none bg-slate-900 text-white text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-none shadow-black/10 cursor-pointer"
                   >
                     {editingCategory ? "Update Category" : "Save Category"}
                   </button>
@@ -733,22 +733,22 @@ export default function CategorySettings() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-black/5 overflow-hidden"
+              className="relative w-full max-w-md bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden"
             >
               <div className="p-8">
                 <div className="flex items-center justify-between mb-8">
                   <div>
-                    <h2 className="text-xl font-black text-slate-900 italic uppercase tracking-tighter">Add Subcategory</h2>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Under {selectedCategoryForSub.name}</p>
+                    <h2 className="text-xl font-black text-[#000000] italic uppercase tracking-tighter">Add Subcategory</h2>
+                    <p className="text-[10px] font-bold text-[#777777] uppercase tracking-widest mt-1">Under {selectedCategoryForSub.name}</p>
                   </div>
-                  <button onClick={() => setSelectedCategoryForSub(null)} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors cursor-pointer">
-                    <X className="w-5 h-5 text-slate-400" />
+                  <button onClick={() => setSelectedCategoryForSub(null)} className="w-10 h-10 rounded-none bg-[#ffffff] flex items-center justify-center hover:bg-[#ffffff] transition-colors cursor-pointer">
+                    <X className="w-5 h-5 text-[#777777]" />
                   </button>
                 </div>
 
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Subcategory Name</label>
+                    <label className="text-[10px] font-black text-[#777777] uppercase tracking-widest ml-1">Subcategory Name</label>
                     <input
                       autoFocus
                       type="text"
@@ -756,7 +756,7 @@ export default function CategorySettings() {
                       value={newSubName}
                       onChange={(e) => setNewSubName(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleSaveSubcategory()}
-                      className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-black/5 focus:outline-none focus:ring-2 focus:ring-[#FF9D00]/20 focus:bg-white transition-all text-sm font-bold text-slate-900"
+                      className="w-full px-6 py-4 rounded-xl bg-slate-50/70 focus:outline-none focus:ring-2 focus:ring-[#FF9D00]/20 focus:bg-white transition-all text-sm font-bold text-[#000000]"
                     />
                   </div>
                 </div>
@@ -764,13 +764,13 @@ export default function CategorySettings() {
                 <div className="grid grid-cols-2 gap-4 mt-10">
                   <button
                     onClick={() => setSelectedCategoryForSub(null)}
-                    className="py-4 rounded-2xl border border-black/5 text-xs font-black text-slate-400 uppercase tracking-widest hover:bg-slate-50 transition-all cursor-pointer"
+                    className="py-4 rounded-xl bg-slate-50/70 text-xs font-black text-[#777777] uppercase tracking-widest hover:bg-slate-50/70 transition-all cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSaveSubcategory}
-                    className="py-4 rounded-2xl bg-slate-900 text-white text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-black/10 cursor-pointer"
+                    className="py-4 rounded-none bg-slate-900 text-white text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-none shadow-black/10 cursor-pointer"
                   >
                     Save Sub
                   </button>
@@ -795,29 +795,29 @@ export default function CategorySettings() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-black/5 overflow-hidden"
+              className="relative w-full max-w-md bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden"
             >
               <div className="p-8">
                 <div className="flex items-center justify-between mb-8">
                   <div>
-                    <h2 className="text-xl font-black text-slate-900 italic uppercase tracking-tighter">Edit Subcategory</h2>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Updating label</p>
+                    <h2 className="text-xl font-black text-[#000000] italic uppercase tracking-tighter">Edit Subcategory</h2>
+                    <p className="text-[10px] font-bold text-[#777777] uppercase tracking-widest mt-1">Updating label</p>
                   </div>
-                  <button onClick={() => setSelectedSubForEdit(null)} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors cursor-pointer">
-                    <X className="w-5 h-5 text-slate-400" />
+                  <button onClick={() => setSelectedSubForEdit(null)} className="w-10 h-10 rounded-none bg-[#ffffff] flex items-center justify-center hover:bg-[#ffffff] transition-colors cursor-pointer">
+                    <X className="w-5 h-5 text-[#777777]" />
                   </button>
                 </div>
 
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Subcategory Name</label>
+                    <label className="text-[10px] font-black text-[#777777] uppercase tracking-widest ml-1">Subcategory Name</label>
                     <input
                       autoFocus
                       type="text"
                       value={editSubName}
                       onChange={(e) => setEditSubName(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleUpdateSubcategory()}
-                      className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-black/5 focus:outline-none focus:ring-2 focus:ring-[#FF9D00]/20 focus:bg-white transition-all text-sm font-bold text-slate-900"
+                      className="w-full px-6 py-4 rounded-xl bg-slate-50/70 focus:outline-none focus:ring-2 focus:ring-[#FF9D00]/20 focus:bg-white transition-all text-sm font-bold text-[#000000]"
                     />
                   </div>
                 </div>
@@ -825,13 +825,13 @@ export default function CategorySettings() {
                 <div className="grid grid-cols-2 gap-4 mt-10">
                   <button
                     onClick={() => setSelectedSubForEdit(null)}
-                    className="py-4 rounded-2xl border border-black/5 text-xs font-black text-slate-400 uppercase tracking-widest hover:bg-slate-50 transition-all cursor-pointer"
+                    className="py-4 rounded-xl bg-slate-50/70 text-xs font-black text-[#777777] uppercase tracking-widest hover:bg-slate-50/70 transition-all cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleUpdateSubcategory}
-                    className="py-4 rounded-2xl bg-slate-900 text-white text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-black/10 cursor-pointer"
+                    className="py-4 rounded-none bg-slate-900 text-white text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-none shadow-black/10 cursor-pointer"
                   >
                     Update
                   </button>
