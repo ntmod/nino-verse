@@ -5,8 +5,8 @@ export function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const pathname = url.pathname;
 
-  // Handle nori sub-path protection (both v1 and v2)
-  if (pathname.startsWith('/nori') || pathname.startsWith('/v2/nori')) {
+  // Handle nori sub-path protection (v1, legacy v1 paths, and v2)
+  if (pathname.startsWith('/nori') || pathname.startsWith('/v1/nori') || pathname.startsWith('/v2/nori')) {
     const sessionCookie = request.cookies.get('nori_session');
     const isLoggedIn = sessionCookie?.value === 'true';
 

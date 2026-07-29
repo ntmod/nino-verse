@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import LoadingScreen from "@/components/LoadingScreen";
-import FloatingActionButton from "@/components/FloatingActionButton";
+import FloatingActionButton from "@/components/v1/FloatingActionButton";
 import { useModal } from "@/lib/modal-context";
 import { Transaction } from "@/lib/types";
 import { transactionService } from "@/lib/services/transactionService";

@@ -60,7 +60,7 @@ export default function RootLayout({
         </ModalProvider>
         <div className="fixed bottom-1.5 right-4 md:bottom-4 md:right-6 pointer-events-none select-none z-[10000]">
           <span className="text-[7.5px] md:text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] md:tracking-[0.3em] italic">
-            v0.2.0
+            v0.2.1
           </span>
         </div>
       </body>

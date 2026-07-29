@@ -28,7 +28,7 @@ export default function LoginPage() {
       if (res.ok) {
         setShowExitWipe(true);
         setTimeout(() => {
-          router.push("/nori");
+          router.push("/v2/nori");
           router.refresh();
         }, 800);
       } else {
@@ -43,7 +43,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="relative w-full min-h-screen bg-[#1A1A1A] flex items-center justify-center p-4 overflow-hidden font-sans">
+    <main className="relative w-full min-h-screen bg-[#F8F9FA] flex items-center justify-center p-4 overflow-hidden font-sans">
       {showExitWipe && <LoadingScreen mode="out" />}
       
       {/* Background ambient glow */}
