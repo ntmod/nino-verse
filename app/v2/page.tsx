@@ -59,7 +59,7 @@ const listItemVariants = {
       damping: 22 
     } 
   }
-};
+} as const;
 
 // Web Audio API Synthesized Sound Effects
 function playSelectSound() {

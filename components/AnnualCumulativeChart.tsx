@@ -105,7 +105,7 @@ export default function AnnualCumulativeChart() {
 
   // Filter X Axis ticks to keep labels clean
   const tickIndices = useMemo(() => {
-    const indices = [];
+    const indices: number[] = [];
     // Always show 1st, 5th, 10th, 15th, 20th, 25th and the last day
     const targets = [1, 5, 10, 15, 20, 25, daysInMonth];
     targets.forEach(t => {
