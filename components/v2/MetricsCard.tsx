@@ -121,7 +121,7 @@ export default function MetricsCard({
                     EST. CYCLE END: <span className="text-[#1A1A1A]">THB <AnimatedNumber value={estimatedEnd} decimals={0} /></span>
                   </p>
                 </div>
-                <Link href="/nori/settings/daily-average">
+                <Link href="/v2/nori/settings/daily-average">
                   <button 
                     title="Configure daily average categories"
                     className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 text-[#1A1A1A] transition-all cursor-pointer shrink-0"

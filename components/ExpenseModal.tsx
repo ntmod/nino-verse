@@ -28,23 +28,32 @@ export default function ExpenseModal() {
     if (!isExpenseModalOpen) return;
 
     if (editingTransaction) {
-      setNewName(editingTransaction.name || "");
-      // Format amount with commas and 2 decimals if defined
-      if (editingTransaction.amount !== undefined && editingTransaction.amount !== null) {
-        const absAmount = Math.abs(editingTransaction.amount);
-        const parts = absAmount.toString().split('.');
-        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        if (parts[1]) parts[1] = parts[1].substring(0, 2);
-        setNewAmount(parts.join('.'));
+      if (editingTransaction._id) {
+        setNewName(editingTransaction.name || "");
+        // Format amount with commas and 2 decimals if defined
+        if (editingTransaction.amount !== undefined && editingTransaction.amount !== null) {
+          const absAmount = Math.abs(editingTransaction.amount);
+          const parts = absAmount.toString().split('.');
+          parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+          if (parts[1]) parts[1] = parts[1].substring(0, 2);
+          setNewAmount(parts.join('.'));
+        } else {
+          setNewAmount("");
+        }
+        
+        setNewCategory(editingTransaction.category || "");
+        setNewSubCategory(editingTransaction.subCategory || "");
+        setNewPayment(editingTransaction.paymentMethod || "");
+        setNewDate(editingTransaction.date ? new Date(editingTransaction.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
+        setAmountError(false);
       } else {
+        // Prefilled initial values for a new transaction (e.g. prefilled date)
+        setNewName(editingTransaction.name || "");
         setNewAmount("");
+        setNewSubCategory("");
+        setAmountError(false);
+        setNewDate(editingTransaction.date ? new Date(editingTransaction.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
       }
-      
-      setNewCategory(editingTransaction.category || "");
-      setNewSubCategory(editingTransaction.subCategory || "");
-      setNewPayment(editingTransaction.paymentMethod || "");
-      setNewDate(editingTransaction.date ? new Date(editingTransaction.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
-      setAmountError(false);
     } else {
       // Reset Form to initial state on open
       setNewName("");
@@ -190,14 +199,15 @@ export default function ExpenseModal() {
       
       if (closeAfter) {
         closeExpenseModal();
-        router.refresh();
         openGlobalModal({
           header: "Save Completed",
           message: "The transaction has been successfully recorded.",
           type: "success",
           mainButton: {
             label: "Close",
-            onClick: () => {}
+            onClick: () => {
+              window.location.reload();
+            }
           }
         });
       }

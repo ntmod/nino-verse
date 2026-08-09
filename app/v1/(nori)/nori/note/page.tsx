@@ -228,9 +228,21 @@ export default function NotePage() {
                   {/* Sticky Date Header */}
                   <div className="sticky top-[56px] md:top-[80px] bg-white md:bg-gray-50/95 backdrop-blur-md py-2.5 z-10 flex items-center justify-between border-b border-gray-100">
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">{dateGroup}</span>
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded-full">
-                      {txList.length} {txList.length === 1 ? 'record' : 'records'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded-full">
+                        {txList.length} {txList.length === 1 ? 'record' : 'records'}
+                      </span>
+                      <button
+                        title={`Add expense for ${dateGroup}`}
+                        onClick={() => {
+                          const dateObj = txList[0]?.date ? new Date(txList[0].date) : new Date();
+                          openExpenseModal(handleAddSuccess, { date: dateObj });
+                        }}
+                        className="w-6 h-6 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:bg-[#FF9D00] hover:border-[#FF9D00] hover:text-white transition-all flex items-center justify-center cursor-pointer active:scale-95"
+                      >
+                        <span className="text-xs font-bold leading-none">+</span>
+                      </button>
+                    </div>
                   </div>
                   
                   {/* Inner list of items */}

@@ -225,9 +225,21 @@ export default function NotePage() {
                   {/* Sticky Date Header */}
                   <div className="sticky top-[56px] md:top-[72px] bg-[#f5f5f7]/95 backdrop-blur-md py-2.5 z-10 flex items-center justify-between border-b border-slate-200/60 font-mono">
                     <span className="text-[10px] font-black text-[#777777] uppercase tracking-[0.15em]">{dateGroup}</span>
-                    <span className="text-[9px] font-bold text-[#777777] uppercase tracking-wider bg-white border border-slate-100 rounded-md px-2 py-0.5 shadow-sm">
-                      {txList.length} {txList.length === 1 ? 'record' : 'records'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[9px] font-bold text-[#777777] uppercase tracking-wider bg-white border border-slate-100 rounded-md px-2 py-0.5 shadow-sm">
+                        {txList.length} {txList.length === 1 ? 'record' : 'records'}
+                      </span>
+                      <button
+                        title={`Add expense for ${dateGroup}`}
+                        onClick={() => {
+                          const dateObj = txList[0]?.date ? new Date(txList[0].date) : new Date();
+                          openExpenseModal(handleAddSuccess, { date: dateObj });
+                        }}
+                        className="w-6 h-6 rounded-md bg-white border border-slate-200 text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+                      >
+                        <span className="text-xs font-bold leading-none">+</span>
+                      </button>
+                    </div>
                   </div>
                   
                   {/* Inner list of items */}
@@ -245,9 +257,14 @@ export default function NotePage() {
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
-                          className="flex items-center justify-between py-4 group"
+                          className="flex items-center justify-between py-4 group cursor-pointer"
                         >
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-3">
+                            <span className="w-3 shrink-0 flex items-center justify-center">
+                              <span className="text-[10px] text-[#1A1A1A] font-black opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                ▶
+                              </span>
+                            </span>
                             <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center border border-slate-200 shadow-sm group-hover:bg-slate-50 transition-all duration-300 shrink-0">
                               <span className="text-xl group-hover:scale-110 transition-transform">{categoryIcon}</span>
                             </div>

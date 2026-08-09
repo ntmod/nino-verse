@@ -295,16 +295,7 @@ export default function Noripage() {
       });
   }, [currentPeriodTransactions, categories]);
 
-  const categoryBreakdown = useMemo(() => {
-    const groups: Record<string, number> = {};
-    currentPeriodTransactions.forEach(tx => {
-      if (tx.amount < 0) {
-        const cat = categories.find(c => c._id === tx.category || c.name === tx.category);
-        const catName = cat ? cat.name : tx.category;
-        groups[catName] = (groups[catName] || 0) + Math.abs(tx.amount);
-      }
-    });
-
+  const categoryColorMap = useMemo(() => {
     const CHART_COLORS = [
       '#FF9D00',
       '#3B82F6',
@@ -318,14 +309,59 @@ export default function Noripage() {
       '#6366F1',
     ];
 
+    const map: Record<string, string> = {};
+    categories.forEach((cat, index) => {
+      map[cat.name] = CHART_COLORS[index % CHART_COLORS.length];
+    });
+
+    return map;
+  }, [categories]);
+
+  const categoryBreakdown = useMemo(() => {
+    const groups: Record<string, number> = {};
+    currentPeriodTransactions.forEach(tx => {
+      if (tx.amount < 0) {
+        const cat = categories.find(c => c._id === tx.category || c.name === tx.category);
+        const catName = cat ? cat.name : tx.category;
+        groups[catName] = (groups[catName] || 0) + Math.abs(tx.amount);
+      }
+    });
+
     return Object.entries(groups)
       .sort((a, b) => b[1] - a[1])
-      .map(([name, amount], index) => ({
+      .map(([name, amount]) => ({
         name,
         amount,
-        color: CHART_COLORS[index % CHART_COLORS.length]
+        color: categoryColorMap[name] || '#94A3B8'
       }));
-  }, [currentPeriodTransactions, categories]);
+  }, [currentPeriodTransactions, categories, categoryColorMap]);
+
+  const prevCategoryBreakdown = useMemo(() => {
+    const cycleDuration = billingCycle.endDate.getTime() - billingCycle.startDate.getTime();
+    const start = billingCycle.startDate.getTime() - cycleDuration;
+    const end = billingCycle.startDate.getTime() - 1;
+    const prevTx = transactions.filter(tx => {
+      const txTime = new Date(tx.date).getTime();
+      return txTime >= start && txTime <= end;
+    });
+
+    const groups: Record<string, number> = {};
+    prevTx.forEach(tx => {
+      if (tx.amount < 0) {
+        const cat = categories.find(c => c._id === tx.category || c.name === tx.category);
+        const catName = cat ? cat.name : tx.category;
+        groups[catName] = (groups[catName] || 0) + Math.abs(tx.amount);
+      }
+    });
+
+    return Object.entries(groups)
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, amount]) => ({
+        name,
+        amount,
+        color: categoryColorMap[name] || '#94A3B8'
+      }));
+  }, [transactions, billingCycle, categories, categoryColorMap]);
 
   const paymentMethodBreakdown = useMemo(() => {
     return paymentMethods.map(pm => {
@@ -357,6 +393,52 @@ export default function Noripage() {
     });
   }, [fixedCosts, currentPeriodTransactions, categories, lastResetTime, billingCycle]);
 
+  const [isThinking, setIsThinking] = useState(false);
+  const [noriTopics, setNoriTopics] = useState<string[]>([]);
+  const [currentTopicIndex, setCurrentTopicIndex] = useState<number | null>(null);
+  const [showThought, setShowThought] = useState(false);
+  const [isFallback, setIsFallback] = useState(false);
+  const [modelName, setModelName] = useState<string>("");
+
+  const handleNoriThink = async () => {
+    try {
+      setIsThinking(true);
+      setShowThought(true);
+      const res = await fetch("/api/nori/think", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          startDate: billingCycle.startDate.toISOString(),
+          endDate: billingCycle.endDate.toISOString()
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setIsFallback(Boolean(data.isFallback));
+        setModelName(data.model || "");
+        if (Array.isArray(data.items) && data.items.length > 0) {
+          setNoriTopics(data.items);
+          const randomIndex = Math.floor(Math.random() * data.items.length);
+          setCurrentTopicIndex(randomIndex);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to run Nori Think analysis:", error);
+    } finally {
+      setIsThinking(false);
+    }
+  };
+
+  const handleNextTopic = () => {
+    if (noriTopics.length <= 1) return;
+    let nextIndex: number;
+    do {
+      nextIndex = Math.floor(Math.random() * noriTopics.length);
+    } while (nextIndex === currentTopicIndex);
+    setCurrentTopicIndex(nextIndex);
+  };
+
   const handleExpenseAdded = () => {
     setRefreshTrigger(prev => prev + 1);
   };
@@ -383,16 +465,84 @@ export default function Noripage() {
           </div>
           {/* Banner Core Row */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5">
-            <div className="flex items-center gap-3 text-left w-full sm:w-auto">
-              <Image src="/animations/nori/cat-idle.gif" alt="Nori" width={36} height={36} className="block shrink-0" />
+            <div className="flex items-start gap-3 text-left w-full sm:w-auto">
+              <Image src="/animations/nori/cat-idle.gif" alt="Nori" width={36} height={36} className="block shrink-0 mt-0.5" />
               <div className="flex flex-col">
-                <h1 className="font-heading text-xl uppercase tracking-wide text-[#1A1A1A] leading-none">NORI'S NOTE</h1>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#FF0000] mt-1.5 font-mono">
-                  NORI_MOOD: PURRING 🐱
-                </span>
+                <div className="flex items-center gap-2.5">
+                  <h1 className="font-heading text-xl uppercase tracking-wide text-[#1A1A1A] leading-none">NORI'S NOTE</h1>
+                  <button
+                    onClick={handleNoriThink}
+                    disabled={isThinking}
+                    className="px-2.5 py-1 rounded-md bg-[#1A1A1A] text-white hover:bg-[#FF9D00] hover:text-[#1A1A1A] text-[9px] font-mono font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1 shrink-0 disabled:opacity-50"
+                  >
+                    {isThinking ? (
+                      <>
+                        <span className="w-2 h-2 rounded-full border-2 border-white border-t-transparent animate-spin inline-block" />
+                        THINKING...
+                      </>
+                    ) : (
+                      <>
+                        <span>THINK</span>
+                        <span>🧠</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Dynamic Nori Analysis Output Replacing Static NORI_MOOD */}
+                <div className="mt-2 font-mono text-[10px]">
+                  {isThinking ? (
+                    <div className="flex items-center gap-2 text-[#FF9D00] font-bold animate-pulse">
+                      <span>NORI_ANALYZING_4_CYCLES...</span>
+                    </div>
+                  ) : showThought && currentTopicIndex !== null && noriTopics[currentTopicIndex] ? (
+                    <motion.div 
+                      key={currentTopicIndex}
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-[#1A1A1A] max-w-xl shadow-inner space-y-2"
+                    >
+                      <div className="flex items-center justify-between font-mono gap-2 flex-wrap">
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-black text-[#FF9D00] uppercase tracking-wider text-[9px] flex items-center gap-1">
+                            <span>🐾 NORI'S THOUGHT (#{currentTopicIndex + 1}/{noriTopics.length}):</span>
+                          </p>
+                          <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
+                            isFallback ? "bg-amber-100 text-amber-700 border border-amber-200" : "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                          }`}>
+                            {isFallback ? "LOCAL FALLBACK" : modelName ? `GEMINI AI (${modelName})` : "GEMINI AI"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={handleNextTopic}
+                            className="px-2 py-0.5 rounded bg-white border border-slate-200 text-[#1A1A1A] hover:bg-[#FF9D00] hover:border-[#FF9D00] hover:text-[#1A1A1A] text-[9px] font-bold uppercase transition-all cursor-pointer"
+                          >
+                            Next Topic 🎲
+                          </button>
+                          <button
+                            onClick={() => setShowThought(false)}
+                            className="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-slate-300 text-[9px] font-bold uppercase transition-all cursor-pointer"
+                          >
+                            Hide ✕
+                          </button>
+                        </div>
+                      </div>
+
+                      <p className="text-[10.5px] font-medium leading-relaxed text-[#1A1A1A] pt-0.5">
+                        {noriTopics[currentTopicIndex]}
+                      </p>
+                    </motion.div>
+                  ) : (
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#FF0000] font-mono inline-block">
+                      NORI_MOOD: PURRING 🐱
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
-            <div className="flex items-center justify-between w-full sm:w-auto gap-2 font-mono">
+            <div className="flex items-center justify-between w-full sm:w-auto gap-2 font-mono self-start sm:self-center">
               <button onClick={() => setCycleOffset(prev => prev - 1)} className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center font-bold hover:bg-slate-50 bg-white text-[#1A1A1A] transition-colors cursor-pointer shrink-0">&lt;</button>
               <motion.span 
                 key={billingCycleStr}
@@ -468,7 +618,7 @@ export default function Noripage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
             >
-              <ExpensePieChart data={categoryBreakdown} isLoading={isLoading} />
+              <ExpensePieChart data={categoryBreakdown} prevData={prevCategoryBreakdown} isLoading={isLoading} />
             </motion.div>
             
             <motion.div

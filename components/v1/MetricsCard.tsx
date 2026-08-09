@@ -38,7 +38,7 @@ export default function MetricsCard({ dailyAverage, breakdown = [], isLoading = 
             THB {dailyAverage.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         </div>
-        <Link href="/nori/settings/daily-average">
+        <Link href="/v1/nori/settings/daily-average">
           <button 
             title="Configure daily average categories"
             className="w-10 h-10 rounded-xl bg-slate-50 border border-black/5 flex items-center justify-center hover:bg-slate-900 hover:border-slate-900 text-slate-400 hover:text-white transition-all cursor-pointer shrink-0"

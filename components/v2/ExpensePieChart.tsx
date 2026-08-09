@@ -12,6 +12,7 @@ interface CategoryData {
 
 interface ExpensePieChartProps {
   data: CategoryData[];
+  prevData?: CategoryData[];
   currency?: string;
   isLoading?: boolean;
 }
@@ -50,20 +51,28 @@ function AnimatedNumber({ value, decimals = 2 }: { value: number; decimals?: num
 
 export default function ExpensePieChart({ 
   data = [], 
+  prevData = [],
   currency = "THB",
   isLoading = false
 }: ExpensePieChartProps) {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
+  const [showCompare, setShowCompare] = useState(false);
+
   const total = useMemo(() => data.reduce((sum, item) => sum + item.amount, 0), [data]);
 
-  // Calculate segment offset data
+  // Calculate segment offset data for current cycle
   let currentPercentage = 0;
   const segments = data.map((item) => {
     const percentage = total > 0 ? (item.amount / total) * 100 : 0;
     const offset = currentPercentage;
     currentPercentage += percentage;
-    return { ...item, percentage, offset };
+
+    // Find previous cycle amount for comparison
+    const prevItem = prevData.find(p => p.name.toLowerCase() === item.name.toLowerCase());
+    const prevAmount = prevItem ? prevItem.amount : 0;
+
+    return { ...item, percentage, offset, prevAmount };
   });
 
   const ITEMS_PER_PAGE = 5;
@@ -117,9 +126,21 @@ export default function ExpensePieChart({
           >
             {/* Top Segment */}
             <div className="p-4 md:p-6 pb-4">
-              <h3 className="text-[10px] font-black text-[#777777] uppercase tracking-[0.2em] mb-6 select-none">
-                SPENDING DISTRIBUTION
-              </h3>
+              <div className="flex items-center justify-between mb-4 font-mono select-none">
+                <h3 className="text-[10px] font-black text-[#777777] uppercase tracking-[0.2em]">
+                  SPENDING DISTRIBUTION
+                </h3>
+                <button
+                  onClick={() => setShowCompare(!showCompare)}
+                  className={`px-2.5 py-1 rounded-lg border text-[9px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                    showCompare 
+                      ? "bg-[#1A1A1A] border-[#1A1A1A] text-white shadow-sm" 
+                      : "bg-white border-slate-200 text-[#777777] hover:text-[#1A1A1A] hover:border-slate-300"
+                  }`}
+                >
+                  {showCompare ? "✓ Comparing Last Cycle" : "+ Compare Last Cycle"}
+                </button>
+              </div>
 
               {data.length === 0 ? (
                 <div className="py-12 flex flex-col items-center justify-center text-center space-y-4 font-mono">
@@ -155,9 +176,14 @@ export default function ExpensePieChart({
                       {activeSegment ? (
                         <span style={{ color: activeSegment.color }}>
                           {activeSegment.name.toUpperCase()}: <AnimatedNumber value={activeSegment.percentage} decimals={0} />% (THB <AnimatedNumber value={activeSegment.amount} decimals={0} />)
+                          {showCompare && (
+                            <span className="ml-1.5 px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-[#777777] font-bold text-[9px] inline-block">
+                              LAST CYCLE: THB {activeSegment.prevAmount.toLocaleString()}
+                            </span>
+                          )}
                         </span>
                       ) : (
-                        <span className="text-[#777777]">HOVER RIBBON SEGMENTS TO DETAILS</span>
+                        <span className="text-[#777777]">HOVER RIBBON SEGMENTS FOR DETAILS</span>
                       )}
                     </div>
                   </div>
@@ -175,17 +201,52 @@ export default function ExpensePieChart({
                             onMouseEnter={() => setHoveredCategory(segment.name)}
                             onMouseLeave={() => setHoveredCategory(null)}
                           >
-                            <div className="flex items-center gap-3">
-                              <div className="w-3.5 h-3.5 rounded-sm border border-slate-200 shrink-0 animate-pulse" style={{ backgroundColor: segment.color, animation: 'none' }} />
+                            <div className="flex items-center gap-2">
+                              <span className="w-3 shrink-0 flex items-center justify-center">
+                                {hoveredCategory === segment.name ? (
+                                  <motion.span 
+                                    initial={{ scale: 0.5, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    className="text-[10px] text-[#1A1A1A] font-black"
+                                  >
+                                    ▶
+                                  </motion.span>
+                                ) : null}
+                              </span>
+                              <div className="w-3.5 h-3.5 rounded-sm border border-slate-200 shrink-0" style={{ backgroundColor: segment.color }} />
                               <span className="text-xs font-bold text-[#333333] group-hover:text-[#1A1A1A] transition-colors uppercase tracking-tight">{segment.name}</span>
                             </div>
                             <div className="text-xs font-black text-[#1A1A1A] italic font-mono flex items-center gap-2">
-                              <span className="text-[9px] font-bold text-[#777777] not-italic mr-1">
-                                THB <AnimatedNumber value={segment.amount} decimals={0} />
-                              </span>
-                              <span>
-                                <AnimatedNumber value={segment.percentage} decimals={0} />%
-                              </span>
+                              {showCompare ? (
+                                <div className="flex items-center gap-2 not-italic text-[10px] font-mono">
+                                  {/* Last Cycle Pill */}
+                                  <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-500 font-bold">
+                                    LAST: THB <AnimatedNumber value={segment.prevAmount} decimals={0} />
+                                  </span>
+                                  <span className="text-slate-300 font-black">→</span>
+                                  {/* Current Cycle Pill */}
+                                  <span className="px-1.5 py-0.5 rounded bg-[#1A1A1A] text-white font-bold">
+                                    CURR: THB <AnimatedNumber value={segment.amount} decimals={0} /> ({Math.round(segment.percentage)}%)
+                                  </span>
+                                  {/* Diff indicator */}
+                                  {segment.amount - segment.prevAmount !== 0 && (
+                                    <span className={`font-black text-[9px] ${
+                                      segment.amount - segment.prevAmount > 0 ? "text-rose-500" : "text-emerald-500"
+                                    }`}>
+                                      ({segment.amount - segment.prevAmount > 0 ? `+${(segment.amount - segment.prevAmount).toLocaleString()}` : (segment.amount - segment.prevAmount).toLocaleString()})
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <>
+                                  <span className="text-[9px] font-bold text-[#777777] not-italic mr-1">
+                                    THB <AnimatedNumber value={segment.amount} decimals={0} />
+                                  </span>
+                                  <span>
+                                    <AnimatedNumber value={segment.percentage} decimals={0} />%
+                                  </span>
+                                </>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -225,7 +286,7 @@ export default function ExpensePieChart({
                 EXPENSE DISTRIBUTION
               </span>
               <span className="text-[#ffffff] font-bold uppercase text-[9px]">
-                TOTALS: <AnimatedNumber value={total} decimals={0} /> {currency}
+                TOTAL: <AnimatedNumber value={total} decimals={0} /> {currency}
               </span>
             </div>
           </motion.div>
@@ -234,3 +295,5 @@ export default function ExpensePieChart({
     </div>
   );
 }
+
+

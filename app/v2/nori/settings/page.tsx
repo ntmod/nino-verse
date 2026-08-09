@@ -46,7 +46,7 @@ const SETTINGS_OPTIONS = [
   { 
     name: "Daily Average", 
     desc: "Select categories to calculate daily average", 
-    path: "/nori/settings/daily-average", 
+    path: "/v2/nori/settings/daily-average", 
     icon: Calculator,
     color: "#a855f7"
   },
