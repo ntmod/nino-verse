@@ -419,8 +419,7 @@ export default function Noripage() {
         setModelName(data.model || "");
         if (Array.isArray(data.items) && data.items.length > 0) {
           setNoriTopics(data.items);
-          const randomIndex = Math.floor(Math.random() * data.items.length);
-          setCurrentTopicIndex(randomIndex);
+          setCurrentTopicIndex(0);
         }
       }
     } catch (error) {
@@ -431,11 +430,8 @@ export default function Noripage() {
   };
 
   const handleNextTopic = () => {
-    if (noriTopics.length <= 1) return;
-    let nextIndex: number;
-    do {
-      nextIndex = Math.floor(Math.random() * noriTopics.length);
-    } while (nextIndex === currentTopicIndex);
+    if (noriTopics.length === 0) return;
+    const nextIndex = ((currentTopicIndex ?? 0) + 1) % noriTopics.length;
     setCurrentTopicIndex(nextIndex);
   };
 
@@ -505,7 +501,7 @@ export default function Noripage() {
                       <div className="flex items-center justify-between font-mono gap-2 flex-wrap">
                         <div className="flex items-center gap-1.5">
                           <p className="font-black text-[#FF9D00] uppercase tracking-wider text-[9px] flex items-center gap-1">
-                            <span>🐾 NORI'S THOUGHT (#{currentTopicIndex + 1}/{noriTopics.length}):</span>
+                            <span>🐾 NORI'S THOUGHT:</span>
                           </p>
                           <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
                             isFallback ? "bg-amber-100 text-amber-700 border border-amber-200" : "bg-emerald-100 text-emerald-700 border border-emerald-200"
@@ -517,9 +513,10 @@ export default function Noripage() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={handleNextTopic}
-                            className="px-2 py-0.5 rounded bg-white border border-slate-200 text-[#1A1A1A] hover:bg-[#FF9D00] hover:border-[#FF9D00] hover:text-[#1A1A1A] text-[9px] font-bold uppercase transition-all cursor-pointer"
+                            className="px-2 py-0.5 rounded bg-white border border-slate-200 text-[#1A1A1A] hover:bg-[#FF9D00] hover:border-[#FF9D00] hover:text-[#1A1A1A] text-[9px] font-bold uppercase transition-all cursor-pointer flex items-center gap-1"
                           >
-                            Next Topic 🎲
+                            <span>Next Topic</span>
+                            <span>➔</span>
                           </button>
                           <button
                             onClick={() => setShowThought(false)}
