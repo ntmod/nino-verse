@@ -393,48 +393,6 @@ export default function Noripage() {
     });
   }, [fixedCosts, currentPeriodTransactions, categories, lastResetTime, billingCycle]);
 
-  const [isThinking, setIsThinking] = useState(false);
-  const [noriTopics, setNoriTopics] = useState<string[]>([]);
-  const [currentTopicIndex, setCurrentTopicIndex] = useState<number | null>(null);
-  const [showThought, setShowThought] = useState(false);
-  const [isFallback, setIsFallback] = useState(false);
-  const [modelName, setModelName] = useState<string>("");
-
-  const handleNoriThink = async () => {
-    try {
-      setIsThinking(true);
-      setShowThought(true);
-      const res = await fetch("/api/nori/think", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          startDate: billingCycle.startDate.toISOString(),
-          endDate: billingCycle.endDate.toISOString()
-        })
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setIsFallback(Boolean(data.isFallback));
-        setModelName(data.model || "");
-        if (Array.isArray(data.items) && data.items.length > 0) {
-          setNoriTopics(data.items);
-          setCurrentTopicIndex(0);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to run Nori Think analysis:", error);
-    } finally {
-      setIsThinking(false);
-    }
-  };
-
-  const handleNextTopic = () => {
-    if (noriTopics.length === 0) return;
-    const nextIndex = ((currentTopicIndex ?? 0) + 1) % noriTopics.length;
-    setCurrentTopicIndex(nextIndex);
-  };
-
   const handleExpenseAdded = () => {
     setRefreshTrigger(prev => prev + 1);
   };
@@ -466,76 +424,12 @@ export default function Noripage() {
               <div className="flex flex-col">
                 <div className="flex items-center gap-2.5">
                   <h1 className="font-heading text-xl uppercase tracking-wide text-[#1A1A1A] leading-none">NORI'S NOTE</h1>
-                  <button
-                    onClick={handleNoriThink}
-                    disabled={isThinking}
-                    className="px-2.5 py-1 rounded-md bg-[#1A1A1A] text-white hover:bg-[#FF9D00] hover:text-[#1A1A1A] text-[9px] font-mono font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1 shrink-0 disabled:opacity-50"
-                  >
-                    {isThinking ? (
-                      <>
-                        <span className="w-2 h-2 rounded-full border-2 border-white border-t-transparent animate-spin inline-block" />
-                        THINKING...
-                      </>
-                    ) : (
-                      <>
-                        <span>THINK</span>
-                        <span>🧠</span>
-                      </>
-                    )}
-                  </button>
                 </div>
 
-                {/* Dynamic Nori Analysis Output Replacing Static NORI_MOOD */}
                 <div className="mt-2 font-mono text-[10px]">
-                  {isThinking ? (
-                    <div className="flex items-center gap-2 text-[#FF9D00] font-bold animate-pulse">
-                      <span>NORI_ANALYZING_4_CYCLES...</span>
-                    </div>
-                  ) : showThought && currentTopicIndex !== null && noriTopics[currentTopicIndex] ? (
-                    <motion.div 
-                      key={currentTopicIndex}
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-[#1A1A1A] max-w-xl shadow-inner space-y-2"
-                    >
-                      <div className="flex items-center justify-between font-mono gap-2 flex-wrap">
-                        <div className="flex items-center gap-1.5">
-                          <p className="font-black text-[#FF9D00] uppercase tracking-wider text-[9px] flex items-center gap-1">
-                            <span>🐾 NORI'S THOUGHT:</span>
-                          </p>
-                          <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
-                            isFallback ? "bg-amber-100 text-amber-700 border border-amber-200" : "bg-emerald-100 text-emerald-700 border border-emerald-200"
-                          }`}>
-                            {isFallback ? "LOCAL FALLBACK" : modelName ? `GEMINI AI (${modelName})` : "GEMINI AI"}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={handleNextTopic}
-                            className="px-2 py-0.5 rounded bg-white border border-slate-200 text-[#1A1A1A] hover:bg-[#FF9D00] hover:border-[#FF9D00] hover:text-[#1A1A1A] text-[9px] font-bold uppercase transition-all cursor-pointer flex items-center gap-1"
-                          >
-                            <span>Next Topic</span>
-                            <span>➔</span>
-                          </button>
-                          <button
-                            onClick={() => setShowThought(false)}
-                            className="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-slate-300 text-[9px] font-bold uppercase transition-all cursor-pointer"
-                          >
-                            Hide ✕
-                          </button>
-                        </div>
-                      </div>
-
-                      <p className="text-[10.5px] font-medium leading-relaxed text-[#1A1A1A] pt-0.5">
-                        {noriTopics[currentTopicIndex]}
-                      </p>
-                    </motion.div>
-                  ) : (
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#FF0000] font-mono inline-block">
-                      NORI_MOOD: PURRING 🐱
-                    </span>
-                  )}
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#FF0000] font-mono inline-block">
+                    NORI_MOOD: PURRING 🐱
+                  </span>
                 </div>
               </div>
             </div>
