@@ -24,10 +24,12 @@ import { categoryService } from "@/lib/services/categoryService";
 import { paymentService } from "@/lib/services/paymentService";
 import { budgetService, fixedCostService } from "@/lib/services/dashboardService";
 import { useModal } from "@/lib/modal-context";
+import { useLanguage } from "@/lib/language-context";
 
 export default function Noripage() {
   const router = useRouter();
   const { openGlobalModal } = useModal();
+  const { language, t } = useLanguage();
   const [showExitWipe, setShowExitWipe] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -38,6 +40,7 @@ export default function Noripage() {
   const [lastResetTime, setLastResetTime] = useState<number | null>(null);
   const [cycleOffset, setCycleOffset] = useState(0);
   const [dailyAverage, setDailyAverage] = useState<number>(0);
+  const [todayUsage, setTodayUsage] = useState<number>(0);
   const [dailyAverageBreakdown, setDailyAverageBreakdown] = useState<any[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -76,10 +79,11 @@ export default function Noripage() {
   }, [cycleOffset]);
 
   const billingCycleStr = useMemo(() => {
-    const start = billingCycle.startDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
-    const end = billingCycle.endDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+    const locale = language === "th" ? "th-TH" : "en-US";
+    const start = billingCycle.startDate.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
+    const end = billingCycle.endDate.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
     return `${start} - ${end}`;
-  }, [billingCycle]);
+  }, [billingCycle, language]);
 
   useEffect(() => {
     const resetDateStr = localStorage.getItem("fixedCostsResetDate");
@@ -90,11 +94,11 @@ export default function Noripage() {
 
   const handleResetFixedCosts = () => {
     openGlobalModal({
-      header: "Reset Fixed Costs",
-      message: "Are you sure you want to reset the payment status of all fixed costs for this month?",
+      header: t("reset_fixed_costs_header"),
+      message: t("reset_fixed_costs_msg"),
       type: "warning",
       mainButton: {
-        label: "Confirm Reset",
+        label: t("confirm_reset"),
         onClick: () => {
           const nowStr = new Date().toISOString();
           localStorage.setItem("fixedCostsResetDate", nowStr);
@@ -102,11 +106,11 @@ export default function Noripage() {
           
           setTimeout(() => {
             openGlobalModal({
-              header: "Reset Completed",
-              message: "Payment status of all fixed costs has been successfully reset.",
+              header: t("reset_completed_header"),
+              message: t("reset_completed_msg"),
               type: "success",
               mainButton: {
-                label: "Close",
+                label: t("close"),
                 onClick: () => {}
               }
             });
@@ -114,7 +118,7 @@ export default function Noripage() {
         }
       },
       subButton: {
-        label: "Cancel",
+        label: t("cancel"),
         onClick: () => {}
       }
     });
@@ -159,6 +163,7 @@ export default function Noripage() {
         if (avgRes.ok) {
           const avgData = await avgRes.json();
           setDailyAverage(avgData.dailyAverage || 0);
+          setTodayUsage(avgData.todayUsage || 0);
           setDailyAverageBreakdown(avgData.breakdown || []);
         }
       } catch (error) {
@@ -478,6 +483,7 @@ export default function Noripage() {
             >
               <MetricsCard 
                 dailyAverage={dailyAverage} 
+                todayUsage={todayUsage}
                 breakdown={dailyAverageBreakdown} 
                 startDate={billingCycle.startDate}
                 endDate={billingCycle.endDate}

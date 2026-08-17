@@ -5,12 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { X, ChevronDown, Plus } from "lucide-react";
 import { useModal } from "@/lib/modal-context";
+import { useLanguage } from "@/lib/language-context";
 import { Transaction } from "@/lib/types";
 import { transactionService } from "@/lib/services/transactionService";
 import { categoryService } from "@/lib/services/categoryService";
 import { paymentService } from "@/lib/services/paymentService";
 export default function ExpenseModal() {
   const { isExpenseModalOpen, closeExpenseModal, onSuccess, editingTransaction, openGlobalModal } = useModal();
+  const { t } = useLanguage();
   const router = useRouter();
   
   const [categories, setCategories] = useState<any[]>([]);
@@ -252,7 +254,7 @@ export default function ExpenseModal() {
             <div className="p-6 md:p-8 space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-black text-[#1A1A1A] tracking-tight uppercase font-mono">
-                  {editingTransaction && editingTransaction._id ? "Edit Record" : "New Record"}
+                  {editingTransaction && editingTransaction._id ? t("edit_expense") : t("add_expense")}
                 </h2>
                 <button onClick={closeExpenseModal} className="w-8 h-8 rounded-full border border-slate-100 hover:border-slate-200 hover:bg-slate-50 flex items-center justify-center transition-colors">
                   <X className="w-4 h-4 text-slate-600" />
@@ -282,7 +284,7 @@ export default function ExpenseModal() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">Category</label>
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">{t("category")}</label>
                       <div className="relative">
                         <select
                           value={newCategory}
@@ -298,7 +300,7 @@ export default function ExpenseModal() {
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">Payment</label>
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">{t("payment_method")}</label>
                       <div className="relative">
                         <select
                           value={newPayment}
@@ -327,7 +329,7 @@ export default function ExpenseModal() {
                         exit={{ opacity: 0, height: 0 }}
                         className="space-y-1 overflow-hidden"
                       >
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">Subcategory</label>
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">{t("subcategory")}</label>
                         <div className="relative">
                           <select
                             value={newSubCategory}
@@ -346,7 +348,7 @@ export default function ExpenseModal() {
                   })()}
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">Date</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">{t("date")}</label>
                     <input
                       type="date"
                       value={newDate}
@@ -356,10 +358,10 @@ export default function ExpenseModal() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">Description</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">{t("expense_name")}</label>
                     <input
                       type="text"
-                      placeholder={`e.g. ${categories.find(c => c._id === newCategory)?.name || 'Lunch at Siam'}`}
+                      placeholder={t("expense_name_placeholder")}
                       maxLength={50}
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
@@ -373,7 +375,7 @@ export default function ExpenseModal() {
                     type="submit"
                     className="flex-1 py-4 bg-[#1A1A1A] text-white rounded-xl font-black text-sm uppercase tracking-widest hover:bg-[#FF9D00] shadow-md shadow-black/10 transition-colors cursor-pointer"
                   >
-                    Confirm Record
+                    {editingTransaction && editingTransaction._id ? t("update_expense") : t("save_expense")}
                   </button>
                   <button
                     type="button"

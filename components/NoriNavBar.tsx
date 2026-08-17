@@ -4,18 +4,20 @@ import { motion } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import LoadingScreen from "./LoadingScreen";
-import { LayoutDashboard, NotebookPen, Settings, PieChart, LogOut, Sun, Moon } from "lucide-react";
+import { LayoutDashboard, NotebookPen, Settings, PieChart, LogOut, Sun, Moon, Globe } from "lucide-react";
+import { useLanguage } from "@/lib/language-context";
 
-const NAV_ITEMS = [
-  { name: "Home", path: "/nori", icon: LayoutDashboard },
-  { name: "Notes", path: "/nori/note", icon: NotebookPen },
-  { name: "Analytics", path: "/nori/analytics", icon: PieChart },
-  { name: "Settings", path: "/nori/settings", icon: Settings },
+const NAV_CONFIG = [
+  { key: "nav_home", path: "/nori", icon: LayoutDashboard },
+  { key: "nav_notes", path: "/nori/note", icon: NotebookPen },
+  { key: "nav_analytics", path: "/nori/analytics", icon: PieChart },
+  { key: "nav_settings", path: "/nori/settings", icon: Settings },
 ];
 
 export default function NoriNavBar() {
   const router = useRouter();
   const pathname = usePathname();
+  const { language, toggleLanguage, t } = useLanguage();
   const [showExitWipe, setShowExitWipe] = useState(false);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -100,7 +102,7 @@ export default function NoriNavBar() {
           transition={{ type: "spring", stiffness: 350, damping: 26 }}
           className="pointer-events-auto bg-white/85 backdrop-blur-md border border-slate-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-full px-2.5 h-12 flex items-center gap-1"
         >
-          {NAV_ITEMS.map((item) => {
+          {NAV_CONFIG.map((item) => {
             const targetPath = isV2 ? `/v2${item.path}` : item.path;
             const isActive = pathname === targetPath;
             const Icon = item.icon;
@@ -122,11 +124,23 @@ export default function NoriNavBar() {
                 )}
                 <Icon className={`w-3.5 h-3.5 transition-transform ${isActive ? "scale-105" : "group-hover:scale-105"}`} />
                 <span className="text-[11px] font-bold uppercase tracking-wider hidden sm:block">
-                  {item.name}
+                  {t(item.key)}
                 </span>
               </button>
             );
           })}
+
+          <div className="w-px h-5 bg-slate-200/60 mx-1" />
+
+          {/* Language Swapper */}
+          <button
+            onClick={toggleLanguage}
+            className="relative px-2.5 py-1 flex items-center gap-1.5 rounded-full text-slate-500 hover:text-[#1A1A1A] border border-slate-200/70 hover:border-slate-300 bg-slate-50/70 hover:bg-white transition-all duration-200 group cursor-pointer text-[10px] font-mono font-black tracking-wider"
+            title={language === "en" ? "Switch to Thai (TH)" : "Switch to English (EN)"}
+          >
+            <Globe className="w-3 h-3 text-slate-400 group-hover:text-[#FF9D00] transition-colors" />
+            <span className="leading-none">{language.toUpperCase()}</span>
+          </button>
 
           {!isV2 && (
             <button
@@ -144,7 +158,7 @@ export default function NoriNavBar() {
             </button>
           )}
 
-          <div className="w-px h-5 bg-slate-200/60 mx-1.5" />
+          <div className="w-px h-5 bg-slate-200/60 mx-1" />
 
           <button
             onClick={handleLogout}
@@ -152,7 +166,7 @@ export default function NoriNavBar() {
           >
             <LogOut className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
             <span className="text-[11px] font-bold uppercase tracking-wider hidden sm:block">
-              Logout
+              {t("nav_logout")}
             </span>
           </button>
         </motion.nav>

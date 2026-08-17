@@ -5,6 +5,7 @@ import { motion, AnimatePresence, animate } from "framer-motion";
 import { Home, ArrowRight, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useModal } from "@/lib/modal-context";
+import { useLanguage } from "@/lib/language-context";
 
 interface FixedCostItem {
   id: string;
@@ -63,6 +64,7 @@ export default function FixedCostCard({
   onReset
 }: FixedCostCardProps) {
   const { openExpenseModal } = useModal();
+  const { t } = useLanguage();
   const [currentPage, setCurrentPage] = useState(0);
 
   const total = React.useMemo(() => items.reduce((sum, item) => sum + item.amount, 0), [items]);
@@ -118,7 +120,7 @@ export default function FixedCostCard({
               {/* Card Header */}
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-[10px] font-black text-[#777777] uppercase tracking-[0.2em] select-none">FIXED COSTS</h3>
+                  <h3 className="text-[10px] font-black text-[#777777] uppercase tracking-[0.2em] select-none">{t("fixed_costs")}</h3>
                 </div>
                 <div className="flex items-center gap-3">
                   {onReset && items.some(item => item.isPaid) && (
@@ -126,12 +128,12 @@ export default function FixedCostCard({
                       onClick={onReset}
                       className="flex items-center gap-1 text-[9px] font-black text-[#777777] hover:text-[#FF3B30] uppercase tracking-widest cursor-pointer transition-colors"
                     >
-                      <RotateCcw className="w-3 h-3" /> RESET
+                      <RotateCcw className="w-3 h-3" /> {t("reset")}
                     </button>
                   )}
                   <Link href="/nori/settings/fixed-cost">
                     <button className="flex items-center gap-1 text-[9px] font-black text-[#1A1A1A] hover:text-[#777777] uppercase tracking-widest cursor-pointer transition-colors">
-                      MANAGE <ArrowRight className="w-3 h-3" />
+                      {t("view_all")} <ArrowRight className="w-3 h-3" />
                     </button>
                   </Link>
                 </div>
@@ -234,10 +236,10 @@ export default function FixedCostCard({
             {/* Dark Status Bottom Bar */}
             <div className="bg-[#1A1A1A] text-[#ffffff] p-3 px-6 flex items-center justify-between text-[10px] font-mono select-none">
               <span className="text-[#777777] font-bold">
-                PAID: {paidItems}/{items.length} BILLS
+                {t("paid").toUpperCase()}: {paidItems}/{items.length}
               </span>
               <span className="text-[#ffffff] font-bold uppercase text-[9px]">
-                TOTAL: <AnimatedNumber value={total} decimals={0} /> {currency}
+                {t("total_fixed").toUpperCase()}: <AnimatedNumber value={total} decimals={0} /> {currency}
               </span>
             </div>
           </motion.div>

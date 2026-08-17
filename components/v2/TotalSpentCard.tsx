@@ -3,6 +3,7 @@
 import React from "react";
 import { motion, AnimatePresence, animate } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
+import { useLanguage } from "@/lib/language-context";
 
 interface TotalSpentCardProps {
   amount: number;
@@ -59,6 +60,7 @@ export default function TotalSpentCard({
   prevCumulativeData = [],
   isLoading = false
 }: TotalSpentCardProps) {
+  const { t } = useLanguage();
   const [isExpanded, setIsExpanded] = React.useState(false);
   const [showLastCycle, setShowLastCycle] = React.useState(false);
   const [hoveredPoint, setHoveredPoint] = React.useState<number | null>(null);
@@ -161,7 +163,7 @@ export default function TotalSpentCard({
           >
             {/* Top Section */}
             <div className="p-6 pb-4">
-              <p className="text-[#777777] text-xs font-bold uppercase tracking-[0.2em] font-mono mb-2">TOTAL SPENT</p>
+              <p className="text-[#777777] text-xs font-bold uppercase tracking-[0.2em] font-mono mb-2">{t("total_spent")}</p>
               <div className="flex items-baseline gap-2">
                 <span className="text-[#777777] text-2xl font-black italic">{currency}</span>
                 <h2 className="text-4xl md:text-5xl font-black text-[#1A1A1A] italic tracking-tighter">
@@ -176,25 +178,23 @@ export default function TotalSpentCard({
               className="bg-[#1A1A1A] text-[#ffffff] p-3 px-6 flex items-center justify-between text-[10px] font-mono select-none cursor-pointer hover:bg-[#262626] transition-colors group"
             >
               <span className="text-[#777777] font-bold flex items-center gap-2">
-                <span>ELAPSED: {daysElapsed}/{totalDays} DAYS ({cycleProgress}%)</span>
+                <span>{daysElapsed}/{totalDays} {t("day")} ({cycleProgress}%)</span>
                 <span className="text-slate-500 group-hover:text-white transition-colors text-xs">
                   {isExpanded ? "▲" : "▼"}
                 </span>
               </span>
               {percentageChange < 0 ? (
                 <span className="text-[#00FF00] font-bold flex items-center gap-0.5">
-                  <ArrowUpRight className="w-3.5 h-3.5 rotate-180 text-current" />
-                  <AnimatedNumber value={Math.abs(percentageChange)} decimals={1} />% VS LAST CYCLE
+                  <ArrowUpRight className="w-3.5 h-3.5 rotate-180 text-[#00FF00]" />
+                  <span>{Math.abs(percentageChange).toFixed(1)}% {t("vs_prev_period")}</span>
                 </span>
               ) : percentageChange > 0 ? (
                 <span className="text-[#FF3B30] font-bold flex items-center gap-0.5">
-                  <ArrowUpRight className="w-3.5 h-3.5 text-current" />
-                  +<AnimatedNumber value={percentageChange} decimals={1} />% VS LAST CYCLE
+                  <ArrowUpRight className="w-3.5 h-3.5 text-[#FF3B30]" />
+                  <span>+{percentageChange.toFixed(1)}% {t("vs_prev_period")}</span>
                 </span>
               ) : (
-                <span className="text-[#ffffff] font-bold">
-                  0% VS LAST CYCLE
-                </span>
+                <span className="text-[#777777] font-bold">0.0% {t("vs_prev_period")}</span>
               )}
             </div>
 

@@ -4,6 +4,7 @@ import React from "react";
 import { motion, AnimatePresence, animate } from "framer-motion";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useLanguage } from "@/lib/language-context";
 
 interface Transaction {
   _id: string;
@@ -58,6 +59,7 @@ export default function RecentTransactionsCard({
   currency = "THB",
   isLoading = false
 }: RecentTransactionsCardProps) {
+  const { t, language } = useLanguage();
   return (
     <div className="p-4 md:p-6 rounded-2xl bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100/80 min-h-[380px] flex flex-col justify-center">
       <AnimatePresence mode="wait">
@@ -101,11 +103,11 @@ export default function RecentTransactionsCard({
           >
             {/* Card Header */}
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-[10px] font-black text-[#777777] uppercase tracking-[0.2em] select-none font-mono">RECENT TRANSACTIONS</h3>
+              <h3 className="text-[10px] font-black text-[#777777] uppercase tracking-[0.2em] select-none font-mono">{t("recent_transactions")}</h3>
               {transactions.length > 0 && (
                 <Link href="/nori/note">
                   <button className="flex items-center gap-1 text-[9px] font-black text-[#1A1A1A] hover:text-[#777777] uppercase tracking-widest cursor-pointer transition-colors">
-                    VIEW ALL <ArrowRight className="w-3 h-3" />
+                    {t("view_all")} <ArrowRight className="w-3 h-3" />
                   </button>
                 </Link>
               )}
@@ -117,14 +119,17 @@ export default function RecentTransactionsCard({
                   <ShoppingBag className="w-8 h-8 text-slate-300" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-[#1A1A1A] uppercase tracking-wider">NO TRANSACTIONS YET</p>
-                  <p className="text-[10px] text-[#777777]">Your recent activity will appear here.</p>
+                  <p className="text-[10px] font-bold text-[#1A1A1A] uppercase tracking-wider">{t("no_recent_transactions")}</p>
                 </div>
               </div>
             ) : (
               <div className="flex flex-col">
                 {transactions.map((tx, index) => {
                   const isNegative = tx.amount < 0;
+                  const dateStr = new Date(tx.date).toLocaleDateString(language === "th" ? "th-TH" : "en-US", { 
+                    day: "numeric", 
+                    month: "short" 
+                  });
                   
                   return (
                     <div 
@@ -137,7 +142,7 @@ export default function RecentTransactionsCard({
                         <div className="text-left">
                           <p className="text-sm font-bold text-[#1A1A1A] tracking-tight leading-none mb-1">{tx.name}</p>
                           <p className="text-[9px] font-black text-[#777777] uppercase tracking-wider flex items-center gap-1.5 flex-wrap font-mono">
-                            <span>{new Date(tx.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}</span>
+                            <span>{dateStr}</span>
                             <span className="text-slate-300">•</span>
                             <span className="text-[#FF9D00]">{tx.category}</span>
                             {tx.subCategory && (

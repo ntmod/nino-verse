@@ -34,6 +34,7 @@ export default function Noripage() {
   const [lastResetTime, setLastResetTime] = useState<number | null>(null);
   const [cycleOffset, setCycleOffset] = useState(0);
   const [dailyAverage, setDailyAverage] = useState<number>(0);
+  const [todayUsage, setTodayUsage] = useState<number>(0);
   const [dailyAverageBreakdown, setDailyAverageBreakdown] = useState<any[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -161,6 +162,7 @@ export default function Noripage() {
         if (avgRes.ok) {
           const avgData = await avgRes.json();
           setDailyAverage(avgData.dailyAverage || 0);
+          setTodayUsage(avgData.todayUsage || 0);
           setDailyAverageBreakdown(avgData.breakdown || []);
         }
       } catch (error) {
@@ -360,7 +362,12 @@ export default function Noripage() {
             isLoading={isLoading}
           />
           
-          <MetricsCard dailyAverage={dailyAverage} breakdown={dailyAverageBreakdown} isLoading={isLoading} />
+          <MetricsCard 
+            dailyAverage={dailyAverage} 
+            todayUsage={todayUsage}
+            breakdown={dailyAverageBreakdown} 
+            isLoading={isLoading} 
+          />
 
           <RecentTransactionsCard transactions={recentTransactions} isLoading={isLoading} />
           <BudgetListCard budgets={budgets} isLoading={isLoading} />

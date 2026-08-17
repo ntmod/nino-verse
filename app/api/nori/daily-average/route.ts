@@ -46,8 +46,8 @@ export async function GET(request: Request) {
     });
 
     // 4. Calculate total spent (only expenses)
-    const totalSpent = Math.abs(matchedTransactions
-      .filter(tx => tx.amount < 0)
+    const expenseTransactions = matchedTransactions.filter(tx => tx.amount < 0);
+    const totalSpent = Math.abs(expenseTransactions
       .reduce((sum, tx) => sum + tx.amount, 0));
 
     // 5. Calculate elapsed days
@@ -60,9 +60,15 @@ export async function GET(request: Request) {
 
     const dailyAverage = totalSpent / elapsedDays;
 
+    // 6. Calculate today's spending for selected categories
+    const todayKey = today.toISOString().split('T')[0];
+    const todaySpent = expenseTransactions
+      .filter(tx => new Date(tx.date).toISOString().split('T')[0] === todayKey)
+      .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
+
     // Calculate daily average per category
     const categorySpent: Record<string, number> = {};
-    matchedTransactions.filter(tx => tx.amount < 0).forEach(tx => {
+    expenseTransactions.forEach(tx => {
       const catObj = categories.find(c => c._id.toString() === tx.category || c.name.toLowerCase() === tx.category.toLowerCase());
       const catId = catObj ? catObj._id.toString() : tx.category;
       categorySpent[catId] = (categorySpent[catId] || 0) + Math.abs(tx.amount);
@@ -82,6 +88,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       dailyAverage,
+      todayUsage: todaySpent,
       totalSpent,
       elapsedDays,
       selectedCategories: allowedIds,

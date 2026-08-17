@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import { Settings } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence, animate } from "framer-motion";
+import { useLanguage } from "@/lib/language-context";
 
 interface CategoryAverage {
   categoryId: string;
@@ -15,6 +16,7 @@ interface CategoryAverage {
 
 interface MetricsCardProps {
   dailyAverage: number;
+  todayUsage?: number | null;
   breakdown?: CategoryAverage[];
   startDate?: Date;
   endDate?: Date;
@@ -57,12 +59,14 @@ function AnimatedNumber({ value, decimals = 2, delay = 0 }: { value: number; dec
 
 export default function MetricsCard({ 
   dailyAverage = 0, 
+  todayUsage = 0,
   breakdown = [], 
   startDate,
   endDate,
   dailyLimit = 500,
   isLoading = false
 }: MetricsCardProps) {
+  const { t } = useLanguage();
   // Estimate ends: daily average multiplied by total days in the cycle
   const estimatedEnd = useMemo(() => {
     if (!startDate || !endDate) return 0;
@@ -91,6 +95,7 @@ export default function MetricsCard({
                 <div className="h-6 bg-slate-200 w-10 animate-pulse rounded-md" />
                 <div className="h-10 bg-slate-200 w-36 animate-pulse rounded-md" />
               </div>
+              <div className="h-4 bg-slate-200 w-48 animate-pulse rounded-md mt-2" />
             </div>
 
             {/* Bottom Segment Loading */}
@@ -112,18 +117,24 @@ export default function MetricsCard({
             <div className="p-6 pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[#777777] text-[10px] font-black uppercase tracking-[0.2em] mb-1">DAILY AVERAGE</p>
+                  <p className="text-[#777777] text-[10px] font-black uppercase tracking-[0.2em] mb-1">{t("daily_average")}</p>
                   <p className="text-2xl md:text-3xl font-black text-[#1A1A1A] italic leading-none">
                     THB <AnimatedNumber value={dailyAverage} decimals={2} />
                   </p>
-                  {/* Projected cycle total based on current average */}
-                  <p className="text-[10px] font-mono text-[#777777] mt-2 font-bold select-none">
-                    EST. CYCLE END: <span className="text-[#1A1A1A]">THB <AnimatedNumber value={estimatedEnd} decimals={0} /></span>
-                  </p>
+                  {/* Projected cycle total and today's usage */}
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2.5">
+                    <p className="text-[10px] font-mono text-[#777777] font-bold select-none">
+                      {t("today")}: <span className="text-[#1A1A1A]">THB <AnimatedNumber value={todayUsage || 0} decimals={2} /></span>
+                    </p>
+                    <span className="text-slate-300 select-none text-[10px]">•</span>
+                    <p className="text-[10px] font-mono text-[#777777] font-bold select-none">
+                      {t("est_cycle_end")}: <span className="text-[#1A1A1A]">THB <AnimatedNumber value={estimatedEnd} decimals={0} /></span>
+                    </p>
+                  </div>
                 </div>
                 <Link href="/v2/nori/settings/daily-average">
                   <button 
-                    title="Configure daily average categories"
+                    title={t("configure_daily_avg")}
                     className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 text-[#1A1A1A] transition-all cursor-pointer shrink-0"
                   >
                     <Settings className="w-4 h-4 transition-colors" />
@@ -133,7 +144,7 @@ export default function MetricsCard({
 
               {breakdown.length > 0 && (
                 <div className="mt-6 pt-6 border-t border-slate-100">
-                  <p className="text-[9px] font-black text-[#777777] uppercase tracking-[0.15em] mb-3">BY CATEGORY</p>
+                  <p className="text-[9px] font-black text-[#777777] uppercase tracking-[0.15em] mb-3">{t("by_category")}</p>
                   <motion.div 
                     className={`flex flex-col gap-1.5 ${
                       breakdown.length > 4 ? "max-h-[192px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-black scrollbar-track-transparent" : ""
@@ -198,11 +209,11 @@ export default function MetricsCard({
             <div className={`p-3 px-6 flex items-center justify-between text-[10px] font-mono select-none font-black ${
               isOverLimit ? "bg-[#FF3B30] text-white" : "bg-[#1A1A1A] text-white"
             }`}>
-              <span>LIMITS CHECK</span>
+              <span>{t("limits_check")}</span>
               <span>
                 {isOverLimit 
-                  ? `OVER LIMIT (${dailyLimit} THB/DAY) ⚠️` 
-                  : `HEALTHY (< ${dailyLimit} THB/DAY) ✓`
+                  ? `${t("over_limit")} (${dailyLimit} THB/${t("day")}) ⚠️` 
+                  : `${t("healthy_limit")} (< ${dailyLimit} THB/${t("day")}) ✓`
                 }
               </span>
             </div>

@@ -3,6 +3,7 @@
 import React, { useMemo } from "react";
 import { motion, AnimatePresence, animate } from "framer-motion";
 import { CreditCard } from "lucide-react";
+import { useLanguage } from "@/lib/language-context";
 
 interface PaymentMethod {
   _id: string;
@@ -55,6 +56,7 @@ export default function PaymentMethodsCard({
   currency = "THB",
   isLoading = false
 }: PaymentMethodsCardProps) {
+  const { t } = useLanguage();
   const total = useMemo(() => methods.reduce((sum, item) => sum + (item.amount || 0), 0), [methods]);
 
   return (
@@ -98,7 +100,7 @@ export default function PaymentMethodsCard({
             {/* Top Segment */}
             <div className="p-4 md:p-6 pb-4">
               <h3 className="text-[10px] font-black text-[#777777] uppercase tracking-[0.2em] mb-6 select-none font-mono">
-                PAYMENT METHODS
+                {t("payment_methods")}
               </h3>
 
               {methods.length === 0 ? (
@@ -141,10 +143,10 @@ export default function PaymentMethodsCard({
             {/* Dark Status Bottom Bar */}
             <div className="bg-[#1A1A1A] text-[#ffffff] p-3 px-6 flex items-center justify-between text-[10px] font-mono select-none">
               <span className="text-[#777777] font-bold">
-                TOTAL LIQUIDITY
+                {t("total_tracked")}
               </span>
               <span className="text-[#ffffff] font-bold uppercase text-[9px]">
-                TOTALS: <AnimatedNumber value={total} decimals={0} /> {currency}
+                TOTAL: <AnimatedNumber value={total} decimals={0} /> {currency}
               </span>
             </div>
           </motion.div>

@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { motion, AnimatePresence, animate } from "framer-motion";
 import { PieChart, ChevronLeft, ChevronRight } from "lucide-react";
+import { useLanguage } from "@/lib/language-context";
 
 interface CategoryData {
   name: string;
@@ -55,6 +56,7 @@ export default function ExpensePieChart({
   currency = "THB",
   isLoading = false
 }: ExpensePieChartProps) {
+  const { t } = useLanguage();
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [showCompare, setShowCompare] = useState(false);
@@ -128,7 +130,7 @@ export default function ExpensePieChart({
             <div className="p-4 md:p-6 pb-4">
               <div className="flex items-center justify-between mb-4 font-mono select-none">
                 <h3 className="text-[10px] font-black text-[#777777] uppercase tracking-[0.2em]">
-                  SPENDING DISTRIBUTION
+                  {t("expense_breakdown")}
                 </h3>
                 <button
                   onClick={() => setShowCompare(!showCompare)}
@@ -148,8 +150,7 @@ export default function ExpensePieChart({
                     <PieChart className="w-8 h-8 text-slate-300" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[10px] font-bold text-[#1A1A1A] uppercase tracking-wider">NO CATEGORIZED DATA</p>
-                    <p className="text-[10px] text-[#777777]">Charts will appear once you log expenses.</p>
+                    <p className="text-[10px] font-bold text-[#1A1A1A] uppercase tracking-wider">{t("no_expense_data")}</p>
                   </div>
                 </div>
               ) : (

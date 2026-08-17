@@ -3,6 +3,7 @@
 import React from "react";
 import { motion, AnimatePresence, animate } from "framer-motion";
 import { ClipboardList } from "lucide-react";
+import { useLanguage } from "@/lib/language-context";
 
 interface Budget {
   _id: string;
@@ -57,6 +58,7 @@ export default function BudgetListCard({
   currency = "THB",
   isLoading = false
 }: BudgetListCardProps) {
+  const { t } = useLanguage();
   return (
     <div className="p-4 rounded-2xl bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100/80 text-left min-h-[100px] flex flex-col justify-center">
       <AnimatePresence mode="wait">
@@ -83,7 +85,7 @@ export default function BudgetListCard({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
           >
-            <h3 className="text-[10px] font-black text-[#777777] uppercase tracking-[0.2em] mb-4 select-none">BUDGET LIMITS</h3>
+            <h3 className="text-[10px] font-black text-[#777777] uppercase tracking-[0.2em] mb-4 select-none">{t("category_budgets")}</h3>
 
             {budgets.length === 0 ? (
               <div className="py-6 flex flex-col items-center justify-center text-center space-y-2 font-mono">

@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 import { ModalProvider } from "@/lib/modal-context";
+import { LanguageProvider } from "@/lib/language-context";
 import ExpenseModal from "@/components/ExpenseModal";
 import GlobalModal from "@/components/GlobalModal";
 
@@ -53,14 +54,16 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
-        <ModalProvider>
-          {children}
-          <ExpenseModal />
-          <GlobalModal />
-        </ModalProvider>
+        <LanguageProvider>
+          <ModalProvider>
+            {children}
+            <ExpenseModal />
+            <GlobalModal />
+          </ModalProvider>
+        </LanguageProvider>
         <div className="fixed bottom-1.5 right-4 md:bottom-4 md:right-6 pointer-events-none select-none z-[10000]">
           <span className="text-[7.5px] md:text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] md:tracking-[0.3em] italic">
-            v0.3.0
+            v0.3.1
           </span>
         </div>
       </body>
