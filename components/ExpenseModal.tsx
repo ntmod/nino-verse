@@ -102,7 +102,7 @@ export default function ExpenseModal() {
         
         if (Array.isArray(payData) && payData.length > 0) {
           setPaymentMethods(payData);
-          if (editingTransaction) {
+          if (editingTransaction?.paymentMethod) {
             const foundPay = payData.find(p => p._id === editingTransaction.paymentMethod || p.name === editingTransaction.paymentMethod);
             if (foundPay) {
               setNewPayment(foundPay._id);
@@ -110,10 +110,7 @@ export default function ExpenseModal() {
               setNewPayment(editingTransaction.paymentMethod);
             }
           } else {
-            setNewPayment(prev => {
-              if (prev && payData.some(p => p._id === prev)) return prev;
-              return payData[0]._id;
-            });
+            setNewPayment(payData[0]._id);
           }
         } else {
           setPaymentMethods([]);
