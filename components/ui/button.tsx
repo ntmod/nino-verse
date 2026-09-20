@@ -16,7 +16,7 @@ const buttonVariants = cva(
         destructive: "bg-[#FF0000] text-[#ffffff] border-[#000000] hover:bg-[#000000] hover:text-[#FF0000]",
         link: "text-[#0000ff] underline normal-case tracking-normal border-none p-0 bg-transparent",
         
-        /* Apple Design System Button Variants (Mapped to Brutalist variants to remain compatible with v2 copy/pasted pages) */
+        /* Soft card design variants */
         "apple-primary": "bg-[#000000] text-[#ffffff] border-[#000000] hover:bg-[#ffffff] hover:text-[#000000]",
         "apple-secondary": "bg-[#ffffff] text-[#000000] border-[#000000] hover:bg-[#000000] hover:text-[#ffffff]",
         "apple-dark-utility": "bg-[#000000] text-[#ffffff] border-[#000000] hover:bg-[#ffffff] hover:text-[#000000]",

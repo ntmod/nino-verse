@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Nino Verse",
-  description: "Welcome to Nino Verse",
+  title: "NoriNote",
+  description: "A personal expense tracker for understanding your spending.",
 };
 
 import { ModalProvider } from "@/lib/modal-context";
@@ -33,26 +33,6 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  const savedTheme = localStorage.getItem("nori_theme");
-                  const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-                  const theme = savedTheme || systemTheme;
-                  if (theme === "dark") {
-                    document.documentElement.classList.add("dark");
-                  } else {
-                    document.documentElement.classList.remove("dark");
-                  }
-                } catch (e) {}
-              })();
-            `
-          }}
-        />
-      </head>
       <body className="min-h-full flex flex-col">
         <LanguageProvider>
           <ModalProvider>

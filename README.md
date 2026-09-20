@@ -1,6 +1,6 @@
-# Nino Verse
+# NoriNote
 
-This is the Nino Verse web application, built with [Next.js](https://nextjs.org).
+NoriNote is a private personal expense tracker built with [Next.js](https://nextjs.org).
 
 ## Getting Started
 
