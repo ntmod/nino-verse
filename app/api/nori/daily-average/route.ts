@@ -3,12 +3,22 @@ import dbConnect from "@/lib/db";
 import Transaction from "@/models/Transaction";
 import Category from "@/models/Category";
 import DailyAverageConfig from "@/models/DailyAverageConfig";
+import { getSpendingCycle } from "@/lib/spending-cycle.js";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const startDateStr = searchParams.get("startDate");
     const endDateStr = searchParams.get("endDate");
+    if (Boolean(startDateStr) !== Boolean(endDateStr)) {
+      return NextResponse.json({ error: "startDate and endDate must be provided together" }, { status: 400 });
+    }
+    const cycle = getSpendingCycle();
+    const startDate = startDateStr ? new Date(startDateStr) : cycle.startDate;
+    const endDate = endDateStr ? new Date(endDateStr) : cycle.endDate;
+    if (!Number.isFinite(startDate.getTime()) || !Number.isFinite(endDate.getTime()) || startDate > endDate) {
+      return NextResponse.json({ error: "Invalid date range" }, { status: 400 });
+    }
 
     await dbConnect();
 
@@ -29,36 +39,29 @@ export async function GET(request: Request) {
     const allowedNames = selectedCatObjects.map(c => c.name.toLowerCase());
 
     // 2. Fetch transactions in range
-    let query: any = {};
-    if (startDateStr && endDateStr) {
-      query.date = {
-        $gte: new Date(startDateStr),
-        $lte: new Date(endDateStr),
-      };
-    }
+    const transactions = await Transaction.find({ date: { $gte: startDate, $lte: endDate } });
 
-    const transactions = await Transaction.find(query);
+    // Total spent includes every expense in the period, matching the dashboard card.
+    const allExpenses = transactions.filter(tx => tx.amount < 0);
+    const totalSpent = Math.abs(allExpenses.reduce((sum, tx) => sum + tx.amount, 0));
 
     // 3. Filter transactions based on category selection
-    const matchedTransactions = transactions.filter(tx => {
+    const expenseTransactions = allExpenses.filter(tx => {
       const txCat = tx.category.toLowerCase();
       return allowedIds.includes(tx.category) || allowedNames.includes(txCat);
     });
 
-    // 4. Calculate total spent (only expenses)
-    const expenseTransactions = matchedTransactions.filter(tx => tx.amount < 0);
-    const totalSpent = Math.abs(expenseTransactions
+    // 4. The configured categories define the daily-average base.
+    const averageBaseSpent = Math.abs(expenseTransactions
       .reduce((sum, tx) => sum + tx.amount, 0));
 
     // 5. Calculate elapsed days
     const today = new Date();
-    const startDate = startDateStr ? new Date(startDateStr) : new Date();
-    const endDate = endDateStr ? new Date(endDateStr) : new Date();
     const endLimit = new Date(Math.min(endDate.getTime(), today.getTime()));
     const diffTime = Math.max(0, endLimit.getTime() - startDate.getTime());
     const elapsedDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
 
-    const dailyAverage = totalSpent / elapsedDays;
+    const dailyAverage = averageBaseSpent / elapsedDays;
 
     // 6. Calculate today's spending for selected categories
     const todayKey = today.toISOString().split('T')[0];
@@ -94,7 +97,7 @@ export async function GET(request: Request) {
       selectedCategories: allowedIds,
       breakdown
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: "Failed to calculate daily average", details: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to calculate daily average", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

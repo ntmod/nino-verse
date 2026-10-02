@@ -3,14 +3,13 @@
 import { motion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Globe, LayoutDashboard, LogOut, NotebookPen, PieChart, Settings } from "lucide-react";
+import { Globe, LayoutDashboard, LogOut, NotebookPen, Settings } from "lucide-react";
 import LoadingScreen from "./LoadingScreen";
 import { useLanguage } from "@/lib/language-context";
 
 const NAV_CONFIG = [
   { key: "nav_home", path: "/dashboard", icon: LayoutDashboard },
   { key: "nav_notes", path: "/note", icon: NotebookPen },
-  { key: "nav_analytics", path: "/analytics", icon: PieChart },
   { key: "nav_settings", path: "/settings", icon: Settings },
 ];
 

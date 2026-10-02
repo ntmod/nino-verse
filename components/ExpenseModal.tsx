@@ -1,19 +1,24 @@
 'use client';
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence, useAnimate, useReducedMotion } from "framer-motion";
 import { X, ChevronDown, Plus } from "lucide-react";
 import { useModal } from "@/lib/modal-context";
 import { useLanguage } from "@/lib/language-context";
-import { Transaction } from "@/lib/types";
+import { getCoinFlightKeyframes } from "@/lib/coin-flight.mjs";
 import { transactionService } from "@/lib/services/transactionService";
 import { categoryService } from "@/lib/services/categoryService";
 import { paymentService } from "@/lib/services/paymentService";
 export default function ExpenseModal() {
   const { isExpenseModalOpen, closeExpenseModal, onSuccess, editingTransaction, openGlobalModal } = useModal();
-  const { t } = useLanguage();
-  const router = useRouter();
+  const { t, language } = useLanguage();
+  const [scope, animate] = useAnimate<HTMLDivElement>();
+  const reducedMotion = useReducedMotion();
+  const amountRef = useRef<HTMLDivElement>(null);
+  const categoryRef = useRef<HTMLDivElement>(null);
+  const coinRef = useRef<HTMLDivElement>(null);
+  const savingRef = useRef(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   const [categories, setCategories] = useState<any[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
@@ -162,8 +167,9 @@ export default function ExpenseModal() {
 
   const handleAddTransaction = async (e?: React.FormEvent, closeAfter: boolean = true) => {
     if (e) e.preventDefault();
+    if (savingRef.current) return;
     
-    if (!newAmount || parseFloat(newAmount.replace(/,/g, '')) === 0) {
+    if (!newAmount || !Number.isFinite(Number(newAmount.replace(/,/g, ''))) || Number(newAmount.replace(/,/g, '')) <= 0) {
       setAmountError(true);
       return;
     }
@@ -175,6 +181,8 @@ export default function ExpenseModal() {
     const selectedCat = categories.find(c => c._id === newCategory);
     const isIncome = selectedCat ? selectedCat.type === "income" : false;
 
+    savingRef.current = true;
+    setIsSaving(true);
     try {
       const data = {
         name: newName || selectedCat?.name || "General",
@@ -190,6 +198,29 @@ export default function ExpenseModal() {
         savedTx = await transactionService.update(editingTransaction._id, data);
       } else {
         savedTx = await transactionService.create(data);
+      }
+
+      // Decorative feedback must never turn a successful save into an error.
+      if (!editingTransaction?._id && !reducedMotion && scope.current && amountRef.current && categoryRef.current && coinRef.current) {
+        const coin = coinRef.current;
+        const category = categoryRef.current;
+        try {
+          const { x, y, times } = getCoinFlightKeyframes(
+            amountRef.current.getBoundingClientRect(),
+            category.getBoundingClientRect(),
+            scope.current.getBoundingClientRect(),
+          );
+          await Promise.all([
+            animate(coin, { x, y }, { duration: 0.65, ease: "linear", times }),
+            animate(coin, { opacity: [0, 1, 1, 0], scale: [0.5, 1.1, 1, 0.4], rotate: [0, 25, -15, 0] }, { duration: 0.65, times: [0, 0.15, 0.8, 1] }),
+            animate(category, { boxShadow: ["0 0 0 0px rgba(255,157,0,0)", "0 0 0 5px rgba(255,157,0,0.3)", "0 0 0 9px rgba(255,157,0,0)"] }, { delay: 0.45, duration: 0.3 }),
+          ]);
+        } catch (error) {
+          console.warn("Coin animation skipped:", error);
+        } finally {
+          coin.style.opacity = "0";
+          category.style.boxShadow = "";
+        }
       }
 
       if (onSuccess) {
@@ -227,6 +258,9 @@ export default function ExpenseModal() {
           onClick: () => {}
         }
       });
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
     }
   };
 
@@ -238,29 +272,39 @@ export default function ExpenseModal() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={closeExpenseModal}
+            onClick={() => { if (!savingRef.current) closeExpenseModal(); }}
             className="absolute inset-0 bg-slate-900/30 backdrop-blur-md"
           />
           <motion.div
+            ref={scope}
             initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ type: "spring", stiffness: 380, damping: 30 }}
             className="relative w-full max-w-md bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-100 overflow-hidden"
           >
+            <div
+              ref={coinRef}
+              aria-hidden="true"
+              className="pointer-events-none absolute left-0 top-0 z-20 -ml-[18px] -mt-[18px] flex h-9 w-9 items-center justify-center rounded-full border-2 border-amber-200 bg-gradient-to-br from-amber-200 via-amber-400 to-orange-500 text-lg font-black text-amber-900 shadow-[0_4px_16px_rgba(255,157,0,0.45)]"
+              style={{ opacity: 0 }}
+            >
+              ฿
+            </div>
             <div className="p-6 md:p-8 space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-black text-[#1A1A1A] tracking-tight uppercase font-mono">
                   {editingTransaction && editingTransaction._id ? t("edit_expense") : t("add_expense")}
                 </h2>
-                <button onClick={closeExpenseModal} className="w-8 h-8 rounded-full border border-slate-100 hover:border-slate-200 hover:bg-slate-50 flex items-center justify-center transition-colors">
+                <button disabled={isSaving} aria-label={language === "th" ? "ปิด" : "Close"} onClick={closeExpenseModal} className="w-8 h-8 rounded-full border border-slate-100 hover:border-slate-200 hover:bg-slate-50 flex items-center justify-center transition-colors disabled:opacity-40">
                   <X className="w-4 h-4 text-slate-600" />
                 </button>
               </div>
 
-              <form onSubmit={handleAddTransaction} className="space-y-6">
+              <form onSubmit={handleAddTransaction} aria-busy={isSaving}>
+                <fieldset disabled={isSaving} className="space-y-6">
                 {/* Amount Field - Wrapped in a clean container */}
-                <div className="py-4 px-6 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-center">
+                <div ref={amountRef} className="py-4 px-6 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-center">
                   <div className="flex items-center justify-center gap-1.5">
                     <span className="text-sm font-black text-slate-400 uppercase tracking-widest mt-1.5 font-mono">THB</span>
                     <input
@@ -282,7 +326,7 @@ export default function ExpenseModal() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">{t("category")}</label>
-                      <div className="relative">
+                      <div ref={categoryRef} className="relative rounded-xl">
                         <select
                           value={newCategory}
                           onChange={(e) => setNewCategory(e.target.value)}
@@ -372,7 +416,7 @@ export default function ExpenseModal() {
                     type="submit"
                     className="flex-1 py-4 bg-[#1A1A1A] text-white rounded-xl font-black text-sm uppercase tracking-widest hover:bg-[#FF9D00] shadow-md shadow-black/10 transition-colors cursor-pointer"
                   >
-                    {editingTransaction && editingTransaction._id ? t("update_expense") : t("save_expense")}
+                    <span role="status">{isSaving ? (language === "th" ? "กำลังบันทึก…" : "Saving…") : editingTransaction && editingTransaction._id ? t("update_expense") : t("save_expense")}</span>
                   </button>
                   <button
                     type="button"
@@ -383,6 +427,7 @@ export default function ExpenseModal() {
                     <Plus className="w-6 h-6 group-hover:scale-110 transition-transform" />
                   </button>
                 </div>
+                </fieldset>
               </form>
             </div>
           </motion.div>

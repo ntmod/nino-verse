@@ -2,6 +2,10 @@
 
 NoriNote is a private personal expense tracker built with [Next.js](https://nextjs.org).
 
+## Galaxy Watch Quick Expense
+
+See [the watch API spec](docs/watch-api-spec.md) for authentication, requests, responses, and setup. The web login requires `SITE_PASSWORD` and `SESSION_SECRET` in the server environment. Existing sessions must log in again after this authentication change.
+
 ## Getting Started
 
 First, run the development server:

@@ -5,7 +5,6 @@ export const translations = {
     // Navigation
     nav_home: "Home",
     nav_notes: "Notes",
-    nav_analytics: "Analytics",
     nav_settings: "Settings",
     nav_logout: "Logout",
     nav_toggle_theme: "Toggle theme",
@@ -93,10 +92,6 @@ export const translations = {
     add_note: "Add Note",
     note_placeholder: "Write your note here...",
 
-    // Analytics Page
-    analytics_title: "Financial Analytics",
-    analytics_subtitle: "Comprehensive insights on your spending habits",
-
     // Settings Page
     settings_title: "Systems Settings",
     settings_subtitle: "Configure your expense tracking environment",
@@ -125,7 +120,6 @@ export const translations = {
     // Navigation
     nav_home: "หน้าแรก",
     nav_notes: "บันทึก",
-    nav_analytics: "วิเคราะห์",
     nav_settings: "ตั้งค่า",
     nav_logout: "ออกจากระบบ",
     nav_toggle_theme: "เปลี่ยนธีม",
@@ -212,10 +206,6 @@ export const translations = {
     notes_subtitle: "จัดการบันทึกด่วนและสิ่งที่ต้องจำ",
     add_note: "เพิ่มบันทึก",
     note_placeholder: "เขียนบันทึกของคุณที่นี่...",
-
-    // Analytics Page
-    analytics_title: "การวิเคราะห์ทางการเงิน",
-    analytics_subtitle: "ข้อมูลเชิงลึกเกี่ยวกับพฤติกรรมการใช้จ่ายของคุณ",
 
     // Settings Page
     settings_title: "การตั้งค่าระบบ",

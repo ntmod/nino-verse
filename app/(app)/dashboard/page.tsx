@@ -8,7 +8,6 @@ import { motion } from "framer-motion";
 import TotalSpentCard from "@/components/nori/TotalSpentCard";
 import Image from "next/image";
 import FixedCostCard from "@/components/nori/FixedCostCard";
-import { ChevronLeft, ChevronRight, Cat } from "lucide-react";
 import ExpensePieChart from "@/components/nori/ExpensePieChart";
 import RecentTransactionsCard from "@/components/nori/RecentTransactionsCard";
 import PaymentMethodsCard from "@/components/nori/PaymentMethodsCard";
@@ -25,6 +24,7 @@ import { paymentService } from "@/lib/services/paymentService";
 import { budgetService, fixedCostService } from "@/lib/services/dashboardService";
 import { useModal } from "@/lib/modal-context";
 import { useLanguage } from "@/lib/language-context";
+import { getSpendingCycle } from "@/lib/spending-cycle.js";
 
 export default function Noripage() {
   const router = useRouter();
@@ -44,39 +44,8 @@ export default function Noripage() {
   const [dailyAverageBreakdown, setDailyAverageBreakdown] = useState<any[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  // --- Billing Cycle Calculation ---
-  const billingCycle = useMemo(() => {
-    const today = new Date();
-    const todayYear = today.getFullYear();
-    const todayMonth = today.getMonth();
-    const todayDate = today.getDate();
-
-    const baseRefMonthIndex = todayDate < 30 ? todayMonth : todayMonth + 1;
-    const refMonthIndex = baseRefMonthIndex + cycleOffset;
-    const refDate = new Date(todayYear, refMonthIndex, 15);
-    const year = refDate.getFullYear();
-    const month = refDate.getMonth();
-
-    let startDate: Date;
-    let endDate: Date;
-
-    const getSafe30th = (y: number, m: number): Date => {
-      const lastDay = new Date(y, m + 1, 0).getDate();
-      const targetDay = Math.min(30, lastDay);
-      return new Date(y, m, targetDay, 0, 0, 0, 0);
-    };
-
-    const getSafe29th = (y: number, m: number): Date => {
-      const lastDay = new Date(y, m + 1, 0).getDate();
-      const targetDay = Math.min(29, lastDay);
-      return new Date(y, m, targetDay, 23, 59, 59, 999);
-    };
-
-    startDate = getSafe30th(year, month - 1);
-    endDate = getSafe29th(year, month);
-
-    return { startDate, endDate };
-  }, [cycleOffset]);
+  const billingCycle = useMemo(() => getSpendingCycle(cycleOffset), [cycleOffset]);
+  const previousBillingCycle = useMemo(() => getSpendingCycle(cycleOffset - 1), [cycleOffset]);
 
   const billingCycleStr = useMemo(() => {
     const locale = language === "th" ? "th-TH" : "en-US";
@@ -149,9 +118,7 @@ export default function Noripage() {
     const fetchTransactionsAndAverage = async () => {
       try {
         setIsLoading(true);
-        const cycleDuration = billingCycle.endDate.getTime() - billingCycle.startDate.getTime();
-        const prevStartDate = new Date(billingCycle.startDate.getTime() - cycleDuration);
-        const prevStartISO = prevStartDate.toISOString();
+        const prevStartISO = previousBillingCycle.startDate.toISOString();
         const endISO = billingCycle.endDate.toISOString();
         
         const [txData, avgRes] = await Promise.all([
@@ -173,7 +140,7 @@ export default function Noripage() {
       }
     };
     fetchTransactionsAndAverage();
-  }, [billingCycle, refreshTrigger]);
+  }, [billingCycle, previousBillingCycle, refreshTrigger]);
 
   const currentPeriodTransactions = useMemo(() => {
     const start = billingCycle.startDate.getTime();
@@ -191,9 +158,8 @@ export default function Noripage() {
   }, [currentPeriodTransactions]);
 
   const prevTotalSpent = useMemo(() => {
-    const cycleDuration = billingCycle.endDate.getTime() - billingCycle.startDate.getTime();
-    const start = billingCycle.startDate.getTime() - cycleDuration;
-    const end = billingCycle.startDate.getTime() - 1;
+    const start = previousBillingCycle.startDate.getTime();
+    const end = previousBillingCycle.endDate.getTime();
     const prevTx = transactions.filter(tx => {
       const txTime = new Date(tx.date).getTime();
       return txTime >= start && txTime <= end;
@@ -201,7 +167,7 @@ export default function Noripage() {
     return Math.abs(prevTx
       .filter(tx => tx.amount < 0)
       .reduce((sum, tx) => sum + tx.amount, 0));
-  }, [transactions, billingCycle]);
+  }, [transactions, previousBillingCycle]);
 
   const percentageChange = useMemo(() => {
     if (prevTotalSpent === 0) return 0;
@@ -245,9 +211,8 @@ export default function Noripage() {
   }, [currentPeriodTransactions, billingCycle]);
 
   const prevCumulativeSpending = useMemo(() => {
-    const cycleDuration = billingCycle.endDate.getTime() - billingCycle.startDate.getTime();
-    const start = new Date(billingCycle.startDate.getTime() - cycleDuration);
-    const end = new Date(billingCycle.startDate.getTime() - 1);
+    const start = new Date(previousBillingCycle.startDate);
+    const end = new Date(previousBillingCycle.endDate);
     const totalDays = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
     
     const dailyAccumulation: { day: number; amount: number; dayAmount: number; dateStr: string }[] = [];
@@ -281,7 +246,7 @@ export default function Noripage() {
     }
     
     return dailyAccumulation;
-  }, [transactions, billingCycle]);
+  }, [transactions, previousBillingCycle]);
 
   const recentTransactions = useMemo(() => {
     return currentPeriodTransactions
@@ -342,9 +307,8 @@ export default function Noripage() {
   }, [currentPeriodTransactions, categories, categoryColorMap]);
 
   const prevCategoryBreakdown = useMemo(() => {
-    const cycleDuration = billingCycle.endDate.getTime() - billingCycle.startDate.getTime();
-    const start = billingCycle.startDate.getTime() - cycleDuration;
-    const end = billingCycle.startDate.getTime() - 1;
+    const start = previousBillingCycle.startDate.getTime();
+    const end = previousBillingCycle.endDate.getTime();
     const prevTx = transactions.filter(tx => {
       const txTime = new Date(tx.date).getTime();
       return txTime >= start && txTime <= end;
@@ -366,7 +330,7 @@ export default function Noripage() {
         amount,
         color: categoryColorMap[name] || '#94A3B8'
       }));
-  }, [transactions, billingCycle, categories, categoryColorMap]);
+  }, [transactions, previousBillingCycle, categories, categoryColorMap]);
 
   const paymentMethodBreakdown = useMemo(() => {
     return paymentMethods.map(pm => {
