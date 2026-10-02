@@ -2,6 +2,7 @@
 
 import { ReceiptText } from "lucide-react";
 import ReceiptPaper from "@/components/ReceiptPaper";
+import ReceiptStamp from "@/components/ReceiptStamp";
 import { useLanguage } from "@/lib/language-context";
 import { summarizeCycle } from "@/lib/cycle-summary.mjs";
 import type { Transaction } from "@/lib/types";
@@ -68,6 +69,7 @@ export default function CycleReceipt({ transactions, cycle, previousTotal, onClo
           </div>
         </>
       )}
+      {summary.status === 'complete' && <ReceiptStamp animated={false} label={th ? "ตรวจแล้ว · ปิดยอดแล้ว" : "Verified · Cycle closed"} />}
       <p className="mt-6 border-t border-dashed border-[#d9cebb] pt-4 text-center text-[10px] leading-relaxed text-[#7f715d]">{th ? "จดนิดหน่อย ใช้ชีวิตชัดขึ้น 🐱" : "Small notes. Clearer days. 🐱"}</p>
     </ReceiptPaper>
   );

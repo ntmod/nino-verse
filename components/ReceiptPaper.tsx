@@ -6,10 +6,11 @@ import { useLanguage } from "@/lib/language-context";
 
 import { playUISound } from "@/lib/ui-sounds.mjs";
 
-export default function ReceiptPaper({ title, children, onClose }: {
+export default function ReceiptPaper({ title, children, onClose, stampDelay }: {
   title: ReactNode;
   children: ReactNode;
   onClose: () => void;
+  stampDelay?: number;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -32,6 +33,17 @@ export default function ReceiptPaper({ title, children, onClose }: {
     if (closingRef.current) return;
     void paperAnimation.start({ y: 0, transition: { duration: reducedMotion ? 0 : 0.55, ease: [0.22, 1, 0.36, 1] } });
   }, [paperAnimation, reducedMotion]);
+
+  useEffect(() => {
+    if (reducedMotion || stampDelay === undefined) return;
+    const timer = window.setTimeout(() => {
+      if (!closingRef.current) void paperAnimation.start({
+        y: [0, 3, 0], scaleY: [1, 0.995, 1],
+        transition: { duration: 0.18, ease: "easeOut" },
+      });
+    }, stampDelay * 1000);
+    return () => window.clearTimeout(timer);
+  }, [paperAnimation, reducedMotion, stampDelay]);
 
   const requestClose = async () => {
     if (closingRef.current) return;

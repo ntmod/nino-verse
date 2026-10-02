@@ -1,7 +1,8 @@
 'use client'
 
 import LoadingScreen from "@/components/LoadingScreen";
-import { useRouter } from "next/navigation";
+import styles from "./layout.module.css";
+import MasonryLayout from "./MasonryLayout";
 import Link from "next/link";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, useReducedMotion, useAnimationControls } from "framer-motion";
@@ -20,8 +21,6 @@ import BudgetListCard from "@/components/nori/BudgetListCard";
 import MetricsCard from "@/components/nori/MetricsCard";
 import FloatingActionButton from "@/components/nori/FloatingActionButton";
 
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 import { transactionService } from "@/lib/services/transactionService";
 import { categoryService } from "@/lib/services/categoryService";
@@ -35,10 +34,8 @@ import { playUISound, prepareUISound } from "@/lib/ui-sounds.mjs";
 import type { Transaction } from "@/lib/types";
 
 export default function Noripage() {
-  const router = useRouter();
   const { openGlobalModal, openExpenseModal } = useModal();
   const { language, t } = useLanguage();
-  const [showExitWipe, setShowExitWipe] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [staticDataLoaded, setStaticDataLoaded] = useState(false);
   const [transactionsLoaded, setTransactionsLoaded] = useState(false);
@@ -52,6 +49,7 @@ export default function Noripage() {
   const [lastResetTime, setLastResetTime] = useState<number | null>(null);
   const [showCycleReceipt, setShowCycleReceipt] = useState(false);
   const [cycleOffset, setCycleOffset] = useState(0);
+  const [view, setView] = useState<"bento" | "masonry">("bento");
   const [isCycleChanging, setIsCycleChanging] = useState(false);
   const cycleChanging = useRef(false);
   const reducedMotion = useReducedMotion();
@@ -273,7 +271,7 @@ export default function Noripage() {
       const txTime = new Date(tx.date).getTime();
       return txTime >= start.getTime() && txTime <= end.getTime();
     });
-    
+
     for (let i = 0; i < totalDays; i++) {
       const currentDay = new Date(start);
       currentDay.setDate(start.getDate() + i);
@@ -421,10 +419,27 @@ export default function Noripage() {
     setRefreshTrigger(prev => prev + 1);
   };
 
+  const cards = {
+    TotalSpentCard: <TotalSpentCard amount={totalSpent} currency="THB" percentageChange={percentageChange} dailyAverage={dailyAverage} startDate={billingCycle.startDate} endDate={billingCycle.endDate} cumulativeData={cumulativeSpending} prevCumulativeData={prevCumulativeSpending} isLoading={isLoading} />,
+    SpendingHeatmapCard: <SpendingHeatmapCard key={cycleOffset} transactions={currentPeriodTransactions} cycle={billingCycle} savedTransaction={savedTransaction} isLoading={isLoading} ready={transactionsLoaded} onEdit={transaction => openExpenseModal(handleExpenseAdded, transaction)} />,
+    ExpensePieChart: <ExpensePieChart data={categoryBreakdown} prevData={prevCategoryBreakdown} isLoading={isLoading} />,
+    BudgetListCard: <BudgetListCard budgets={budgets} isLoading={isLoading} />,
+    MetricsCard: <MetricsCard dailyAverage={dailyAverage} todayUsage={todayUsage} breakdown={dailyAverageBreakdown} startDate={billingCycle.startDate} endDate={billingCycle.endDate} isLoading={isLoading} />,
+    PaymentMethodsCard: <PaymentMethodsCard methods={paymentMethodBreakdown} isLoading={isLoading} />,
+    RecentTransactionsCard: <RecentTransactionsCard transactions={recentTransactions} isLoading={isLoading} savedId={savedTransaction?._id} />,
+    FixedCostCard: <FixedCostCard items={fixedCostsWithStatus} isLoading={isLoading} onReset={handleResetFixedCosts} />,
+  };
+  const renderCard = (name: keyof typeof cards) => (
+    <motion.div key={name} data-home-card={name} className={view === "masonry" ? styles.item : undefined}
+      initial={reducedMotion ? false : { opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: reducedMotion ? 0 : 0.3, ease: "easeOut" }}>
+      {cards[name]}
+    </motion.div>
+  );
+
   return (
     <div className="relative min-h-screen bg-[#f5f0e5] flex flex-col pb-20 select-none">
       <LoadingScreen mode="in" />
-      {showExitWipe && <LoadingScreen mode="out" />}
 
       <div className="max-w-7xl w-full mx-auto px-6 md:px-8 mt-8 flex flex-col gap-4 relative z-10">
         
@@ -488,100 +503,34 @@ export default function Noripage() {
           onClose={() => setShowCycleReceipt(false)}
         />}
 
-        {/* Dashboard 2-Column Store Grid */}
+        <div role="group" aria-label={language === "th" ? "รูปแบบการวางการ์ด" : "Card layout"} className="flex self-end border border-[#d9cebb] bg-[#fffdf5] p-1 font-mono">
+          {(["bento", "masonry"] as const).map(option => (
+            <button key={option} type="button" aria-pressed={view === option} onClick={() => setView(option)}
+              className="min-h-11 px-4 text-xs font-bold focus-visible:outline-2 focus-visible:outline-[#b97423]"
+              style={{ background: view === option ? "#e9a342" : "transparent", color: "#635744" }}>
+              {option === "bento" ? "Bento" : "Masonry"}
+            </button>
+          ))}
+        </div>
+
         <div aria-busy={isCycleChanging} className={`relative isolate -m-2 p-2 ${isCycleChanging ? "overflow-hidden" : "overflow-visible"}`}>
-          <motion.div animate={cycleAnimation} className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-          <div className="lg:col-span-2">
+          <motion.div animate={cycleAnimation} className="space-y-6">
             <CycleGardenCard key={`garden-${cycleOffset}`} transactions={currentPeriodTransactions} cycle={billingCycle} feedback={gardenFeedback} isLoading={isLoading} ready={transactionsLoaded} onEdit={transaction => openExpenseModal(handleExpenseAdded, transaction)} />
-          </div>
-          {/* Left Column */}
-          <div className="space-y-6">
-            <motion.div
-              initial={reducedMotion ? false : { opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: reducedMotion ? 0 : 0.3, ease: "easeOut" }}
-            >
-              <TotalSpentCard
-                amount={totalSpent}
-                currency="THB"
-                percentageChange={percentageChange}
-                dailyAverage={dailyAverage}
-                startDate={billingCycle.startDate}
-                endDate={billingCycle.endDate}
-                cumulativeData={cumulativeSpending}
-                prevCumulativeData={prevCumulativeSpending}
-                isLoading={isLoading}
-              />
-            </motion.div>
-            
-            <motion.div
-              initial={reducedMotion ? false : { opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: reducedMotion ? 0 : 0.3, ease: "easeOut" }}
-            >
-              <MetricsCard 
-                dailyAverage={dailyAverage} 
-                todayUsage={todayUsage}
-                breakdown={dailyAverageBreakdown} 
-                startDate={billingCycle.startDate}
-                endDate={billingCycle.endDate}
-                isLoading={isLoading} 
-              />
-            </motion.div>
-
-            <motion.div
-              initial={reducedMotion ? false : { opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: reducedMotion ? 0 : 0.3, ease: "easeOut" }}
-            >
-              <BudgetListCard budgets={budgets} isLoading={isLoading} />
-            </motion.div>
-            
-            <motion.div
-              initial={reducedMotion ? false : { opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: reducedMotion ? 0 : 0.3, ease: "easeOut" }}
-            >
-              <FixedCostCard items={fixedCostsWithStatus} isLoading={isLoading} onReset={handleResetFixedCosts} />
-            </motion.div>
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-6">
-            <SpendingHeatmapCard
-              key={cycleOffset}
-              transactions={currentPeriodTransactions}
-              cycle={billingCycle}
-              savedTransaction={savedTransaction}
-              isLoading={isLoading}
-              ready={transactionsLoaded}
-              onEdit={transaction => openExpenseModal(handleExpenseAdded, transaction)}
-            />
-            <motion.div
-              initial={reducedMotion ? false : { opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: reducedMotion ? 0 : 0.3, ease: "easeOut" }}
-            >
-              <ExpensePieChart data={categoryBreakdown} prevData={prevCategoryBreakdown} isLoading={isLoading} />
-            </motion.div>
-            
-            <motion.div
-              initial={reducedMotion ? false : { opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: reducedMotion ? 0 : 0.3, ease: "easeOut" }}
-            >
-              <PaymentMethodsCard methods={paymentMethodBreakdown} isLoading={isLoading} />
-            </motion.div>
-            
-            <motion.div
-              initial={reducedMotion ? false : { opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: reducedMotion ? 0 : 0.3, ease: "easeOut" }}
-            >
-              <RecentTransactionsCard transactions={recentTransactions} isLoading={isLoading} savedId={savedTransaction?._id} />
-            </motion.div>
-          </div>
-        </motion.div>
+            {view === "masonry" ? (
+              <MasonryLayout>
+                {(["TotalSpentCard", "SpendingHeatmapCard", "ExpensePieChart", "BudgetListCard", "MetricsCard", "PaymentMethodsCard", "RecentTransactionsCard", "FixedCostCard"] as const).map(renderCard)}
+              </MasonryLayout>
+            ) : (
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-start">
+                <div className="space-y-6">
+                  {(["TotalSpentCard", "MetricsCard", "BudgetListCard", "FixedCostCard"] as const).map(renderCard)}
+                </div>
+                <div className="space-y-6">
+                  {(["SpendingHeatmapCard", "ExpensePieChart", "PaymentMethodsCard", "RecentTransactionsCard"] as const).map(renderCard)}
+                </div>
+              </div>
+            )}
+          </motion.div>
         </div>
       </div>
 

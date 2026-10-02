@@ -1,26 +1,23 @@
 "use client";
 
 import LoadingScreen from "@/components/LoadingScreen";
-import { motion } from "framer-motion";
-import { useRouter, usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
-import { 
-  Settings, 
-  Tags, 
-  CreditCard, 
-  Target, 
-  CalendarClock, 
-  ChevronRight,
-  Calculator,
-  Globe
-} from "lucide-react";
+import Image from "next/image";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { Tags, CreditCard, Target, CalendarClock, ChevronRight, Calculator, Globe } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
+import { playUISound } from "@/lib/ui-sounds.mjs";
+import styles from "./index.module.css";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const pathname = usePathname();
   const { language, setLanguage, t } = useLanguage();
-  const [showExitWipe, setShowExitWipe] = useState(false);
+  const reducedMotion = useReducedMotion();
+  const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  const [hello, setHello] = useState(false);
+  const navigationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const th = language === "th";
 
   const SETTINGS_OPTIONS = [
     { 
@@ -60,104 +57,80 @@ export default function SettingsPage() {
     },
   ];
 
+
+  useEffect(() => () => {
+    if (navigationTimer.current !== null) clearTimeout(navigationTimer.current);
+  }, []);
   useEffect(() => {
-    setShowExitWipe(false);
-  }, [pathname]);
+    if (!hello) return;
+    const timer = setTimeout(() => setHello(false), 3500);
+    return () => clearTimeout(timer);
+  }, [hello]);
 
   const handleNavigate = (path: string) => {
-    setShowExitWipe(true);
-    setTimeout(() => {
-      router.push(path);
-    }, 800);
+    if (navigationTimer.current !== null) return;
+    setSelectedPath(path);
+    playUISound("paper");
+    navigationTimer.current = setTimeout(() => router.push(path), reducedMotion ? 0 : 200);
   };
 
-  return (
-    <main className="relative min-h-screen bg-[#f5f0e5] flex flex-col items-center px-6 py-8 pt-24 pb-20">
-      <LoadingScreen mode="in" />
-      {showExitWipe && <LoadingScreen mode="out" />}
-
-      <div className="max-w-2xl w-full space-y-8">
-        <header className="flex items-center gap-4 mb-12">
-          <div className="w-12 h-12 rounded-xl bg-[#fffdf5] flex items-center justify-center shadow-sm">
-            <Settings className="w-6 h-6 text-[#292722]" />
-          </div>
-          <div className="text-left font-mono">
-            <h1 className="text-3xl font-black text-[#292722] italic tracking-tighter uppercase leading-none mb-1.5">{t("settings_title")}</h1>
-            <p className="text-xs font-bold text-[#7f715d] uppercase tracking-widest leading-none">{t("settings_subtitle")}</p>
-          </div>
-        </header>
-
-        <div className="grid grid-cols-1 gap-4">
-          {/* Language Switch Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="w-full p-4 sm:p-6 bg-[#fffdf5] shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] rounded-none flex flex-col gap-4 sm:flex-row sm:items-center items-start justify-between text-left"
-          >
-            <div className="flex items-center gap-3 sm:gap-6">
-              <div 
-                className="w-10 h-10 sm:w-14 sm:h-14 shrink-0 rounded-none flex items-center justify-center"
-                style={{ backgroundColor: "#64829515" }}
-              >
-                <Globe className="w-6 h-6 text-[#648295]" />
-              </div>
-              <div>
-                <h3 className="text-sm sm:text-base font-black text-[#292722] italic uppercase font-mono">{t("settings_language")}</h3>
-                <p className="text-xs font-medium text-[#7f715d] font-mono mt-0.5">{t("settings_language_desc")}</p>
-              </div>
-            </div>
-            <div className="flex items-center bg-[#eee5d6] p-1 rounded-xl border border-[#d9cebb]/60 font-mono text-xs font-bold">
-              <button
-                onClick={() => setLanguage("en")}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                  language === "en" ? "bg-[#fffdf5] text-[#292722] shadow-sm" : "text-[#7f715d] hover:text-[#292722]"
-                }`}
-              >
-                EN
-              </button>
-              <button
-                onClick={() => setLanguage("th")}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                  language === "th" ? "bg-[#fffdf5] text-[#292722] shadow-sm" : "text-[#7f715d] hover:text-[#292722]"
-                }`}
-              >
-                TH
-              </button>
-            </div>
+  return <main className="relative min-h-screen bg-[#f5f0e5] px-5 pb-20 pt-24 sm:px-8">
+    {!reducedMotion && <LoadingScreen mode="in" />}
+    <div className="mx-auto w-full max-w-2xl">
+      <header className={styles.header}>
+        <div className="relative z-10 pr-20">
+          <p className="mb-3 font-mono text-[9px] font-bold tracking-[0.2em] text-[#93846b]">NORINOTE / {th ? 'ท้ายสมุด' : 'BACK OF THE NOTEBOOK'}</p>
+          <h1 className="font-mono text-3xl font-black text-[#292722]">{t("settings_title")}</h1>
+          <p className="mt-2 text-xs leading-relaxed text-[#7f715d]">{th ? 'จัดสมุดให้เข้ามือ แล้วจดต่อในแบบของเรา' : 'Make this notebook yours, then keep your story going.'}</p>
+        </div>
+        <motion.button type="button" aria-label={th ? 'ทักทาย Nori' : 'Say hello to Nori'} aria-pressed={hello}
+          onClick={() => { setHello(previous => !previous); playUISound("click"); }}
+          className={styles.nori} whileTap={reducedMotion ? undefined : { scale: 0.96 }}>
+          <motion.div animate={{ y: hello ? -10 : 9, rotate: hello && !reducedMotion ? [0, -7, 7, 0] : 0 }} transition={{ duration: reducedMotion ? 0 : 0.35 }}>
+            <Image src="/animations/nori/cat-idle.webp" alt="" width={80} height={80} unoptimized />
           </motion.div>
+        </motion.button>
+        <AnimatePresence>
+          {hello && <motion.p role="status" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reducedMotion ? 0 : 0.15 }} className={styles.greeting}>
+            {th ? 'สมุดพร้อมแล้ว ไปจดกัน 🍙' : 'Notebook ready! Let’s jot 🍙'}
+          </motion.p>}
+        </AnimatePresence>
+      </header>
 
+      <section className={styles.notebook} aria-label={th ? 'สารบัญการตั้งค่า' : 'Settings contents'}>
+        <div className={styles.language}>
+          <div className="flex min-w-0 items-center gap-3">
+            <Globe aria-hidden="true" className="h-5 w-5 shrink-0 text-[#648295]" />
+            <div><h2 className="text-sm font-bold text-[#403b32]">{t("settings_language")}</h2><p className="mt-1 text-[11px] text-[#93846b]">{t("settings_language_desc")}</p></div>
+          </div>
+          <div className="flex shrink-0 gap-2" role="group" aria-label={t("settings_language")}>
+            {(["en", "th"] as const).map(value => <motion.button key={value} type="button" aria-pressed={language === value}
+              onClick={() => { setLanguage(value); if (language !== value) playUISound("click"); }}
+              className={styles.sticker} data-selected={language === value}
+              animate={{ rotate: language === value || reducedMotion ? 0 : value === "en" ? -5 : 5, y: language === value || reducedMotion ? 0 : -2 }}
+              whileTap={reducedMotion ? undefined : { scale: 0.94 }} transition={{ duration: reducedMotion ? 0 : 0.2 }}>
+              {value.toUpperCase()}
+            </motion.button>)}
+          </div>
+        </div>
+        <div className="px-4 pb-4 pt-2 sm:px-6 sm:pb-6">
+          <p className="mb-3 font-mono text-[9px] font-bold tracking-widest text-[#93846b]">{th ? 'สารบัญ' : 'CONTENTS'} / 01—05</p>
           {SETTINGS_OPTIONS.map((option, index) => {
             const Icon = option.icon;
-            return (
-              <motion.button
-                key={option.path}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + index * 0.05 }}
-                onClick={() => handleNavigate(option.path)}
-                className="w-full p-4 sm:p-6 bg-[#fffdf5] shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] rounded-none hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all duration-300 flex items-center justify-between group cursor-pointer text-left"
-              >
-                <div className="flex items-center gap-3 sm:gap-6">
-                  <div 
-                    className="w-10 h-10 sm:w-14 sm:h-14 shrink-0 rounded-none flex items-center justify-center group-hover:scale-105 transition-transform duration-300"
-                    style={{ backgroundColor: `${option.color}10` }}
-                  >
-                    <Icon className="w-6 h-6" style={{ color: option.color }} />
-                  </div>
-                  <div>
-                    <h3 className="text-sm sm:text-base font-black text-[#292722] italic uppercase font-mono">{option.name}</h3>
-                    <p className="text-xs font-medium text-[#7f715d] font-mono mt-0.5">{option.desc}</p>
-                  </div>
-                </div>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 shrink-0 rounded-xl flex items-center justify-center bg-[#f5eedf]/70 group-hover:bg-[#292722] transition-all">
-                  <ChevronRight className="w-5 h-5 text-[#7f715d] group-hover:text-white transition-colors" />
-                </div>
-              </motion.button>
-            );
+            const selected = selectedPath === option.path;
+            return <motion.button type="button" key={option.path} disabled={selectedPath !== null}
+              onClick={() => handleNavigate(option.path)} className={styles.entry}
+              style={{ '--tab-color': option.color } as React.CSSProperties}
+              animate={{ x: selected && !reducedMotion ? 8 : 0 }} transition={{ duration: reducedMotion ? 0 : 0.2 }}>
+              <span className={styles.tab} aria-hidden="true"><Icon className="h-5 w-5" /></span>
+              <span aria-hidden="true" className="font-mono text-[10px] text-[#b6a68e]">{String(index + 1).padStart(2, '0')}</span>
+              <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-[#403b32] sm:text-base">{option.name}</span><span className="mt-1 block text-[11px] leading-relaxed text-[#93846b]">{option.desc}</span></span>
+              <motion.span aria-hidden="true" animate={{ x: selected && !reducedMotion ? 4 : 0 }} transition={{ duration: reducedMotion ? 0 : 0.2 }}><ChevronRight className="h-4 w-4 text-[#93846b]" /></motion.span>
+            </motion.button>;
           })}
         </div>
-      </div>
-    </main>
-  );
+        <div className="border-t border-dashed border-[#d9cebb] px-6 py-3 text-center font-mono text-[9px] tracking-wider text-[#b6a68e]">{th ? 'สมุดเล่มนี้เป็นของเรา' : 'A NOTEBOOK OF YOUR OWN'} · NORINOTE</div>
+      </section>
+    </div>
+  </main>;
 }

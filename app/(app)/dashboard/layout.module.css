@@ -1,0 +1,15 @@
+.masonry {
+  --columns: 1;
+  position: relative;
+}
+
+.item {
+  position: absolute;
+  width: calc((100% - (var(--columns) - 1) * 24px) / var(--columns));
+}
+
+@media (min-width: 1024px) {
+  .masonry {
+    --columns: 2;
+  }
+}

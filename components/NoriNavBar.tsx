@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Globe, LayoutDashboard, LogOut, NotebookPen, Settings } from "lucide-react";
@@ -20,6 +20,7 @@ export default function NoriNavBar() {
   const pathname = usePathname();
   const { language, toggleLanguage, t } = useLanguage();
   const [showExitWipe, setShowExitWipe] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   const navigate = (path: string) => {
     if (path === pathname) return;
@@ -48,12 +49,13 @@ export default function NoriNavBar() {
   return (
     <>
       {showExitWipe && <LoadingScreen mode="out" />}
-      <div className="fixed top-0 left-0 right-0 z-[10000] p-4 flex justify-center pointer-events-none select-none">
+      <div className="fixed top-0 left-0 right-0 z-[10000] p-3 sm:p-4 flex justify-center pointer-events-none select-none">
         <motion.nav
-          initial={{ y: -20, opacity: 0 }}
+          initial={reducedMotion ? false : { y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 350, damping: 26 }}
-          className="pointer-events-auto bg-[#fffdf5]/85 backdrop-blur-md border border-[#d9cebb]/50 shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] rounded-full px-1.5 sm:px-2.5 h-12 flex items-center gap-0 sm:gap-1"
+          transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 350, damping: 26 }}
+          className="pointer-events-auto bg-[#fffdf5] border border-[#d9cebb] px-1 sm:px-2 h-14 flex items-center gap-0 sm:gap-1"
+          style={{ borderRadius: "5px 5px 12px 12px", boxShadow: "2px 4px 0 #e7dece, 0 8px 24px rgba(78,62,36,0.06)" }}
           aria-label={t("nav_home")}
         >
           {NAV_CONFIG.map((item) => {
@@ -61,19 +63,19 @@ export default function NoriNavBar() {
             const Icon = item.icon;
 
             return (
-              <button
+              <motion.button
                 key={item.path}
                 aria-label={t(item.key)}
                 aria-current={active ? "page" : undefined}
                 onClick={() => navigate(item.path)}
-                className={`relative min-h-11 min-w-11 px-2 py-1.5 flex items-center gap-2 rounded-full transition-all duration-300 group cursor-pointer ${active ? "text-[#372b1c]" : "text-[#93846b] hover:text-[#635744]"}`}
+                animate={{ y: active ? 4 : 0, backgroundColor: active ? "#e9a342" : "#f5f0e5" }}
+                transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 400, damping: 25 }}
+                style={{ borderRadius: "3px 3px 9px 3px", border: "1px solid #d9cebb", background: "#f5f0e5", boxShadow: active ? "1px 3px 0 #bd8a45" : "1px 2px 0 #e7dece" }}
+                className={`relative isolate min-h-11 min-w-11 px-2 py-1.5 flex items-center gap-2 group cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b97423] ${active ? "text-[#372b1c]" : "text-[#93846b] hover:text-[#635744]"}`}
               >
-                {active && (
-                  <motion.div layoutId="activeNav" className="absolute inset-0 bg-[#e9a342] rounded-full -z-10 shadow-sm" transition={{ type: "spring", bounce: 0.15, duration: 0.5 }} />
-                )}
-                <Icon className={`w-3.5 h-3.5 transition-transform ${active ? "scale-105" : "group-hover:scale-105"}`} />
+                <Icon aria-hidden="true" className="w-4 h-4" />
                 <span className="text-[11px] font-bold uppercase tracking-wider hidden sm:block">{t(item.key)}</span>
-              </button>
+              </motion.button>
             );
           })}
 

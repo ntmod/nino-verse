@@ -1,0 +1,16 @@
+.header { position: relative; padding: 0 8px 24px; }
+.nori { position: absolute; right: 8px; bottom: 0; width: 80px; height: 62px; overflow: hidden; border-radius: 40px 40px 0 0; }
+.nori:focus-visible, .sticker:focus-visible, .entry:focus-visible { outline: 2px solid #b97423; outline-offset: 3px; }
+.greeting { position: absolute; right: 8px; bottom: 72px; z-index: 20; max-width: calc(100% - 16px); padding: 8px 12px; border: 1px solid #d9cebb; border-radius: 12px; background: #fffdf5; color: #635744; font-size: 11px; box-shadow: 2px 3px 0 #e7dece; }
+.notebook { position: relative; border: 1px solid #d9cebb; background: #fffdf5; box-shadow: 4px 5px 0 #e7dece, 0 12px 32px #4e3e240a; }
+.language { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding: 20px 24px; border-bottom: 1px dashed #d9cebb; background: #f5eedf66; }
+.sticker { position: relative; width: 48px; min-height: 44px; border: 1px solid #d9cebb; border-radius: 8px 8px 3px 8px; background: #e6eced; color: #648295; font: bold 12px monospace; box-shadow: 2px 3px 0 #d9cebb66; cursor: pointer; }
+.sticker::after { content: ''; position: absolute; right: 0; bottom: 0; width: 10px; height: 10px; background: linear-gradient(135deg, transparent 45%, #c6cfcf 50%, #fffdf5 65%); }
+.sticker[data-selected='true'] { background: #e9a342; color: #403b32; border-color: #c98b35; box-shadow: 0 1px 2px #4e3e2414; }
+.sticker[data-selected='true']::after { display: none; }
+.entry { --tab-color: #b97423; position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 88px; padding: 16px 0 16px 40px; text-align: left; border-bottom: 1px dashed #e1d7c5; cursor: pointer; transition: background 150ms; }
+.entry:last-child { border-bottom: 0; }
+.entry:hover { background: #f5eedf66; }
+.tab { position: absolute; left: -25px; display: flex; align-items: center; justify-content: center; width: 48px; height: 44px; border: 1px solid color-mix(in srgb, var(--tab-color) 35%, #d9cebb); border-radius: 4px 10px 10px 4px; background: color-mix(in srgb, var(--tab-color) 12%, #fffdf5); color: var(--tab-color); box-shadow: 2px 2px 0 #e7dece; }
+@media (min-width: 640px) { .tab { left: -35px; } .entry { gap: 16px; } }
+@media (prefers-reduced-motion: reduce) { .entry { transition: none; } }
