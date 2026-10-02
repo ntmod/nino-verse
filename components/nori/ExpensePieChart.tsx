@@ -84,7 +84,7 @@ export default function ExpensePieChart({
   const activeSegment = hoveredCategory ? segments.find(s => s.name === hoveredCategory) : null;
 
   return (
-    <div className="relative rounded-2xl bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100/80 min-h-[380px] flex flex-col justify-between overflow-hidden">
+    <div className="relative bg-[#fffdf5] shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] border border-[#e1d7c5]/80 min-h-[380px] flex flex-col justify-between overflow-hidden">
       <AnimatePresence mode="wait">
         {isLoading ? (
           <motion.div
@@ -96,21 +96,21 @@ export default function ExpensePieChart({
             className="p-4 md:p-6 pb-4 flex-1 flex flex-col justify-between select-none"
           >
             <div>
-              <div className="flex items-center justify-between mb-6 animate-pulse">
-                <div className="h-3.5 bg-slate-200 rounded-md w-40" />
+              <div className="flex flex-wrap gap-3 items-center justify-between mb-6 animate-pulse">
+                <div className="h-3.5 bg-[#e1d7c5] rounded-md w-40" />
               </div>
               <div className="flex flex-col items-center gap-6 animate-pulse">
                 {/* Horizontal progress bar skeleton */}
-                <div className="w-full h-8 bg-slate-100 border border-slate-200 rounded-md" />
+                <div className="w-full h-8 bg-[#eee5d6] border border-[#d9cebb] rounded-md" />
                 {/* Legend Skeleton */}
                 <div className="w-full space-y-4">
                   {[...Array(3)].map((_, i) => (
                     <div key={i} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-3.5 h-3.5 bg-slate-200 rounded-md shrink-0" />
-                        <div className="h-3.5 bg-slate-200 rounded-md w-24" />
+                        <div className="w-3.5 h-3.5 bg-[#e1d7c5] rounded-md shrink-0" />
+                        <div className="h-3.5 bg-[#e1d7c5] rounded-md w-24" />
                       </div>
-                      <div className="h-3.5 bg-slate-200 rounded-md w-8" />
+                      <div className="h-3.5 bg-[#e1d7c5] rounded-md w-8" />
                     </div>
                   ))}
                 </div>
@@ -128,29 +128,29 @@ export default function ExpensePieChart({
           >
             {/* Top Segment */}
             <div className="p-4 md:p-6 pb-4">
-              <div className="flex items-center justify-between mb-4 font-mono select-none">
-                <h3 className="text-[10px] font-black text-[#777777] uppercase tracking-[0.2em]">
+              <div className="flex flex-wrap gap-3 items-center justify-between mb-4 font-mono select-none">
+                <h3 className="text-[10px] font-black text-[#7f715d] uppercase tracking-[0.2em]">
                   {t("expense_breakdown")}
                 </h3>
                 <button
                   onClick={() => setShowCompare(!showCompare)}
-                  className={`px-2.5 py-1 rounded-lg border text-[9px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                  className={`min-h-11 px-2.5 py-1 rounded-lg border text-[9px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
                     showCompare 
-                      ? "bg-[#1A1A1A] border-[#1A1A1A] text-white shadow-sm" 
-                      : "bg-white border-slate-200 text-[#777777] hover:text-[#1A1A1A] hover:border-slate-300"
+                      ? "bg-[#292722] border-[#292722] text-white shadow-sm"
+                      : "bg-[#fffdf5] border-[#d9cebb] text-[#7f715d] hover:text-[#292722] hover:border-[#b6a68e]"
                   }`}
                 >
-                  {showCompare ? "✓ Comparing Last Cycle" : "+ Compare Last Cycle"}
+                  {showCompare ? t("ui_comparing_last_cycle") : t("ui_compare_last_cycle")}
                 </button>
               </div>
 
               {data.length === 0 ? (
                 <div className="py-12 flex flex-col items-center justify-center text-center space-y-4 font-mono">
-                  <div className="w-16 h-16 rounded-xl bg-white border border-slate-200 flex items-center justify-center">
-                    <PieChart className="w-8 h-8 text-slate-300" />
+                  <div className="w-16 h-16 rounded-xl bg-[#fffdf5] border border-[#d9cebb] flex items-center justify-center">
+                    <PieChart className="w-8 h-8 text-[#b6a68e]" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[10px] font-bold text-[#1A1A1A] uppercase tracking-wider">{t("no_expense_data")}</p>
+                    <p className="text-[10px] font-bold text-[#292722] uppercase tracking-wider">{t("no_expense_data")}</p>
                   </div>
                 </div>
               ) : (
@@ -158,11 +158,17 @@ export default function ExpensePieChart({
                   
                   {/* HORIZONTAL PROGRESS RIBBON */}
                   <div className="w-full flex flex-col gap-3 font-mono">
-                    <div className="w-full h-8 border border-slate-200 bg-white flex overflow-hidden select-none rounded-md">
+                    <div className="w-full h-8 border border-[#d9cebb] bg-[#fffdf5] flex overflow-hidden select-none rounded-md">
                       {segments.map((seg) => (
-                        <div 
+                        <button
+                          type="button"
+                          aria-label={seg.name}
+                          aria-pressed={hoveredCategory === seg.name}
+                          onClick={() => setHoveredCategory(hoveredCategory === seg.name ? null : seg.name)}
+                          onFocus={() => setHoveredCategory(seg.name)}
+                          onBlur={() => setHoveredCategory(null)}
                           key={seg.name}
-                          className="h-full border-r border-slate-200 last:border-r-0 transition-opacity duration-150 cursor-pointer"
+                          className="h-full border-r border-[#d9cebb] last:border-r-0 transition-opacity duration-150 cursor-pointer"
                           style={{ 
                             width: `${seg.percentage}%`,
                             backgroundColor: seg.color,
@@ -178,13 +184,13 @@ export default function ExpensePieChart({
                         <span style={{ color: activeSegment.color }}>
                           {activeSegment.name.toUpperCase()}: <AnimatedNumber value={activeSegment.percentage} decimals={0} />% (THB <AnimatedNumber value={activeSegment.amount} decimals={0} />)
                           {showCompare && (
-                            <span className="ml-1.5 px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-[#777777] font-bold text-[9px] inline-block">
-                              LAST CYCLE: THB {activeSegment.prevAmount.toLocaleString()}
+                            <span className="ml-1.5 whitespace-nowrap px-1.5 py-0.5 rounded bg-[#eee5d6] border border-[#d9cebb] text-[#7f715d] font-bold text-[9px] inline-block">
+                              {t("ui_last_cycle_thb")} {activeSegment.prevAmount.toLocaleString()}
                             </span>
                           )}
                         </span>
                       ) : (
-                        <span className="text-[#777777]">HOVER RIBBON SEGMENTS FOR DETAILS</span>
+                        <span className="text-[#7f715d]">{t("ui_hover_ribbon_segments_for_details")}</span>
                       )}
                     </div>
                   </div>
@@ -196,7 +202,7 @@ export default function ExpensePieChart({
                         {currentSegments.map((segment) => (
                           <div 
                             key={segment.name}
-                            className={`flex items-center justify-between py-2 border-b border-dashed border-slate-100 last:border-none last:pb-0 group cursor-pointer transition-opacity duration-200 ${
+                            className={`flex flex-wrap gap-y-2 items-center justify-between py-2 border-b border-dashed border-[#e1d7c5] last:border-none last:pb-0 group cursor-pointer transition-opacity duration-200 ${
                               hoveredCategory && hoveredCategory !== segment.name ? 'opacity-30' : 'opacity-100'
                             }`}
                             onMouseEnter={() => setHoveredCategory(segment.name)}
@@ -208,26 +214,26 @@ export default function ExpensePieChart({
                                   <motion.span 
                                     initial={{ scale: 0.5, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
-                                    className="text-[10px] text-[#1A1A1A] font-black"
+                                    className="text-[10px] text-[#292722] font-black"
                                   >
                                     ▶
                                   </motion.span>
                                 ) : null}
                               </span>
-                              <div className="w-3.5 h-3.5 rounded-sm border border-slate-200 shrink-0" style={{ backgroundColor: segment.color }} />
-                              <span className="text-xs font-bold text-[#333333] group-hover:text-[#1A1A1A] transition-colors uppercase tracking-tight">{segment.name}</span>
+                              <div className="w-3.5 h-3.5 rounded-sm border border-[#d9cebb] shrink-0" style={{ backgroundColor: segment.color }} />
+                              <span className="text-xs font-bold text-[#403b32] group-hover:text-[#292722] transition-colors uppercase tracking-tight">{segment.name}</span>
                             </div>
-                            <div className="text-xs font-black text-[#1A1A1A] italic font-mono flex items-center gap-2">
+                            <div className={`text-xs font-black text-[#292722] italic font-mono flex items-center gap-2 ${showCompare ? "w-full sm:w-auto" : ""}`}>
                               {showCompare ? (
-                                <div className="flex items-center gap-2 not-italic text-[10px] font-mono">
+                                <div className="flex flex-wrap items-center gap-2 not-italic text-[10px] font-mono">
                                   {/* Last Cycle Pill */}
-                                  <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-500 font-bold">
-                                    LAST: THB <AnimatedNumber value={segment.prevAmount} decimals={0} />
+                                  <span className="whitespace-nowrap px-1.5 py-0.5 rounded bg-[#eee5d6] border border-[#d9cebb] text-[#7f715d] font-bold">
+                                    {t("ui_last_thb")} <AnimatedNumber value={segment.prevAmount} decimals={0} />
                                   </span>
-                                  <span className="text-slate-300 font-black">→</span>
+                                  <span className="text-[#b6a68e] font-black">→</span>
                                   {/* Current Cycle Pill */}
-                                  <span className="px-1.5 py-0.5 rounded bg-[#1A1A1A] text-white font-bold">
-                                    CURR: THB <AnimatedNumber value={segment.amount} decimals={0} /> ({Math.round(segment.percentage)}%)
+                                  <span className="whitespace-nowrap px-1.5 py-0.5 rounded bg-[#292722] text-white font-bold">
+                                    {t("ui_curr_thb")} <AnimatedNumber value={segment.amount} decimals={0} /> ({Math.round(segment.percentage)}%)
                                   </span>
                                   {/* Diff indicator */}
                                   {segment.amount - segment.prevAmount !== 0 && (
@@ -240,7 +246,7 @@ export default function ExpensePieChart({
                                 </div>
                               ) : (
                                 <>
-                                  <span className="text-[9px] font-bold text-[#777777] not-italic mr-1">
+                                  <span className="text-[9px] font-bold text-[#7f715d] not-italic mr-1">
                                     THB <AnimatedNumber value={segment.amount} decimals={0} />
                                   </span>
                                   <span>
@@ -256,21 +262,21 @@ export default function ExpensePieChart({
 
                     {/* Brutalist Pagination Row */}
                     {totalPages > 1 && (
-                      <div className="flex items-center justify-between mt-4 pt-4 border-t border-dashed border-slate-100">
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t border-dashed border-[#e1d7c5]">
                         <button 
                           onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
                           disabled={currentPage === 0}
-                          className="w-7 h-7 flex items-center justify-center rounded-md border border-slate-200 text-[#1A1A1A] hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-white disabled:hover:text-[#1A1A1A] transition-colors cursor-pointer"
+                          className="w-7 h-7 flex items-center justify-center rounded-md border border-[#d9cebb] text-[#292722] hover:bg-[#f5eedf] disabled:opacity-30 disabled:hover:bg-[#fffdf5] disabled:hover:text-[#292722] transition-colors cursor-pointer"
                         >
                           <ChevronLeft className="w-4 h-4" />
                         </button>
-                        <span className="text-[9px] font-mono font-black text-[#777777] uppercase tracking-widest">
-                          PAGE {currentPage + 1} OF {totalPages}
+                        <span className="text-[9px] font-mono font-black text-[#7f715d] uppercase tracking-widest">
+                          {t("ui_page")} {currentPage + 1} {t("ui_of")} {totalPages}
                         </span>
                         <button 
                           onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
                           disabled={currentPage === totalPages - 1}
-                          className="w-7 h-7 flex items-center justify-center rounded-md border border-slate-200 text-[#1A1A1A] hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-white disabled:hover:text-[#1A1A1A] transition-colors cursor-pointer"
+                          className="w-7 h-7 flex items-center justify-center rounded-md border border-[#d9cebb] text-[#292722] hover:bg-[#f5eedf] disabled:opacity-30 disabled:hover:bg-[#fffdf5] disabled:hover:text-[#292722] transition-colors cursor-pointer"
                         >
                           <ChevronRight className="w-4 h-4" />
                         </button>
@@ -282,12 +288,12 @@ export default function ExpensePieChart({
             </div>
 
             {/* Dark Status Bottom Bar */}
-            <div className="bg-[#1A1A1A] text-[#ffffff] p-3 px-6 flex items-center justify-between text-[10px] font-mono select-none">
-              <span className="text-[#777777] font-bold">
-                EXPENSE DISTRIBUTION
+            <div className="border-t border-dashed border-[#d9cebb] bg-[#f5eedf] text-[#292722] p-3 px-6 flex flex-wrap gap-2 items-center justify-between text-[10px] font-mono select-none">
+              <span className="text-[#7f715d] font-bold">
+                {t("ui_expense_distribution")}
               </span>
-              <span className="text-[#ffffff] font-bold uppercase text-[9px]">
-                TOTAL: <AnimatedNumber value={total} decimals={0} /> {currency}
+              <span className="text-[#292722] font-bold uppercase text-[9px]">
+                {t("ui_total")} <AnimatedNumber value={total} decimals={0} /> {currency}
               </span>
             </div>
           </motion.div>

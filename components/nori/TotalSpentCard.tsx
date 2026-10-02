@@ -1,9 +1,11 @@
 "use client";
 
 import React from "react";
-import { motion, AnimatePresence, animate } from "framer-motion";
+import { motion, AnimatePresence, animate, useReducedMotion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
+
+import NoriPeek from "./NoriPeek";
 
 interface TotalSpentCardProps {
   amount: number;
@@ -21,11 +23,12 @@ interface TotalSpentCardProps {
 function AnimatedNumber({ value, decimals = 2, delay = 0 }: { value: number; decimals?: number; delay?: number }) {
   const ref = React.useRef<HTMLSpanElement>(null);
   const prevValue = React.useRef(0);
+  const reducedMotion = useReducedMotion();
 
   React.useEffect(() => {
     const controls = animate(prevValue.current, value, {
-      duration: 0.8,
-      delay: delay,
+      duration: reducedMotion ? 0 : 0.8,
+      delay: reducedMotion ? 0 : delay,
       ease: "easeOut",
       onUpdate(latest) {
         if (ref.current) {
@@ -38,7 +41,7 @@ function AnimatedNumber({ value, decimals = 2, delay = 0 }: { value: number; dec
     });
     prevValue.current = value;
     return () => controls.stop();
-  }, [value, decimals, delay]);
+  }, [value, decimals, delay, reducedMotion]);
 
   return (
     <span ref={ref}>
@@ -126,7 +129,9 @@ export default function TotalSpentCard({
   }, [totalDays]);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100/80 text-left flex flex-col justify-between min-h-[140px]">
+    <div className="relative">
+      {!isLoading && <NoriPeek />}
+    <div className="relative overflow-hidden bg-[#fffdf5] shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] border border-[#e1d7c5] text-left flex flex-col justify-between min-h-[140px]">
       <AnimatePresence mode="wait">
         {isLoading ? (
           <motion.div
@@ -139,17 +144,17 @@ export default function TotalSpentCard({
           >
             {/* Top Segment Loading */}
             <div className="p-6 pb-4 space-y-4">
-              <div className="h-3 bg-slate-200 w-24 animate-pulse rounded-md" />
+              <div className="h-3 bg-[#e7dece] w-24 animate-pulse rounded-md" />
               <div className="flex gap-2 items-baseline">
-                <div className="h-6 bg-slate-200 w-10 animate-pulse rounded-md" />
-                <div className="h-10 bg-slate-200 w-36 animate-pulse rounded-md" />
+                <div className="h-6 bg-[#e7dece] w-10 animate-pulse rounded-md" />
+                <div className="h-10 bg-[#e7dece] w-36 animate-pulse rounded-md" />
               </div>
             </div>
 
             {/* Bottom Segment Loading */}
-            <div className="bg-[#1A1A1A] p-3.5 px-6 flex items-center justify-between min-h-[44px]">
-              <div className="h-2.5 bg-slate-700 w-28 animate-pulse rounded-md" />
-              <div className="h-2.5 bg-slate-700 w-20 animate-pulse rounded-md" />
+            <div className="border-t border-dashed border-[#d9cebb] bg-[#f5eedf] p-3.5 px-6 flex items-center justify-between min-h-[44px]">
+              <div className="h-2.5 bg-[#d9cebb] w-28 animate-pulse rounded-md" />
+              <div className="h-2.5 bg-[#d9cebb] w-20 animate-pulse rounded-md" />
             </div>
           </motion.div>
         ) : (
@@ -163,40 +168,42 @@ export default function TotalSpentCard({
           >
             {/* Top Section */}
             <div className="p-6 pb-4">
-              <p className="text-[#777777] text-xs font-bold uppercase tracking-[0.2em] font-mono mb-2">{t("total_spent")}</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-[#777777] text-2xl font-black italic">{currency}</span>
-                <h2 className="text-4xl md:text-5xl font-black text-[#1A1A1A] italic tracking-tighter">
+              <p className="text-[#93846b] text-xs font-bold uppercase tracking-[0.2em] font-mono mb-2">{t("total_spent")}</p>
+              <div className="flex flex-wrap items-baseline gap-2">
+                <span className="text-[#b97423] text-sm font-bold font-mono">{currency}</span>
+                <h2 className="text-4xl md:text-5xl font-black text-[#292722] tracking-tighter tabular-nums">
                   <AnimatedNumber value={amount} decimals={2} />
                 </h2>
               </div>
             </div>
 
             {/* Dark Status Bottom Bar (Clickable) */}
-            <div 
+            <button
+              type="button"
+              aria-expanded={isExpanded}
               onClick={() => setIsExpanded(!isExpanded)}
-              className="bg-[#1A1A1A] text-[#ffffff] p-3 px-6 flex items-center justify-between text-[10px] font-mono select-none cursor-pointer hover:bg-[#262626] transition-colors group"
+              className="border-t border-dashed border-[#d9cebb] bg-[#f5eedf] text-[#292722] p-3 px-6 flex flex-wrap gap-2 items-center justify-between text-[10px] font-mono select-none cursor-pointer hover:bg-[#efe4cf] focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-[#d58a2b] transition-colors group"
             >
-              <span className="text-[#777777] font-bold flex items-center gap-2">
+              <span className="text-[#93846b] font-bold flex items-center gap-2">
                 <span>{daysElapsed}/{totalDays} {t("day")} ({cycleProgress}%)</span>
-                <span className="text-slate-500 group-hover:text-white transition-colors text-xs">
+                <span className="text-[#b39a73] group-hover:text-[#292722] transition-colors text-xs">
                   {isExpanded ? "▲" : "▼"}
                 </span>
               </span>
               {percentageChange < 0 ? (
-                <span className="text-[#00FF00] font-bold flex items-center gap-0.5">
-                  <ArrowUpRight className="w-3.5 h-3.5 rotate-180 text-[#00FF00]" />
+                <span className="text-[#508069] font-bold flex items-center gap-0.5">
+                  <ArrowUpRight className="w-3.5 h-3.5 rotate-180 text-[#508069]" />
                   <span>{Math.abs(percentageChange).toFixed(1)}% {t("vs_prev_period")}</span>
                 </span>
               ) : percentageChange > 0 ? (
-                <span className="text-[#FF3B30] font-bold flex items-center gap-0.5">
-                  <ArrowUpRight className="w-3.5 h-3.5 text-[#FF3B30]" />
+                <span className="text-[#b96145] font-bold flex items-center gap-0.5">
+                  <ArrowUpRight className="w-3.5 h-3.5 text-[#b96145]" />
                   <span>+{percentageChange.toFixed(1)}% {t("vs_prev_period")}</span>
                 </span>
               ) : (
-                <span className="text-[#777777] font-bold">0.0% {t("vs_prev_period")}</span>
+                <span className="text-[#93846b] font-bold">0.0% {t("vs_prev_period")}</span>
               )}
-            </div>
+            </button>
 
             {/* Expandable Chart Drawer */}
             <AnimatePresence>
@@ -206,15 +213,15 @@ export default function TotalSpentCard({
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="overflow-hidden bg-[#fafafa] text-[#1A1A1A] border-t border-slate-200/80 p-4 md:p-6"
+                  className="overflow-hidden bg-[#f8f3e9] text-[#292722] border-t border-[#e1d7c5] p-4 md:p-6"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 font-mono">
                     <div>
-                      <h4 className="text-xs font-black uppercase tracking-widest text-[#1A1A1A] flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-[#FF9D00]" />
-                        CUMULATIVE EXPENSE TREND
+                      <h4 className="text-xs font-black uppercase tracking-widest text-[#292722] flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[#d58a2b]" />
+                        {t("ui_cumulative_expense_trend")}
                       </h4>
-                      <p className="text-[10px] text-[#777777] font-bold mt-0.5">Day-by-day accumulation over cycle</p>
+                      <p className="text-[10px] text-[#93846b] font-bold mt-0.5">{t("ui_day_by_day_accumulation_over_cycle")}</p>
                     </div>
 
                     <button
@@ -224,11 +231,11 @@ export default function TotalSpentCard({
                       }}
                       className={`px-3 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
                         showLastCycle 
-                          ? "bg-[#1A1A1A] border-[#1A1A1A] text-white shadow-sm" 
-                          : "bg-white border-slate-200 text-[#777777] hover:text-[#1A1A1A] hover:border-slate-300"
+                          ? "bg-[#292722] border-[#292722] text-white shadow-sm"
+                          : "bg-[#fffdf5] border-[#d9cebb] text-[#93846b] hover:text-[#292722] hover:border-[#b39a73]"
                       }`}
                     >
-                      {showLastCycle ? "✓ Comparing Last Cycle" : "+ Compare Last Cycle"}
+                      {showLastCycle ? t("ui_comparing_last_cycle") : t("ui_compare_last_cycle")}
                     </button>
                   </div>
 
@@ -240,8 +247,8 @@ export default function TotalSpentCard({
                     >
                       <defs>
                         <linearGradient id="v2CumulativeGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#1A1A1A" stopOpacity="0.12" />
-                          <stop offset="100%" stopColor="#1A1A1A" stopOpacity="0.0" />
+                          <stop offset="0%" stopColor="#292722" stopOpacity="0.12" />
+                          <stop offset="100%" stopColor="#292722" stopOpacity="0.0" />
                         </linearGradient>
                       </defs>
 
@@ -256,7 +263,7 @@ export default function TotalSpentCard({
                               y1={y}
                               x2={svgWidth - paddingX}
                               y2={y}
-                              stroke="#e2e8f0"
+                              stroke="#e1d7c5"
                               strokeWidth="1"
                               strokeDasharray="3 3"
                             />
@@ -264,7 +271,7 @@ export default function TotalSpentCard({
                               x={paddingX - 8}
                               y={y + 3}
                               textAnchor="end"
-                              className="text-[8.5px] font-mono fill-[#777777] font-bold"
+                              className="text-[8.5px] font-mono fill-[#93846b] font-bold"
                             >
                               {val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}
                             </text>
@@ -277,7 +284,7 @@ export default function TotalSpentCard({
                         <path
                           d={prevPaths.linePath}
                           fill="none"
-                          stroke="#94A3B8"
+                          stroke="#b6a68e"
                           strokeWidth="2"
                           strokeDasharray="4 4"
                           opacity="0.8"
@@ -292,7 +299,7 @@ export default function TotalSpentCard({
                         <path
                           d={currentPaths.linePath}
                           fill="none"
-                          stroke="#1A1A1A"
+                          stroke="#292722"
                           strokeWidth="3"
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -308,8 +315,8 @@ export default function TotalSpentCard({
                               cx={pt.x}
                               cy={pt.y}
                               r={isHovered ? 5 : 2.5}
-                              fill="#1A1A1A"
-                              stroke={isHovered ? "#FF9D00" : "transparent"}
+                              fill="#292722"
+                              stroke={isHovered ? "#d58a2b" : "transparent"}
                               strokeWidth={isHovered ? 2.5 : 0}
                               className="transition-all duration-150"
                             />
@@ -337,7 +344,7 @@ export default function TotalSpentCard({
                             x={pt.x}
                             y={svgHeight - 4}
                             textAnchor="middle"
-                            className="text-[9px] font-mono fill-[#777777] font-bold"
+                            className="text-[9px] font-mono fill-[#93846b] font-bold"
                           >
                             D{dayNum}
                           </text>
@@ -348,23 +355,23 @@ export default function TotalSpentCard({
                     {/* Hover Tooltip */}
                     {hoveredPoint !== null && points[hoveredPoint] && (
                       <div
-                        className="absolute bg-[#1A1A1A] text-white text-[10px] font-mono p-2.5 rounded-xl border border-slate-800 shadow-xl pointer-events-none z-20"
+                        className="absolute bg-[#292722] text-white text-[10px] font-mono p-2.5 rounded-xl border border-slate-800 shadow-xl pointer-events-none z-20"
                         style={{
                           left: `${(points[hoveredPoint].x / svgWidth) * 100}%`,
                           top: `${(points[hoveredPoint].y / svgHeight) * 100 - 25}%`,
                           transform: "translateX(-50%) translateY(-50%)"
                         }}
                       >
-                        <p className="font-bold text-[#777777]">DAY {points[hoveredPoint].day} ({points[hoveredPoint].dateStr})</p>
-                        <p className="text-xs font-black text-[#00FF00] mt-0.5">
+                        <p className="font-bold text-[#93846b]">{t("day")} {points[hoveredPoint].day} ({points[hoveredPoint].dateStr})</p>
+                        <p className="text-xs font-black text-[#edbe67] mt-0.5">
                           THB {points[hoveredPoint].amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </p>
                         <p className="text-[9px] text-slate-300 mt-0.5">
-                          Daily: +{points[hoveredPoint].dayAmount.toLocaleString()}
+                          {t("ui_daily")}{points[hoveredPoint].dayAmount.toLocaleString()}
                         </p>
                         {showLastCycle && prevCumulativeData[hoveredPoint] && (
                           <p className="text-[9px] text-slate-400 mt-0.5 border-t border-slate-700 pt-0.5">
-                            Last cycle: THB {prevCumulativeData[hoveredPoint].amount.toLocaleString()}
+                            {t("ui_last_cycle_thb")} {prevCumulativeData[hoveredPoint].amount.toLocaleString()}
                           </p>
                         )}
                       </div>
@@ -372,22 +379,22 @@ export default function TotalSpentCard({
                   </div>
 
                   {/* Legend & Summary Footer */}
-                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-slate-200/80 text-[10px] font-mono text-[#777777]">
+                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-[#e1d7c5] text-[10px] font-mono text-[#93846b]">
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#1A1A1A] inline-block" />
-                        <span className="font-bold">Current Cycle</span>
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#292722] inline-block" />
+                        <span className="font-bold">{t("ui_current_cycle")}</span>
                       </div>
                       {showLastCycle && (
                         <div className="flex items-center gap-1.5">
-                          <span className="w-2.5 h-0.5 bg-slate-400 inline-block border-b border-dashed" />
-                          <span className="font-bold">Last Cycle</span>
+                          <span className="w-2.5 h-0.5 bg-[#b6a68e] inline-block border-b border-dashed" />
+                          <span className="font-bold">{t("ui_last_cycle")}</span>
                         </div>
                       )}
                     </div>
                     <div>
-                      <span>Today Cumulative: </span>
-                      <span className="font-black text-[#1A1A1A]">THB {amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                      <span>{t("ui_today_cumulative")} </span>
+                      <span className="font-black text-[#292722]">THB {amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                     </div>
                   </div>
                 </motion.div>
@@ -396,6 +403,7 @@ export default function TotalSpentCard({
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
     </div>
   );
 }

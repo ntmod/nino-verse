@@ -11,26 +11,26 @@
   --font-heading: "Archivo Black", sans-serif;
   --font-display: "Archivo Black", sans-serif;
 
-  /* RawBlock Color System */
-  --color-primary: #000000;
-  --color-primary-focus: #000000;
+  /* Warm paper and ink palette */
+  --color-primary: #e9a342;
+  --color-primary-focus: #c98a35;
   --color-primary-on-dark: #ffffff;
-  --color-ink: #000000;
-  --color-ink-muted-80: #333333;
-  --color-ink-muted-48: #777777;
+  --color-ink: #292722;
+  --color-ink-muted-80: #403b32;
+  --color-ink-muted-48: #7f715d;
   
   /* Canvas Surfaces */
-  --color-canvas-white: #ffffff;
-  --color-canvas-parchment: #ffffff; /* RawBlock is pure white */
-  --color-surface-pearl: #ffffff;
-  --color-surface-tile-1: #000000;
-  --color-surface-tile-2: #000000;
-  --color-surface-tile-3: #000000;
-  --color-surface-black: #000000;
+  --color-canvas-white: #fffdf5;
+  --color-canvas-parchment: #f5f0e5; /* Warm ledger paper */
+  --color-surface-pearl: #fffdf5;
+  --color-surface-tile-1: #f5eedf;
+  --color-surface-tile-2: #eee5d6;
+  --color-surface-tile-3: #e7dece;
+  --color-surface-black: #292722;
   
   /* Borders */
-  --color-divider-soft: #000000;
-  --color-hairline: #000000;
+  --color-divider-soft: #d9cebb;
+  --color-hairline: #e1d7c5;
 
   /* Radii scale -- RawBlock uses 0px exclusively */
   --radius-none: 0px;
@@ -72,24 +72,24 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --background: #f5f0e5;
+  --foreground: #292722;
+  --card: #fffdf5;
+  --card-foreground: #292722;
+  --popover: #fffdf5;
+  --popover-foreground: #292722;
+  --primary: #e9a342;
+  --primary-foreground: #372b1c;
+  --secondary: #f5eedf;
+  --secondary-foreground: #292722;
+  --muted: #eee5d6;
+  --muted-foreground: #7f715d;
+  --accent: #f5eedf;
+  --accent-foreground: #292722;
+  --destructive: #b0523b;
+  --border: #d9cebb;
+  --input: #d9cebb;
+  --ring: #b97423;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -141,8 +141,8 @@
 }
 
 body {
-  background: #ffffff;
-  color: #1d1d1f;
+  background: var(--background);
+  color: var(--foreground);
   font-family: 'Outfit', sans-serif;
   overflow-x: hidden;
   margin: 0;
@@ -150,21 +150,35 @@ body {
 
 
 
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
+/* Small paper-themed scrollbars for pages, dialogs and category lists. */
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+*::-webkit-scrollbar-track {
+  background: #f5eedf;
+  border-radius: 999px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #e2e8f0;
-  border-radius: 10px;
+*::-webkit-scrollbar-thumb {
+  background: #9b886b;
+  border-radius: 999px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #cbd5e1;
+*::-webkit-scrollbar-thumb:hover {
+  background: #b97423;
+}
+
+*::-webkit-scrollbar-corner {
+  background: #f5eedf;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #9b886b #f5eedf;
+  }
 }
 
 /* Dark mode styling overrides */
@@ -247,4 +261,45 @@ html.dark .bg-white\/80 {
 
 html.dark .shadow-xl {
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Keep form controls readable and prevent focus zoom on mobile. */
+@media (max-width: 639px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+  select, textarea {
+    font-size: 16px;
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+/* A folded paper corner; native radio selection flattens it again. */
+.sticker-corner {
+  position: absolute;
+  pointer-events: none;
+  right: -1px;
+  bottom: -1px;
+  width: 15px;
+  height: 15px;
+  border-radius: 2px 0 8px 0;
+  background: linear-gradient(135deg, #fffdf5 48%, #cfbea4 52%, #f5f0e5 65%);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  transform: scale(0);
+  transform-origin: bottom right;
+  transition: transform 180ms ease;
+}
+.category-sticker:focus-within .sticker-corner,
+.category-sticker:active .sticker-corner { transform: scale(1); }
+@media (hover: hover) {
+  .category-sticker:hover .sticker-corner { transform: scale(1); }
+}
+.category-sticker:has(input:checked) .sticker-corner { transform: scale(0); }
+@keyframes garden-firefly {
+  0%, 100% { opacity: 0.15; transform: translateY(0); }
+  50% { opacity: 0.9; transform: translateY(-7px); }
+}
+.garden-firefly { animation: garden-firefly 4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .sticker-corner { transition: none; }
+  .garden-firefly { animation: none; opacity: 0.65; }
 }

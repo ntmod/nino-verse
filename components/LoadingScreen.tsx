@@ -16,7 +16,7 @@ export default function LoadingScreen({ mode }: LoadingScreenProps) {
         duration: 0.8, 
         ease: [0.65, 0, 0.35, 1] 
       }}
-      className={`fixed inset-0 bg-white pointer-events-none ${
+      className={`fixed inset-0 bg-[#fffdf5] pointer-events-none ${
         isOut ? "z-[9999]" : "z-[1000]"
       }`}
     />

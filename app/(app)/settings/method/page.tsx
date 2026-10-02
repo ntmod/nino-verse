@@ -1,5 +1,7 @@
 
 "use client";
+import { useLanguage } from "@/lib/language-context";
+
 import LoadingScreen from "@/components/LoadingScreen";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -9,6 +11,7 @@ import { EmojiPicker } from "frimousse";
 import { useModal } from "@/lib/modal-context";
 
 export default function MethodSettings() {
+  const { t, language } = useLanguage();
   const router = useRouter();
   const { openGlobalModal } = useModal();
   const [showExitWipe, setShowExitWipe] = useState(false);
@@ -46,8 +49,8 @@ export default function MethodSettings() {
   const handleSaveMethod = async () => {
     if (!newMethod.name) return;
     try {
-      const url = editingMethod 
-        ? `/api/nori/method/${editingMethod._id}` 
+      const url = editingMethod
+        ? `/api/nori/method/${editingMethod._id}`
         : "/api/nori/method";
       const fetchMethod = editingMethod ? "PATCH" : "POST";
 
@@ -61,13 +64,13 @@ export default function MethodSettings() {
         setEditingMethod(null);
         setNewMethod({ name: "", icon: "💳", color: "#6366f1", desc: "" });
         fetchMethods();
-        
+
         openGlobalModal({
-          header: "Save Completed",
-          message: "The payment method has been saved successfully.",
+          header: t("ui_save_completed"),
+          message: t("ui_the_payment_method_has_been_saved_successfully"),
           type: "success",
           mainButton: {
-            label: "Close",
+            label: t("close"),
             onClick: () => {}
           }
         });
@@ -76,14 +79,14 @@ export default function MethodSettings() {
       console.error("Failed to save method:", err);
     }
   };
- 
+
   const handleDeleteMethod = (id: string) => {
     openGlobalModal({
-      header: "Delete Method?",
-      message: "Are you sure you want to delete this payment method? This action cannot be undone.",
+      header: t("ui_delete_method"),
+      message: t("ui_are_you_sure_you_want_to_delete_this_payment_method_this_action_cannot_be_undone"),
       type: "danger",
       mainButton: {
-        label: "Yes, Delete",
+        label: t("ui_yes_delete"),
         onClick: async () => {
           try {
             const res = await fetch(`/api/nori/method/${id}`, {
@@ -93,11 +96,11 @@ export default function MethodSettings() {
               fetchMethods();
               setTimeout(() => {
                 openGlobalModal({
-                  header: "Delete Completed",
-                  message: "The payment method has been removed successfully.",
+                  header: t("ui_delete_completed"),
+                  message: t("ui_the_payment_method_has_been_removed_successfully"),
                   type: "success",
                   mainButton: {
-                    label: "Close",
+                    label: t("close"),
                     onClick: () => {}
                   }
                 });
@@ -110,7 +113,7 @@ export default function MethodSettings() {
         color: "bg-rose-500 hover:bg-rose-600 text-white"
       },
       subButton: {
-        label: "Cancel",
+        label: t("cancel"),
         onClick: () => {}
       }
     });
@@ -131,8 +134,8 @@ export default function MethodSettings() {
       await fetch("/api/nori/method", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          orders: newMethods.map((m, i) => ({ id: m._id, order: i })) 
+        body: JSON.stringify({
+          orders: newMethods.map((m, i) => ({ id: m._id, order: i }))
         }),
       });
     } catch (err) {
@@ -148,30 +151,30 @@ export default function MethodSettings() {
   };
 
   return (
-    <main className="relative min-h-screen bg-[#F8F9FA] flex flex-col items-center p-8 pt-24 pb-20">
+    <main className="relative min-h-screen bg-[#f5f0e5] flex flex-col items-center px-4 sm:px-6 py-8 pt-24 pb-28">
       <LoadingScreen mode="in" />
       {showExitWipe && <LoadingScreen mode="out" />}
 
       <div className="max-w-2xl w-full space-y-8">
-        <header className="flex items-center justify-between mb-12">
-          <div className="flex items-center gap-4">
-            <button 
+        <header className="flex flex-wrap gap-4 items-center justify-between mb-12">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+            <button aria-label={t("back")}
               onClick={handleBack}
-              className="w-10 h-10 rounded-xl bg-white hover:bg-slate-50/70 transition-colors cursor-pointer"
+              className="w-11 h-11 shrink-0 rounded-xl bg-[#fffdf5] hover:bg-[#f5eedf]/70 transition-colors cursor-pointer"
             >
-              <ArrowLeft className="w-5 h-5 text-[#777777]" />
+              <ArrowLeft className="w-5 h-5 text-[#7f715d]" />
             </button>
             <div>
-              <h1 className="text-2xl font-black text-[#000000] italic tracking-tighter uppercase">Payment Methods</h1>
-              <p className="text-xs font-bold text-[#777777] uppercase tracking-widest">Manage your cards and cash wallets</p>
+              <h1 className="text-2xl font-black text-[#292722] italic tracking-tighter uppercase">{t("settings_methods")}</h1>
+              <p className="text-xs font-bold text-[#7f715d] uppercase tracking-widest">{t("ui_manage_your_cards_and_cash_wallets")}</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 text-white text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-none shadow-black/10 cursor-pointer"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#e9a342] text-[#372b1c] text-xs font-black uppercase tracking-widest hover:bg-[#403b32] transition-all shadow-none shadow-black/10 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            Add Method
+            {t("ui_add_method")}
           </button>
         </header>
 
@@ -184,53 +187,53 @@ export default function MethodSettings() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="p-4 md:p-6 rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] flex items-center justify-between group select-none"
+                className="p-4 md:p-4 sm:p-6 rounded-none bg-[#fffdf5] shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] flex flex-wrap gap-3 items-center justify-between group select-none"
               >
-                <div className="flex items-center gap-4">
+                <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                   <div className="flex flex-col gap-0.5 -ml-1">
-                    <button 
+                    <button aria-label={t("move_up")}
                       onClick={() => handleMove(method, "up")}
-                      className="p-1 rounded hover:bg-[#ffffff] text-slate-300 hover:text-[#333333] transition-colors cursor-pointer"
+                      className="p-1 rounded hover:bg-[#fffdf5] text-[#b6a68e] hover:text-[#403b32] transition-colors cursor-pointer"
                     >
                       <ChevronUp className="w-4 h-4" />
                     </button>
-                    <button 
+                    <button aria-label={t("move_down")}
                       onClick={() => handleMove(method, "down")}
-                      className="p-1 rounded hover:bg-[#ffffff] text-slate-300 hover:text-[#333333] transition-colors cursor-pointer"
+                      className="p-1 rounded hover:bg-[#fffdf5] text-[#b6a68e] hover:text-[#403b32] transition-colors cursor-pointer"
                     >
                       <ChevronDown className="w-4 h-4" />
                     </button>
                   </div>
-                  <div className="flex items-center gap-6">
-                    <div 
-                      className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl"
+                  <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-6">
+                    <div
+                      className="w-10 h-10 sm:w-14 sm:h-14 shrink-0 rounded-xl flex items-center justify-center text-2xl"
                       style={{ backgroundColor: `${method.color}10` }}
                     >
                       {method.icon}
                     </div>
-                    <div>
-                      <h3 className="text-base font-black text-[#000000] italic uppercase">{method.name}</h3>
-                      <p className="text-[10px] font-bold text-[#777777] uppercase tracking-widest mt-0.5">{method.desc}</p>
+                    <div className="min-w-0">
+                      <h3 className="break-words text-base font-black text-[#292722] italic uppercase">{method.name}</h3>
+                      <p className="text-[10px] font-bold text-[#7f715d] uppercase tracking-widest mt-0.5">{method.desc}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button 
+                  <button aria-label={t("edit")}
                     onClick={() => {
                       setEditingMethod(method);
                       setNewMethod({ name: method.name, icon: method.icon, color: method.color, desc: method.desc });
                       setIsModalOpen(true);
                     }}
-                    className="w-10 h-10 rounded-xl bg-white hover:bg-slate-50/70 transition-all group/btn cursor-pointer"
+                    className="w-11 h-11 shrink-0 rounded-xl bg-[#fffdf5] hover:bg-[#f5eedf]/70 transition-all group/btn cursor-pointer"
                   >
-                    <Pencil className="w-4 h-4 text-[#777777] group-hover/btn:text-[#FF9D00]" />
+                    <Pencil className="w-4 h-4 text-[#7f715d] group-hover/btn:text-[#b97423]" />
                   </button>
-                  <button 
+                  <button aria-label={t("delete")}
                     onClick={() => handleDeleteMethod(method._id)}
-                    className="w-10 h-10 rounded-xl bg-white hover:bg-rose-50 transition-all group/btn cursor-pointer"
+                    className="w-11 h-11 shrink-0 rounded-xl bg-[#fffdf5] hover:bg-rose-50 transition-all group/btn cursor-pointer"
                   >
-                    <Trash2 className="w-4 h-4 text-[#777777] group-hover/btn:text-rose-500" />
+                    <Trash2 className="w-4 h-4 text-[#7f715d] group-hover/btn:text-rose-500" />
                   </button>
                 </div>
               </motion.div>
@@ -242,7 +245,7 @@ export default function MethodSettings() {
       {/* NEW/EDIT METHOD MODAL */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[20000] flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -252,25 +255,25 @@ export default function MethodSettings() {
                 setEditingMethod(null);
                 setNewMethod({ name: "", icon: "💳", color: "#6366f1", desc: "" });
               }}
-              className="absolute inset-0 bg-black/20 backdrop-blur-md"
+              className="absolute inset-0 bg-[#292722]/20 backdrop-blur-md"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-lg bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden"
+              className="max-h-[85dvh] relative w-full max-w-lg bg-[#fffdf5] rounded-none shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] overflow-y-auto"
             >
-              <div className="p-8">
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-xl font-black text-[#000000] italic uppercase tracking-tighter">
-                    {editingMethod ? "Edit Method" : "Add Method"}
+              <div className="p-4 sm:p-8">
+                <div className="flex flex-wrap gap-4 items-center justify-between mb-8">
+                  <h2 className="text-xl font-black text-[#292722] italic uppercase tracking-tighter">
+                    {editingMethod ? t("ui_edit_method") : t("ui_add_method")}
                   </h2>
-                  <button onClick={() => {
+                  <button aria-label={t("close")} onClick={() => {
                     setIsModalOpen(false);
                     setEditingMethod(null);
                     setNewMethod({ name: "", icon: "💳", color: "#6366f1", desc: "" });
-                  }} className="w-10 h-10 rounded-none bg-[#ffffff] flex items-center justify-center hover:bg-[#ffffff] transition-colors cursor-pointer">
-                    <X className="w-5 h-5 text-[#777777]" />
+                  }} className="w-11 h-11 shrink-0 rounded-none bg-[#fffdf5] flex items-center justify-center hover:bg-[#fffdf5] transition-colors cursor-pointer">
+                    <X className="w-5 h-5 text-[#7f715d]" />
                   </button>
                 </div>
 
@@ -278,35 +281,36 @@ export default function MethodSettings() {
                   {/* ICON PICKER */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between ml-1">
-                      <label className="text-[10px] font-black text-[#777777] uppercase tracking-widest">Select Icon</label>
-                      <div className="rounded-none ring-2 ring-slate-100 w-14 h-14 flex items-center justify-center text-[2rem] bg-[#ffffff]">{newMethod.icon}</div>
+                      <label className="text-[10px] font-black text-[#7f715d] uppercase tracking-widest">{t("ui_select_icon")}</label>
+                      <div className="rounded-none ring-2 ring-[#d9cebb] w-14 h-14 flex items-center justify-center text-[2rem] bg-[#fffdf5]">{newMethod.icon}</div>
                     </div>
 
                     <EmojiPicker.Root
+                      locale={language}
                       columns={pickerColumns}
                       onEmojiSelect={(emoji) => setNewMethod({ ...newMethod, icon: emoji.emoji })}
                       className="flex flex-col gap-4"
                     >
                       <div className="relative">
-                        <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#777777]" />
+                        <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7f715d]" />
                         <EmojiPicker.Search
-                          placeholder="Search emojis..."
-                          className="w-full pl-11 pr-6 py-3 rounded-xl bg-slate-50/70 focus:outline-none focus:ring-2 focus:ring-[#FF9D00]/20 focus:bg-white transition-all text-xs font-bold text-[#000000]"
+                          placeholder={t("ui_search_emojis")}
+                          className="w-full pl-11 pr-6 py-3 rounded-xl bg-[#f5eedf]/70 focus:outline-none focus:ring-2 focus:ring-[#b97423]/20 focus:bg-[#fffdf5] transition-all text-xs font-bold text-[#292722]"
                         />
                       </div>
 
-                      <EmojiPicker.Viewport className="w-full h-48 pr-2 custom-scrollbar bg-white/50 rounded-xl p-2">
+                      <EmojiPicker.Viewport className="w-full h-48 pr-2 custom-scrollbar bg-[#fffdf5]/50 rounded-xl p-2">
                         <EmojiPicker.List
                           components={{
                             CategoryHeader: ({ category, ...props }) => (
-                              <div {...props} className="text-[9px] font-black text-[#777777] uppercase py-4 px-2 bg-[#ffffff]/80 backdrop-blur-sm sticky top-0 z-10 -mx-2">
+                              <div {...props} className="text-[9px] font-black text-[#7f715d] uppercase py-4 px-2 bg-[#fffdf5]/80 backdrop-blur-sm sticky top-0 z-10 -mx-2">
                                 {category.label}
                               </div>
                             ),
                             Emoji: ({ emoji, ...props }) => (
                               <button
                                 {...props}
-                                className={`my-2 w-10 h-10 aspect-square rounded-none flex items-center justify-center text-2xl transition-all hover:bg-white ${newMethod.icon === emoji.emoji ? "bg-white ring-2 ring-[#FF9D00]/20 scale-110" : "hover:scale-120"}`}
+                                className={`my-2 w-8 h-8 sm:w-10 sm:h-10 aspect-square rounded-none flex items-center justify-center text-2xl transition-all hover:bg-[#fffdf5] ${newMethod.icon === emoji.emoji ? "bg-[#fffdf5] ring-2 ring-[#b97423]/20 scale-110" : "hover:scale-120"}`}
                               >
                                 {emoji.emoji}
                               </button>
@@ -323,34 +327,34 @@ export default function MethodSettings() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[#777777] uppercase tracking-widest ml-1">Method Name</label>
+                    <label className="text-[10px] font-black text-[#7f715d] uppercase tracking-widest ml-1">{t("ui_method_name")}</label>
                     <input
                       type="text"
-                      placeholder="e.g. K-Bank Credit"
+                      placeholder={t("ui_e_g_k_bank_credit")}
                       value={newMethod.name}
                       onChange={(e) => setNewMethod({ ...newMethod, name: e.target.value })}
-                      className="w-full px-6 py-4 rounded-xl bg-slate-50/70 focus:outline-none focus:ring-2 focus:ring-[#FF9D00]/20 focus:bg-white transition-all text-sm font-bold text-[#000000]"
+                      className="w-full px-6 py-4 rounded-xl bg-[#f5eedf]/70 focus:outline-none focus:ring-2 focus:ring-[#b97423]/20 focus:bg-[#fffdf5] transition-all text-sm font-bold text-[#292722]"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[#777777] uppercase tracking-widest ml-1">Description</label>
+                    <label className="text-[10px] font-black text-[#7f715d] uppercase tracking-widest ml-1">{t("ui_description")}</label>
                     <input
                       type="text"
-                      placeholder="e.g. **** 4589"
+                      placeholder="•••• 4589"
                       value={newMethod.desc}
                       onChange={(e) => setNewMethod({ ...newMethod, desc: e.target.value })}
-                      className="w-full px-6 py-4 rounded-xl bg-slate-50/70 focus:outline-none focus:ring-2 focus:ring-[#FF9D00]/20 focus:bg-white transition-all text-sm font-bold text-[#000000]"
+                      className="w-full px-6 py-4 rounded-xl bg-[#f5eedf]/70 focus:outline-none focus:ring-2 focus:ring-[#b97423]/20 focus:bg-[#fffdf5] transition-all text-sm font-bold text-[#292722]"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[#777777] uppercase tracking-widest ml-1">Color Theme</label>
+                    <label className="text-[10px] font-black text-[#7f715d] uppercase tracking-widest ml-1">{t("ui_color_theme")}</label>
                     <input
                       type="color"
                       value={newMethod.color}
                       onChange={(e) => setNewMethod({ ...newMethod, color: e.target.value })}
-                      className="w-full h-[54px] p-2 rounded-xl bg-slate-50/70 cursor-pointer"
+                      className="w-full h-[54px] p-2 rounded-xl bg-[#f5eedf]/70 cursor-pointer"
                     />
                   </div>
                 </div>
@@ -362,15 +366,15 @@ export default function MethodSettings() {
                       setEditingMethod(null);
                       setNewMethod({ name: "", icon: "💳", color: "#6366f1", desc: "" });
                     }}
-                    className="py-4 rounded-xl bg-slate-50/70 text-xs font-black text-[#777777] uppercase tracking-widest hover:bg-slate-50/70 transition-all cursor-pointer"
+                    className="py-4 rounded-xl bg-[#f5eedf]/70 text-xs font-black text-[#7f715d] uppercase tracking-widest hover:bg-[#f5eedf]/70 transition-all cursor-pointer"
                   >
-                    Cancel
+                    {t("cancel")}
                   </button>
                   <button
                     onClick={handleSaveMethod}
-                    className="py-4 rounded-xl bg-slate-900 text-white text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-none shadow-black/10 cursor-pointer"
+                    className="py-4 rounded-xl bg-[#e9a342] text-[#372b1c] text-xs font-black uppercase tracking-widest hover:bg-[#403b32] transition-all shadow-none shadow-black/10 cursor-pointer"
                   >
-                    {editingMethod ? "Update Method" : "Save Method"}
+                    {editingMethod ? t("ui_update_method") : t("ui_save_method")}
                   </button>
                 </div>
               </div>

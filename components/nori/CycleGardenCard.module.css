@@ -1,0 +1,19 @@
+@keyframes garden-gust {
+  0%, 34%, 72%, 100% { rotate: 0deg; }
+  45% { rotate: var(--garden-sway); }
+  57% { rotate: calc(var(--garden-sway) * -0.6); }
+  65% { rotate: calc(var(--garden-sway) * 0.25); }
+}
+.bush :global(.garden-wind) {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: garden-gust 9s ease-in-out infinite;
+}
+.bush :global(.garden-plant), .bush :global(.garden-leaves), .bush :global(.garden-bloom) {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.bush :global(.garden-bloom) { transform-origin: center; }
+@media (prefers-reduced-motion: reduce) {
+  .bush :global(.garden-wind) { animation: none; }
+}

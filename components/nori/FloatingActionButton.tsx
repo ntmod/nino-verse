@@ -1,5 +1,7 @@
 'use client'
 
+import { useLanguage } from "@/lib/language-context";
+
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Plus, Car, Utensils, Pencil } from "lucide-react";
@@ -11,6 +13,7 @@ interface FloatingActionButtonProps {
 }
 
 export default function FloatingActionButton({ onSuccess }: FloatingActionButtonProps) {
+  const { t } = useLanguage();
   const { openExpenseModal } = useModal();
   const [isOpen, setIsOpen] = useState(false);
   const reducedMotion = useReducedMotion();
@@ -63,16 +66,16 @@ export default function FloatingActionButton({ onSuccess }: FloatingActionButton
               transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 24, delay: 0.03 }}
               className="pointer-events-auto absolute bottom-0 right-0 group"
             >
-              <span className="pointer-events-none absolute right-full top-1/2 mr-3 -translate-y-1/2 whitespace-nowrap bg-white text-slate-700 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1.5 rounded-lg border border-slate-100 shadow-sm opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
-                Quick Food
+              <span className="pointer-events-none absolute right-full top-1/2 mr-3 -translate-y-1/2 whitespace-nowrap bg-[#fffdf5] text-[#635744] text-[10px] font-bold uppercase tracking-wider px-2.5 py-1.5 rounded-lg border border-[#e1d7c5] shadow-sm opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
+                {t("ui_quick_food")}
               </span>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleAction("Food & Drink")}
-                className="w-12 h-12 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-[0_4px_15px_rgba(16,185,129,0.3)] cursor-pointer hover:bg-emerald-600 transition-colors"
-                aria-label="Quick food expense"
-                title="Quick food expense"
+                className="w-12 h-12 bg-[#508069] text-white rounded-full flex items-center justify-center shadow-[0_4px_15px_rgba(16,185,129,0.3)] cursor-pointer hover:bg-[#416b54] transition-colors"
+                aria-label={t("ui_quick_food_expense")}
+                title={t("ui_quick_food_expense")}
               >
                 <Utensils className="w-4.5 h-4.5 md:w-5.5 md:h-5.5" />
               </motion.button>
@@ -86,16 +89,16 @@ export default function FloatingActionButton({ onSuccess }: FloatingActionButton
               transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 24, delay: 0.08 }}
               className="pointer-events-auto absolute bottom-0 right-0 group"
             >
-              <span className="pointer-events-none absolute right-full top-1/2 mr-3 -translate-y-1/2 whitespace-nowrap bg-white text-slate-700 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1.5 rounded-lg border border-slate-100 shadow-sm opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
-                Quick Transport
+              <span className="pointer-events-none absolute right-full top-1/2 mr-3 -translate-y-1/2 whitespace-nowrap bg-[#fffdf5] text-[#635744] text-[10px] font-bold uppercase tracking-wider px-2.5 py-1.5 rounded-lg border border-[#e1d7c5] shadow-sm opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
+                {t("ui_quick_transport")}
               </span>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleAction("Transport")}
-                className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-[0_4px_15px_rgba(59,130,246,0.3)] cursor-pointer hover:bg-blue-600 transition-colors"
-                aria-label="Quick transport expense"
-                title="Quick transport expense"
+                className="w-12 h-12 bg-[#648295] text-white rounded-full flex items-center justify-center shadow-[0_4px_15px_rgba(59,130,246,0.3)] cursor-pointer hover:bg-[#4e6878] transition-colors"
+                aria-label={t("ui_quick_transport_expense")}
+                title={t("ui_quick_transport_expense")}
               >
                 <Car className="w-4.5 h-4.5 md:w-5.5 md:h-5.5" />
               </motion.button>
@@ -109,16 +112,16 @@ export default function FloatingActionButton({ onSuccess }: FloatingActionButton
               transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 24, delay: 0.13 }}
               className="pointer-events-auto absolute bottom-0 right-0 group"
             >
-              <span className="pointer-events-none absolute right-full top-1/2 mr-3 -translate-y-1/2 whitespace-nowrap bg-white text-slate-700 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1.5 rounded-lg border border-slate-100 shadow-sm opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
-                Create New Expense
+              <span className="pointer-events-none absolute right-full top-1/2 mr-3 -translate-y-1/2 whitespace-nowrap bg-[#fffdf5] text-[#635744] text-[10px] font-bold uppercase tracking-wider px-2.5 py-1.5 rounded-lg border border-[#e1d7c5] shadow-sm opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
+                {t("ui_create_new_expense")}
               </span>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleAction()}
-                className="w-12 h-12 bg-[#FF9D00] text-white rounded-full flex items-center justify-center shadow-[0_4px_15px_rgba(255,157,0,0.3)] cursor-pointer hover:bg-[#E08B00] transition-colors"
-                aria-label="Create new expense"
-                title="Create new expense"
+                className="w-12 h-12 bg-[#e9a342] text-white rounded-full flex items-center justify-center shadow-[0_4px_15px_rgba(255,157,0,0.3)] cursor-pointer hover:bg-[#c98a35] transition-colors"
+                aria-label={t("ui_create_new_expense")}
+                title={t("ui_create_new_expense")}
               >
                 <Pencil className="w-4.5 h-4.5 md:w-5.5 md:h-5.5" />
               </motion.button>
@@ -134,9 +137,9 @@ export default function FloatingActionButton({ onSuccess }: FloatingActionButton
         transition={{ duration: reducedMotion ? 0 : 0.2 }}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        aria-label={isOpen ? "Close expense actions" : "Create expense"}
+        aria-label={isOpen ? t("ui_close_expense_actions") : t("ui_create_expense")}
         aria-expanded={isOpen}
-        className="relative w-12 h-12 bg-[#FF9D00] text-white rounded-full flex items-center justify-center shadow-[0_8px_25px_rgba(255,157,0,0.3)] cursor-pointer z-50 hover:bg-[#E08B00] transition-colors"
+        className="relative w-12 h-12 bg-[#e9a342] text-white rounded-full flex items-center justify-center shadow-[0_8px_25px_rgba(255,157,0,0.3)] cursor-pointer z-50 hover:bg-[#c98a35] transition-colors"
       >
         <Plus className="w-5 h-5" />
       </motion.button>

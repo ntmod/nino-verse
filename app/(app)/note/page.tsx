@@ -1,18 +1,23 @@
 'use client'
 
-import { useState, useMemo, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Search, 
-  Calendar, 
-  CreditCard, 
-  ChevronDown, 
+import { useLanguage } from "@/lib/language-context";
+
+import { useState, useMemo, useEffect, useRef } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import {
+  Search,
+  Calendar,
+  CreditCard,
+  ChevronDown,
   X,
   ArrowLeft,
   Pencil,
-  Trash2
+  Trash2,
+  MoreVertical
 } from "lucide-react";
 import Link from "next/link";
+import { DropdownMenu } from "radix-ui";
+import styles from "./actions.module.css";
 import LoadingScreen from "@/components/LoadingScreen";
 import FloatingActionButton from "@/components/nori/FloatingActionButton";
 import { useModal } from "@/lib/modal-context";
@@ -25,15 +30,19 @@ import { paymentService } from "@/lib/services/paymentService";
 const INITIAL_TRANSACTIONS: Transaction[] = [];
 
 export default function NotePage() {
+  const { t, language } = useLanguage();
+  const reducedMotion = useReducedMotion();
   const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
   const [categories, setCategories] = useState<any[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedPayment, setSelectedPayment] = useState("All");
-  const [dateFilter, setDateFilter] = useState(""); 
-  
+  const [dateFilter, setDateFilter] = useState("");
+
   const { openExpenseModal, openGlobalModal } = useModal();
+
+  const menuActionSelected = useRef(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,7 +59,7 @@ export default function NotePage() {
             displayDate: new Date(tx.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })
           })));
         }
-        
+
         if (Array.isArray(catData)) setCategories(catData);
         if (Array.isArray(payData)) setPaymentMethods(payData);
       } catch (error) {
@@ -64,17 +73,17 @@ export default function NotePage() {
     return transactions.filter((tx) => {
       const matchesSearch = tx.name.toLowerCase().includes(searchQuery.toLowerCase());
       const selectedCatObj = categories.find(c => c._id === selectedCategory || c.name === selectedCategory);
-      const matchesCategory = selectedCategory === "All" || 
-        tx.category === selectedCategory || 
+      const matchesCategory = selectedCategory === "All" ||
+        tx.category === selectedCategory ||
         (selectedCatObj && (tx.category === selectedCatObj._id || tx.category === selectedCatObj.name));
       const selectedPayObj = paymentMethods.find(p => p._id === selectedPayment || p.name === selectedPayment);
-      const matchesPayment = selectedPayment === "All" || 
+      const matchesPayment = selectedPayment === "All" ||
         tx.paymentMethod === selectedPayment ||
         (selectedPayObj && (tx.paymentMethod === selectedPayObj._id || tx.paymentMethod === selectedPayObj.name));
-      
+
       const txDateStr = tx.date ? new Date(tx.date).toISOString().split('T')[0] : "";
       const matchesDate = !dateFilter || txDateStr === dateFilter;
-      
+
       return matchesSearch && matchesCategory && matchesPayment && matchesDate;
     });
   }, [transactions, searchQuery, selectedCategory, selectedPayment, dateFilter, categories, paymentMethods]);
@@ -94,13 +103,13 @@ export default function NotePage() {
 
       let groupKey = "";
       if (dateObj.toDateString() === today.toDateString()) {
-        groupKey = "Today";
+        groupKey = t("today");
       } else if (dateObj.toDateString() === yesterday.toDateString()) {
-        groupKey = "Yesterday";
+        groupKey = t("yesterday");
       } else {
-        groupKey = dateObj.toLocaleDateString('en-US', { 
-          weekday: 'long', 
-          month: 'short', 
+        groupKey = dateObj.toLocaleDateString(language === 'th' ? 'th-TH' : 'en-US', {
+          weekday: 'long',
+          month: 'short',
           day: 'numeric',
           year: dateObj.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
         });
@@ -113,7 +122,7 @@ export default function NotePage() {
     });
 
     return Object.entries(groups);
-  }, [filteredTransactions]);
+  }, [filteredTransactions, language, t]);
 
   const resetFilters = () => {
     setSearchQuery("");
@@ -127,37 +136,37 @@ export default function NotePage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#f5f5f7] flex flex-col items-center p-0 md:p-6 pt-16 md:pt-24 pb-20">
+    <main className="min-h-screen bg-[#f5f0e5] flex flex-col items-center p-0 md:p-6 pt-16 md:pt-24 pb-20">
       <LoadingScreen mode="in" />
 
       <div className="w-full max-w-2xl px-4 md:px-0 space-y-6 md:space-y-8">
         {/* Compact Header */}
         <div className="flex items-center justify-between">
           <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
-            <Link href="/dashboard" className="flex items-center gap-1.5 text-gray-400 hover:text-[#1A1A1A] transition-colors mb-2 text-[10px] font-bold uppercase tracking-widest font-mono">
+            <Link href="/dashboard" className="flex items-center gap-1.5 text-[#7f715d] hover:text-[#292722] transition-colors mb-2 text-[10px] font-bold uppercase tracking-widest font-mono">
               <ArrowLeft className="w-3 h-3" />
-              Back to Dashboard
+              {t("ui_back_to_dashboard")}
             </Link>
-            <h1 className="text-2xl md:text-3xl font-black text-[#1A1A1A] tracking-tight uppercase font-mono">
-              Notes<span className="text-gray-300">/</span><span className="text-[#FF9D00]">Expense</span>
+            <h1 className="text-2xl md:text-3xl font-black text-[#292722] tracking-tight uppercase font-mono">
+              {t("nav_notes")}<span className="text-[#93846b]">/</span><span className="text-[#b97423]">{t("ui_expense")}</span>
             </h1>
           </motion.div>
-          
+
           <div className="text-right font-mono">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{filteredTransactions.length} Items</p>
+            <p className="text-[10px] font-bold text-[#7f715d] uppercase tracking-widest">{filteredTransactions.length} {t("ui_items")}</p>
           </div>
         </div>
 
         {/* Minimal Filters Card in Floating Style */}
-        <div className="bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100/80 rounded-2xl p-4 md:p-6 space-y-4">
+        <div className="bg-[#fffdf5] shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] border border-[#e1d7c5]/80 rounded-none p-4 md:p-6 space-y-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#93846b]" />
             <input
               type="text"
-              placeholder="Search transactions..."
+              placeholder={t("ui_search_transactions")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-slate-50/70 border border-slate-100 rounded-xl text-sm font-bold text-[#1A1A1A] focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-slate-100/50 transition-all placeholder:text-slate-400"
+              className="w-full pl-10 pr-4 py-3 bg-[#f5eedf]/70 border border-[#e1d7c5] rounded-xl text-sm font-bold text-[#292722] focus:bg-[#fffdf5] focus:border-[#d9cebb] focus:ring-4 focus:ring-[#d9cebb]/50 transition-all placeholder:text-[#93846b]"
             />
           </div>
 
@@ -173,45 +182,45 @@ export default function NotePage() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full pl-9 pr-8 py-2.5 bg-slate-50/70 border border-slate-100 rounded-xl text-[11px] font-bold text-slate-600 appearance-none focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-slate-100/50 transition-all"
+                className="w-full pl-9 pr-8 py-2.5 bg-[#f5eedf]/70 border border-[#e1d7c5] rounded-xl text-[11px] font-bold text-[#635744] appearance-none focus:bg-[#fffdf5] focus:border-[#d9cebb] focus:ring-4 focus:ring-[#d9cebb]/50 transition-all"
               >
-                <option value="All">All Categories</option>
+                <option value="All">{t("ui_all_categories")}</option>
                 {categories.map(cat => <option key={cat._id} value={cat._id}>{cat.name}</option>)}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#93846b] pointer-events-none" />
             </div>
 
             <div className="relative">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                <CreditCard className="w-3.5 h-3.5 text-slate-400" />
+                <CreditCard className="w-3.5 h-3.5 text-[#93846b]" />
               </div>
               <select
                 value={selectedPayment}
                 onChange={(e) => setSelectedPayment(e.target.value)}
-                className="w-full pl-9 pr-8 py-2.5 bg-slate-50/70 border border-slate-100 rounded-xl text-[11px] font-bold text-slate-600 appearance-none focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-slate-100/50 transition-all"
+                className="w-full pl-9 pr-8 py-2.5 bg-[#f5eedf]/70 border border-[#e1d7c5] rounded-xl text-[11px] font-bold text-[#635744] appearance-none focus:bg-[#fffdf5] focus:border-[#d9cebb] focus:ring-4 focus:ring-[#d9cebb]/50 transition-all"
               >
-                <option value="All">All Payments</option>
+                <option value="All">{t("ui_all_payments")}</option>
                 {paymentMethods.map(pm => <option key={pm._id} value={pm._id}>{pm.name}</option>)}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#93846b] pointer-events-none" />
             </div>
 
             <div className="relative col-span-2 md:col-span-1">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                <Calendar className="w-3.5 h-3.5 text-[#93846b]" />
               </div>
               <input
                 type="date"
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
-                className="w-full pl-9 pr-3 py-2.5 bg-slate-50/70 border border-slate-100 rounded-xl text-[11px] font-bold text-slate-600 focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-slate-100/50 transition-all font-mono"
+                className="w-full pl-9 pr-3 py-2.5 bg-[#f5eedf]/70 border border-[#e1d7c5] rounded-xl text-[11px] font-bold text-[#635744] focus:bg-[#fffdf5] focus:border-[#d9cebb] focus:ring-4 focus:ring-[#d9cebb]/50 transition-all font-mono"
               />
             </div>
           </div>
 
           {(searchQuery || selectedCategory !== "All" || selectedPayment !== "All" || dateFilter) && (
-            <button onClick={resetFilters} className="text-[10px] font-bold text-[#FF9D00] hover:text-[#E08B00] uppercase tracking-widest flex items-center gap-1 cursor-pointer transition-colors font-mono">
-              <X className="w-3 h-3" /> Reset Filters
+            <button onClick={resetFilters} className="text-[10px] font-bold text-[#b97423] hover:text-[#9d601c] uppercase tracking-widest flex items-center gap-1 cursor-pointer transition-colors font-mono">
+              <X className="w-3 h-3" /> {t("ui_reset_filters")}
             </button>
           )}
         </div>
@@ -221,29 +230,30 @@ export default function NotePage() {
           <AnimatePresence mode="popLayout">
             {groupedTransactions.length > 0 ? (
               groupedTransactions.map(([dateGroup, txList]) => (
-                <div key={dateGroup} className="space-y-2">
+                <motion.div key={dateGroup} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reducedMotion ? 0 : 0.18 }} className="relative space-y-2">
                   {/* Sticky Date Header */}
-                  <div className="sticky top-[56px] md:top-[72px] bg-[#f5f5f7]/95 backdrop-blur-md py-2.5 z-10 flex items-center justify-between border-b border-slate-200/60 font-mono">
-                    <span className="text-[10px] font-black text-[#777777] uppercase tracking-[0.15em]">{dateGroup}</span>
+                  <div className="sticky top-[56px] md:top-[72px] bg-[#f5f0e5]/95 backdrop-blur-md py-2.5 z-10 flex items-center justify-between border-b border-[#d9cebb]/60 font-mono">
+                    <span className="text-[10px] font-black text-[#7f715d] uppercase tracking-[0.15em]">{dateGroup}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-bold text-[#777777] uppercase tracking-wider bg-white border border-slate-100 rounded-md px-2 py-0.5 shadow-sm">
-                        {txList.length} {txList.length === 1 ? 'record' : 'records'}
+                      <span className="text-[9px] font-bold text-[#7f715d] uppercase tracking-wider bg-[#fffdf5] border border-[#e1d7c5] rounded-md px-2 py-0.5 shadow-sm">
+                        {txList.length} {t("ui_items")}
                       </span>
                       <button
-                        title={`Add expense for ${dateGroup}`}
+                        title={`${t("add_expense")} · ${dateGroup}`}
                         onClick={() => {
                           const dateObj = txList[0]?.date ? new Date(txList[0].date) : new Date();
                           openExpenseModal(handleAddSuccess, { date: dateObj });
                         }}
-                        className="w-6 h-6 rounded-md bg-white border border-slate-200 text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+                        className="w-11 h-11 shrink-0 rounded-md bg-[#fffdf5] border border-[#d9cebb] text-[#292722] hover:bg-[#292722] hover:text-white transition-all flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
                       >
                         <span className="text-xs font-bold leading-none">+</span>
                       </button>
                     </div>
                   </div>
-                  
+
                   {/* Inner list of items */}
-                  <div className="divide-y divide-slate-100">
+                  <div className="relative divide-y divide-[#e1d7c5]">
+                    <AnimatePresence mode="popLayout">
                     {txList.map((tx) => {
                       const categoryData = categories.find(c => c._id === tx.category || c.name === tx.category);
                       const categoryIcon = categoryData?.icon || "🏷️";
@@ -254,34 +264,35 @@ export default function NotePage() {
                         <motion.div
                           key={tx._id}
                           layout
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="flex items-center justify-between py-4 group cursor-pointer"
+                          initial={{ opacity: 0, x: reducedMotion ? 0 : -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: reducedMotion ? 0 : 8 }}
+                          transition={{ duration: reducedMotion ? 0 : 0.18, layout: { duration: reducedMotion ? 0 : 0.25 } }}
+                          className="relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 py-4 group sm:gap-3"
                         >
-                          <div className="flex items-center gap-3">
-                            <span className="w-3 shrink-0 flex items-center justify-center">
-                              <span className="text-[10px] text-[#1A1A1A] font-black opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                            <span className="hidden w-3 shrink-0 items-center justify-center sm:flex">
+                              <span className="text-[10px] text-[#292722] font-black opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                 ▶
                               </span>
                             </span>
-                            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center border border-slate-200 shadow-sm group-hover:bg-slate-50 transition-all duration-300 shrink-0">
+                            <div className="w-10 h-10 rounded-xl bg-[#fffdf5] flex items-center justify-center border border-[#d9cebb] shadow-sm group-hover:bg-[#f5eedf] transition-all duration-300 shrink-0">
                               <span className="text-xl group-hover:scale-110 transition-transform">{categoryIcon}</span>
                             </div>
-                            <div className="text-left">
-                              <h3 className="text-sm font-bold text-[#1A1A1A] tracking-tight line-clamp-1 leading-none mb-1.5">{tx.name}</h3>
+                            <div className="min-w-0 text-left">
+                              <h3 className="text-sm font-bold text-[#292722] tracking-tight truncate leading-tight mb-1.5" title={tx.name}>{tx.name}</h3>
                               <div className="flex flex-col gap-0.5">
-                                <p className="text-[10px] font-bold text-[#FF9D00] uppercase tracking-widest flex items-center gap-1.5 flex-wrap font-mono leading-none">
+                                <p title={`${categoryData ? categoryData.name : tx.category}${subCategoryName ? ` / ${subCategoryName}` : ""}`} className="truncate text-[10px] font-bold text-[#b97423] uppercase tracking-wider font-mono leading-tight">
                                   <span>{categoryData ? categoryData.name : tx.category}</span>
                                   {subCategoryName && (
                                     <>
-                                      <span className="text-slate-300">/</span>
-                                      <span className="text-slate-400 lowercase font-medium">{subCategoryName}</span>
+                                      <span className="mx-1 text-[#b6a68e]">/</span>
+                                      <span className="text-[#93846b] lowercase font-medium">{subCategoryName}</span>
                                     </>
                                   )}
                                 </p>
-                                <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-                                  <span>{(() => {
+                                <div className="flex min-w-0 items-center gap-2 text-[9px] font-bold text-[#93846b] uppercase tracking-wider font-mono">
+                                  <span className="truncate">{(() => {
                                     const payData = paymentMethods.find(p => p._id === tx.paymentMethod || p.name === tx.paymentMethod);
                                     return payData ? payData.name : tx.paymentMethod;
                                   })()}</span>
@@ -289,39 +300,59 @@ export default function NotePage() {
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <div className="text-right">
-                              <p className={`text-sm md:text-base font-black italic font-mono ${tx.amount < 0 ? "text-red-500" : "text-emerald-500"}`}>
+                          <div className="flex shrink-0 items-center gap-1 sm:gap-3">
+                            <div className="shrink-0 text-right">
+                              <p className={`whitespace-nowrap text-sm md:text-base font-black italic font-mono ${tx.amount < 0 ? "text-red-500" : "text-emerald-500"}`}>
                                 {tx.amount > 0 ? "+" : ""}{tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                               </p>
-                              <p className="text-[9px] font-bold text-slate-300 uppercase font-mono">THB</p>
+                              <p className="text-[9px] font-bold text-[#b6a68e] uppercase font-mono">THB</p>
                             </div>
-                            
-                            <button 
-                              onClick={() => openExpenseModal(undefined, tx)}
-                              className="w-8 h-8 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#FF9D00] hover:border-slate-300 shadow-sm hover:bg-slate-50 transition-all flex items-center justify-center cursor-pointer"
+
+                            <DropdownMenu.Root modal={false}>
+                              <DropdownMenu.Trigger
+                                aria-label={`${language === "th" ? "เมนูรายการ" : "Transaction actions"} · ${tx.name}`}
+                                className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border border-[#d9cebb] bg-[#fffdf5] text-[#93846b] shadow-sm transition-colors hover:bg-[#f5eedf] focus-visible:outline-2 focus-visible:outline-[#b97423]"
+                              >
+                                <MoreVertical className="h-4 w-4" />
+                              </DropdownMenu.Trigger>
+                              <DropdownMenu.Portal>
+                              <DropdownMenu.Content side="bottom" align="end" sideOffset={7} collisionPadding={12}
+                                onCloseAutoFocus={event => {
+                                  if (menuActionSelected.current) event.preventDefault();
+                                  menuActionSelected.current = false;
+                                }}
+                                className={styles.paper}>
+                            <DropdownMenu.Item
+                              aria-label={t("edit_expense")}
+                              onSelect={() => {
+                                menuActionSelected.current = true;
+                                openExpenseModal(undefined, tx);
+                              }}
+                              className={`${styles.item} text-[#7f715d] data-highlighted:bg-[#f5eedf] data-highlighted:text-[#b97423]`}
                             >
                               <Pencil className="w-3.5 h-3.5" />
-                            </button>
-                            <button 
-                              onClick={() => {
+                              {t("edit_expense")}
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item aria-label={t("delete")}
+                              onSelect={() => {
+                                menuActionSelected.current = true;
                                 openGlobalModal({
-                                  header: "Delete Record?",
-                                  message: `Are you sure you want to delete "${tx.name}"? This action cannot be undone.`,
+                                  header: t("ui_delete_record"),
+                                  message: `${t("delete_prompt")} “${tx.name}”`,
                                   type: "delete",
                                   mainButton: {
-                                    label: "Delete Now",
+                                    label: t("ui_delete_now"),
                                     color: "bg-rose-500 text-white hover:bg-rose-600",
                                     onClick: async () => {
                                       try {
                                         await transactionService.delete(tx._id);
                                         setTimeout(() => {
                                           openGlobalModal({
-                                            header: "Delete Completed",
-                                            message: `"${tx.name}" has been deleted successfully.`,
+                                            header: t("ui_delete_completed"),
+                                            message: `“${tx.name}” · ${t("ui_delete_completed")}`,
                                             type: "success",
                                             mainButton: {
-                                              label: "Close",
+                                              label: t("close"),
                                               onClick: () => {
                                                 window.location.reload();
                                               }
@@ -334,26 +365,32 @@ export default function NotePage() {
                                     }
                                   },
                                   subButton: {
-                                    label: "Go Back",
+                                    label: t("ui_go_back"),
                                     onClick: () => {}
                                   }
                                 });
                               }}
-                              className="w-8 h-8 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-slate-300 shadow-sm hover:bg-slate-50 transition-all flex items-center justify-center cursor-pointer"
+                              className={`${styles.item} text-rose-500 data-highlighted:bg-rose-50`}
                             >
                               <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                              {t("delete")}
+                            </DropdownMenu.Item>
+                                <DropdownMenu.Arrow width={12} height={6} className="fill-[#fffdf5]" />
+                              </DropdownMenu.Content>
+                              </DropdownMenu.Portal>
+                            </DropdownMenu.Root>
                           </div>
                         </motion.div>
                       );
                     })}
+                    </AnimatePresence>
                   </div>
-                </div>
+                </motion.div>
               ))
             ) : (
-              <div className="py-20 text-center">
-                <p className="text-sm font-bold text-slate-300 uppercase tracking-widest font-mono">Empty Note</p>
-              </div>
+              <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reducedMotion ? 0 : 0.18 }} className="py-20 text-center">
+                <p className="text-sm font-bold text-[#b6a68e] uppercase tracking-widest font-mono">{t("ui_empty_note")}</p>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
