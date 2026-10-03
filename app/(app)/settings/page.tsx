@@ -1,5 +1,6 @@
 "use client";
 
+import { authClient } from "@/lib/auth-client";
 import LoadingScreen from "@/components/LoadingScreen";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -11,6 +12,7 @@ import { playUISound } from "@/lib/ui-sounds.mjs";
 import styles from "./index.module.css";
 
 export default function SettingsPage() {
+  const { data: account } = authClient.useSession();
   const router = useRouter();
   const { language, setLanguage, t } = useLanguage();
   const reducedMotion = useReducedMotion();
@@ -97,6 +99,7 @@ export default function SettingsPage() {
         </AnimatePresence>
       </header>
 
+      {account?.user && <p className="mb-4 break-words px-2 text-[11px] text-[#93846b]">{th ? 'สมุดของ' : 'Notebook of'} {account.user.name} · {account.user.email}</p>}
       <section className={styles.notebook} aria-label={th ? 'สารบัญการตั้งค่า' : 'Settings contents'}>
         <div className={styles.language}>
           <div className="flex min-w-0 items-center gap-3">

@@ -2,11 +2,13 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Globe, LayoutDashboard, LogOut, NotebookPen, Settings } from "lucide-react";
 import LoadingScreen from "./LoadingScreen";
 import { useLanguage } from "@/lib/language-context";
 
+import { authClient } from "@/lib/auth-client";
+import Image from "next/image";
 import SoundToggle from "./SoundToggle";
 
 const NAV_CONFIG = [
@@ -16,6 +18,10 @@ const NAV_CONFIG = [
 ];
 
 export default function NoriNavBar() {
+  useEffect(() => { document.documentElement.classList.remove("dark"); }, []);
+  const { data: account } = authClient.useSession();
+  const [failedImage, setFailedImage] = useState<string | null>(null);
+  const profile = account?.user;
   const router = useRouter();
   const pathname = usePathname();
   const { language, toggleLanguage, t } = useLanguage();
@@ -34,8 +40,8 @@ export default function NoriNavBar() {
   const logout = async () => {
     setShowExitWipe(true);
     try {
-      const response = await fetch("/api/nori/logout", { method: "POST" });
-      if (!response.ok) throw new Error("Logout failed");
+      const result = await authClient.signOut();
+      if (result.error) throw new Error("Logout failed");
       window.setTimeout(() => {
         setShowExitWipe(false);
         router.push("/login");
@@ -49,7 +55,7 @@ export default function NoriNavBar() {
   return (
     <>
       {showExitWipe && <LoadingScreen mode="out" />}
-      <div className="fixed top-0 left-0 right-0 z-[10000] p-3 sm:p-4 flex justify-center pointer-events-none select-none">
+      <div className="fixed top-0 left-0 right-0 z-[10000] p-2 sm:p-4 flex justify-center pointer-events-none select-none">
         <motion.nav
           initial={reducedMotion ? false : { y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -80,13 +86,16 @@ export default function NoriNavBar() {
           })}
 
           <div className="w-px h-5 bg-[#e1d7c5]/60 mx-0.5 sm:mx-1" />
-          <button onClick={toggleLanguage} className="relative min-h-11 px-2 py-1 flex items-center gap-1.5 rounded-full text-[#7f715d] hover:text-[#292722] border border-[#d9cebb]/70 hover:border-[#b6a68e] bg-[#f5eedf]/70 hover:bg-[#fffdf5] transition-all duration-200 group cursor-pointer text-[10px] font-mono font-black tracking-wider" title={language === "en" ? "Switch to Thai (TH)" : "Switch to English (EN)"}>
-            <Globe className="w-3 h-3 text-[#93846b] group-hover:text-[#b97423] transition-colors" />
+          <button onClick={toggleLanguage} className="relative min-h-11 px-1.5 sm:px-2 py-1 flex items-center gap-1.5 rounded-full text-[#7f715d] hover:text-[#292722] border border-[#d9cebb]/70 hover:border-[#b6a68e] bg-[#f5eedf]/70 hover:bg-[#fffdf5] transition-all duration-200 group cursor-pointer text-[10px] font-mono font-black tracking-wider" title={language === "en" ? "Switch to Thai (TH)" : "Switch to English (EN)"}>
+            <Globe className="hidden sm:block w-3 h-3 text-[#93846b] group-hover:text-[#b97423] transition-colors" />
             <span className="leading-none">{language.toUpperCase()}</span>
           </button>
 
           <div className="w-px h-5 bg-[#e1d7c5]/60 mx-0.5 sm:mx-1" />
           <SoundToggle />
+          {profile && <span title={`${profile.name} · ${profile.email}`} aria-label={`${language === 'th' ? 'บัญชีของ' : 'Account of'} ${profile.name}`} className="relative ml-1 flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#fffdf5] text-xs font-bold text-[#635744]" style={{ borderRadius: "50%", border: "3px solid #fffdf5", boxShadow: "0 0 0 1px #d9cebb, 1px 2px 0 #e7dece", transform: "rotate(-6deg)" }}>
+            {profile.image && failedImage !== profile.image ? <Image src={profile.image} alt={profile.name} width={28} height={28} unoptimized referrerPolicy="no-referrer" onError={() => setFailedImage(profile.image ?? null)} className="h-full w-full rounded-full object-cover" style={{ borderRadius: "50%" }} /> : <span aria-hidden="true">{Array.from(profile.name || profile.email)[0]?.toUpperCase()}</span>}
+          </span>}
           <button aria-label={t("nav_logout")} onClick={logout} className="relative min-h-11 min-w-11 px-2 py-1.5 flex items-center gap-1.5 rounded-full text-red-400 hover:text-red-600 transition-all duration-300 group cursor-pointer">
             <LogOut className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
             <span className="text-[11px] font-bold uppercase tracking-wider hidden sm:block">{t("nav_logout")}</span>

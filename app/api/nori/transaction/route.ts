@@ -1,14 +1,18 @@
+import { ownedReferences } from "@/lib/owned-references";
+import { requireUser } from "@/lib/current-user";
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Transaction from "@/models/Transaction";
 
 export async function GET(request: Request) {
   try {
+    const owner = await requireUser();
+    if (owner instanceof Response) return owner;
     const { searchParams } = new URL(request.url);
     const startDateStr = searchParams.get("startDate");
     const endDateStr = searchParams.get("endDate");
 
-    let query: any = {};
+    const query: any = { ...owner.scope };
     if (startDateStr && endDateStr) {
       query.date = {
         $gte: new Date(startDateStr),
@@ -26,7 +30,10 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const owner = await requireUser();
+    if (owner instanceof Response) return owner;
     const body = await request.json();
+    if (!await ownedReferences(body, owner.scope)) return NextResponse.json({ error: "Invalid category or payment method" }, { status: 400 });
     const { name, category, subCategory, amount, date, paymentMethod } = body;
 
     if (!name || !category || amount === undefined || !date || !paymentMethod) {
@@ -35,6 +42,7 @@ export async function POST(request: Request) {
 
     await dbConnect();
     const newTransaction = new Transaction({
+      userId: owner.id,
       name,
       category,
       subCategory,

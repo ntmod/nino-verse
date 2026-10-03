@@ -1,3 +1,4 @@
+import { requireUser } from "@/lib/current-user";
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Transaction from "@/models/Transaction";
@@ -7,6 +8,8 @@ import { getSpendingCycle } from "@/lib/spending-cycle.js";
 
 export async function GET(request: Request) {
   try {
+    const owner = await requireUser();
+    if (owner instanceof Response) return owner;
     const { searchParams } = new URL(request.url);
     const startDateStr = searchParams.get("startDate");
     const endDateStr = searchParams.get("endDate");
@@ -24,8 +27,8 @@ export async function GET(request: Request) {
 
     // 1. Fetch categories and daily average configuration
     const [categories, config] = await Promise.all([
-      Category.find({}),
-      DailyAverageConfig.findOne({})
+      Category.find(owner.scope),
+      DailyAverageConfig.findOne(owner.scope)
     ]);
 
     const selectedCategories = config?.selectedCategories || [];
@@ -39,7 +42,7 @@ export async function GET(request: Request) {
     const allowedNames = selectedCatObjects.map(c => c.name.toLowerCase());
 
     // 2. Fetch transactions in range
-    const transactions = await Transaction.find({ date: { $gte: startDate, $lte: endDate } });
+    const transactions = await Transaction.find({ ...owner.scope, date: { $gte: startDate, $lte: endDate } });
 
     // Total spent includes every expense in the period, matching the dashboard card.
     const allExpenses = transactions.filter(tx => tx.amount < 0);

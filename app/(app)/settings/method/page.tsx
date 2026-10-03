@@ -18,7 +18,9 @@ export default function MethodSettings() {
   const [methods, setMethods] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMethod, setEditingMethod] = useState<any>(null);
-  const [newMethod, setNewMethod] = useState({ name: "", icon: "💳", color: "#6366f1", desc: "" });
+  const [newMethod, setNewMethod] = useState({ name: "", icon: "💳", color: "#6366f1", desc: "", initialBalance: "" });
+  const [saveError, setSaveError] = useState("");
+  const [saving, setSaving] = useState(false);
   const [pickerColumns, setPickerColumns] = useState(6);
 
   useEffect(() => {
@@ -47,7 +49,14 @@ export default function MethodSettings() {
   };
 
   const handleSaveMethod = async () => {
-    if (!newMethod.name) return;
+    if (!newMethod.name || saving) return;
+    setSaveError("");
+    const balance = newMethod.initialBalance.trim() === "" ? null : Number(newMethod.initialBalance);
+    if (balance !== null && (!Number.isFinite(balance) || !Number.isSafeInteger(Math.round(balance * 100)))) {
+      setSaveError(language === "th" ? "กรุณาใส่ยอดเงินที่ถูกต้อง" : "Enter a valid amount");
+      return;
+    }
+    setSaving(true);
     try {
       const url = editingMethod
         ? `/api/nori/method/${editingMethod._id}`
@@ -57,12 +66,13 @@ export default function MethodSettings() {
       const res = await fetch(url, {
         method: fetchMethod,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newMethod),
+        body: JSON.stringify({ ...newMethod, initialBalance: balance }),
       });
+      if (!res.ok) throw new Error("Failed to save method");
       if (res.ok) {
         setIsModalOpen(false);
         setEditingMethod(null);
-        setNewMethod({ name: "", icon: "💳", color: "#6366f1", desc: "" });
+        setNewMethod({ name: "", icon: "💳", color: "#6366f1", desc: "", initialBalance: "" });
         fetchMethods();
 
         openGlobalModal({
@@ -77,6 +87,9 @@ export default function MethodSettings() {
       }
     } catch (err) {
       console.error("Failed to save method:", err);
+      setSaveError(language === "th" ? "บันทึกไม่สำเร็จ ลองใหม่อีกครั้งนะ" : "Could not save. Please try again.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -170,7 +183,7 @@ export default function MethodSettings() {
             </div>
           </div>
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => { setSaveError(""); setIsModalOpen(true); }}
             className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#e9a342] text-[#372b1c] text-xs font-black uppercase tracking-widest hover:bg-[#403b32] transition-all shadow-none shadow-black/10 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
@@ -214,6 +227,7 @@ export default function MethodSettings() {
                     <div className="min-w-0">
                       <h3 className="break-words text-base font-black text-[#292722] italic uppercase">{method.name}</h3>
                       <p className="text-[10px] font-bold text-[#7f715d] uppercase tracking-widest mt-0.5">{method.desc}</p>
+                      {method.balance != null && <p className="mt-2 text-xs font-bold text-[#416b54]">{language === 'th' ? 'คงเหลือ' : 'Balance'} · {method.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} THB</p>}
                     </div>
                   </div>
                 </div>
@@ -221,8 +235,9 @@ export default function MethodSettings() {
                 <div className="flex items-center gap-2">
                   <button aria-label={t("edit")}
                     onClick={() => {
+                      setSaveError("");
                       setEditingMethod(method);
-                      setNewMethod({ name: method.name, icon: method.icon, color: method.color, desc: method.desc });
+                      setNewMethod({ name: method.name, icon: method.icon, color: method.color, desc: method.desc || "", initialBalance: method.initialBalance == null ? "" : String(method.initialBalance) });
                       setIsModalOpen(true);
                     }}
                     className="w-11 h-11 shrink-0 rounded-xl bg-[#fffdf5] hover:bg-[#f5eedf]/70 transition-all group/btn cursor-pointer"
@@ -253,7 +268,7 @@ export default function MethodSettings() {
               onClick={() => {
                 setIsModalOpen(false);
                 setEditingMethod(null);
-                setNewMethod({ name: "", icon: "💳", color: "#6366f1", desc: "" });
+                setNewMethod({ name: "", icon: "💳", color: "#6366f1", desc: "", initialBalance: "" });
               }}
               className="absolute inset-0 bg-[#292722]/20 backdrop-blur-md"
             />
@@ -271,7 +286,7 @@ export default function MethodSettings() {
                   <button aria-label={t("close")} onClick={() => {
                     setIsModalOpen(false);
                     setEditingMethod(null);
-                    setNewMethod({ name: "", icon: "💳", color: "#6366f1", desc: "" });
+                    setNewMethod({ name: "", icon: "💳", color: "#6366f1", desc: "", initialBalance: "" });
                   }} className="w-11 h-11 shrink-0 rounded-none bg-[#fffdf5] flex items-center justify-center hover:bg-[#fffdf5] transition-colors cursor-pointer">
                     <X className="w-5 h-5 text-[#7f715d]" />
                   </button>
@@ -349,6 +364,15 @@ export default function MethodSettings() {
                   </div>
 
                   <div className="space-y-2">
+                    <label htmlFor="method-initial-balance" className="text-[10px] font-black text-[#7f715d] uppercase tracking-widest ml-1">{language === 'th' ? 'ยอดตั้งต้น (THB)' : 'Initial balance (THB)'}</label>
+                    <input id="method-initial-balance" type="number" step="0.01" value={newMethod.initialBalance}
+                      onChange={event => setNewMethod({ ...newMethod, initialBalance: event.target.value })}
+                      placeholder={language === 'th' ? 'เว้นว่างหากไม่ติดตามยอดเงิน' : 'Leave blank to skip balance tracking'}
+                      className="w-full px-6 py-4 rounded-xl bg-[#f5eedf]/70 focus:outline-none focus:ring-2 focus:ring-[#b97423]/20 text-sm font-bold text-[#292722]" />
+                    <p className="text-[11px] leading-relaxed text-[#93846b]">{language === 'th' ? 'ยอดคงเหลือ = ยอดตั้งต้น + รายรับ − รายจ่ายทั้งหมด รวมรายการที่เคยบันทึกไว้แล้ว' : 'Balance = initial balance + all income − all expenses, including existing records.'}</p>
+                  </div>
+
+                  <div className="space-y-2">
                     <label className="text-[10px] font-black text-[#7f715d] uppercase tracking-widest ml-1">{t("ui_color_theme")}</label>
                     <input
                       type="color"
@@ -359,22 +383,24 @@ export default function MethodSettings() {
                   </div>
                 </div>
 
+                {saveError && <p role="alert" className="mt-4 text-xs text-rose-600">{saveError}</p>}
                 <div className="grid grid-cols-2 gap-4 mt-10">
                   <button
                     onClick={() => {
                       setIsModalOpen(false);
                       setEditingMethod(null);
-                      setNewMethod({ name: "", icon: "💳", color: "#6366f1", desc: "" });
+                      setNewMethod({ name: "", icon: "💳", color: "#6366f1", desc: "", initialBalance: "" });
                     }}
                     className="py-4 rounded-xl bg-[#f5eedf]/70 text-xs font-black text-[#7f715d] uppercase tracking-widest hover:bg-[#f5eedf]/70 transition-all cursor-pointer"
                   >
                     {t("cancel")}
                   </button>
                   <button
+                    disabled={saving}
                     onClick={handleSaveMethod}
                     className="py-4 rounded-xl bg-[#e9a342] text-[#372b1c] text-xs font-black uppercase tracking-widest hover:bg-[#403b32] transition-all shadow-none shadow-black/10 cursor-pointer"
                   >
-                    {editingMethod ? t("ui_update_method") : t("ui_save_method")}
+                    {saving ? (language === "th" ? "กำลังบันทึก…" : "Saving…") : editingMethod ? t("ui_update_method") : t("ui_save_method")}
                   </button>
                 </div>
               </div>

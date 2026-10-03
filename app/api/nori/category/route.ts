@@ -1,11 +1,14 @@
+import { requireUser } from "@/lib/current-user";
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Category from "@/models/Category";
 
 export async function GET() {
   try {
+    const owner = await requireUser();
+    if (owner instanceof Response) return owner;
     await dbConnect();
-    const categories = await Category.find({}).sort({ order: 1, createdAt: -1 });
+    const categories = await Category.find(owner.scope).sort({ order: 1, createdAt: -1 });
     return NextResponse.json(categories);
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 });
@@ -14,6 +17,8 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
+    const owner = await requireUser();
+    if (owner instanceof Response) return owner;
     const { orders } = await request.json(); // Array of { id: string, order: number }
     console.time('start')
     if (!Array.isArray(orders)) {
@@ -25,7 +30,7 @@ export async function PATCH(request: Request) {
     console.time('updates')
     // Bulk update orders
     const updates = orders.map((item: any) => 
-      Category.findByIdAndUpdate(item.id, { order: item.order })
+      Category.findOneAndUpdate({ $and: [owner.scope, { _id: item.id }] }, { order: item.order })
     );
     console.timeEnd('updates')
     console.time('promise')
@@ -40,6 +45,8 @@ export async function PATCH(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const owner = await requireUser();
+    if (owner instanceof Response) return owner;
     const body = await request.json();
     const { name, icon, type = "expense" } = body;
 
@@ -49,6 +56,7 @@ export async function POST(request: Request) {
 
     await dbConnect();
     const newCategory = new Category({
+      userId: owner.id,
       name,
       icon,
       type,

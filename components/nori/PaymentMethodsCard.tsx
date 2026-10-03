@@ -9,6 +9,7 @@ interface PaymentMethod {
   _id: string;
   name: string;
   amount: number;
+  balance?: number | null;
   icon: string;
   color: string;
 }
@@ -56,7 +57,7 @@ export default function PaymentMethodsCard({
   currency = "THB",
   isLoading = false
 }: PaymentMethodsCardProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const total = useMemo(() => methods.reduce((sum, item) => sum + (item.amount || 0), 0), [methods]);
 
   return (
@@ -119,7 +120,7 @@ export default function PaymentMethodsCard({
                     return (
                       <div 
                         key={method._id || index}
-                        className="flex items-center justify-between py-2.5 border-b-2 border-dashed border-[#e1d7c5] last:border-none last:pb-0"
+                        className="flex flex-wrap gap-2 items-center justify-between py-2.5 border-b-2 border-dashed border-[#e1d7c5] last:border-none last:pb-0"
                       >
                         <div className="flex items-center gap-3">
                           {/* Floating emoji icon matching lists */}
@@ -132,6 +133,9 @@ export default function PaymentMethodsCard({
                           <p className="text-xs font-black text-[#292722] italic font-mono">
                             {currency} <AnimatedNumber value={method.amount || 0} decimals={2} />
                           </p>
+                          {method.balance != null && <p className="mt-1 text-[10px] font-mono text-[#416b54]">
+                            {language === 'th' ? 'คงเหลือทั้งหมด' : 'Current balance'} {method.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
+                          </p>}
                         </div>
                       </div>
                     );

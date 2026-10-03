@@ -1,3 +1,4 @@
+import { requireUser } from "@/lib/current-user";
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Category from "@/models/Category";
@@ -7,15 +8,17 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const owner = await requireUser();
+    if (owner instanceof Response) return owner;
     const { id } = await params;
     const body = await request.json();
     const { name, icon, type } = body;
 
     await dbConnect();
-    const category = await Category.findByIdAndUpdate(
-      id,
+    const category = await Category.findOneAndUpdate(
+      { $and: [owner.scope, { _id: id }] },
       { name, icon, type },
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     if (!category) {
@@ -35,9 +38,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const owner = await requireUser();
+    if (owner instanceof Response) return owner;
     const { id } = await params;
     await dbConnect();
-    const category = await Category.findByIdAndDelete(id);
+    const category = await Category.findOneAndDelete({ $and: [owner.scope, { _id: id }] });
 
     if (!category) {
       return NextResponse.json({ error: "Category not found" }, { status: 404 });

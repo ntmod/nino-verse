@@ -1,11 +1,15 @@
+import { ownedReferences } from "@/lib/owned-references";
+import { requireUser } from "@/lib/current-user";
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import FixedCost from "@/models/FixedCost";
 
 export async function GET() {
   try {
+    const owner = await requireUser();
+    if (owner instanceof Response) return owner;
     await dbConnect();
-    const fixedCosts = await FixedCost.find({}).sort({ order: 1, createdAt: -1 });
+    const fixedCosts = await FixedCost.find(owner.scope).sort({ order: 1, createdAt: -1 });
     return NextResponse.json(fixedCosts);
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch fixed costs" }, { status: 500 });
@@ -14,7 +18,10 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const owner = await requireUser();
+    if (owner instanceof Response) return owner;
     const body = await request.json();
+    if (!await ownedReferences(body, owner.scope)) return NextResponse.json({ error: "Invalid category or payment method" }, { status: 400 });
     const { name, amount, category, paymentMethod, order } = body;
 
     if (!name || amount === undefined || !category || !paymentMethod) {
@@ -23,6 +30,7 @@ export async function POST(request: Request) {
 
     await dbConnect();
     const newFixedCost = new FixedCost({
+      userId: owner.id,
       name,
       amount: Number(amount),
       category,
@@ -42,6 +50,8 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
+    const owner = await requireUser();
+    if (owner instanceof Response) return owner;
     const body = await request.json();
     const { orders } = body;
 
@@ -52,7 +62,7 @@ export async function PATCH(request: Request) {
     await dbConnect();
     
     const updatePromises = orders.map((o: { id: string, order: number }) => 
-      FixedCost.findByIdAndUpdate(o.id, { order: o.order })
+      FixedCost.findOneAndUpdate({ $and: [owner.scope, { _id: o.id }] }, { order: o.order })
     );
     
     await Promise.all(updatePromises);

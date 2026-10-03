@@ -1,3 +1,4 @@
+import { requireUser } from "@/lib/current-user";
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Category from "@/models/Category";
@@ -7,6 +8,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const owner = await requireUser();
+    if (owner instanceof Response) return owner;
     const { id } = await params;
     const body = await request.json();
     const { name } = body;
@@ -16,7 +19,7 @@ export async function POST(
     }
 
     await dbConnect();
-    const category = await Category.findById(id);
+    const category = await Category.findOne({ $and: [owner.scope, { _id: id }] });
     
     if (!category) {
       return NextResponse.json({ error: "Category not found" }, { status: 404 });
@@ -36,6 +39,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const owner = await requireUser();
+    if (owner instanceof Response) return owner;
     const { id } = await params;
     const { searchParams } = new URL(request.url);
     const subId = searchParams.get("subId");
@@ -45,7 +50,7 @@ export async function DELETE(
     }
 
     await dbConnect();
-    const category = await Category.findById(id);
+    const category = await Category.findOne({ $and: [owner.scope, { _id: id }] });
 
     if (!category) {
       return NextResponse.json({ error: "Category not found" }, { status: 404 });
@@ -66,6 +71,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const owner = await requireUser();
+    if (owner instanceof Response) return owner;
     const { id } = await params;
     const body = await request.json();
     const { subId, name } = body;
@@ -76,7 +83,7 @@ export async function PATCH(
 
     await dbConnect();
     const category = await Category.findOneAndUpdate(
-      { _id: id, "subcategories._id": subId },
+      { $and: [owner.scope, { _id: id, "subcategories._id": subId }] },
       { $set: { "subcategories.$.name": name } },
       { new: true }
     );

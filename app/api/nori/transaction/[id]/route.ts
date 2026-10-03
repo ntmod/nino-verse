@@ -1,3 +1,5 @@
+import { ownedReferences } from "@/lib/owned-references";
+import { requireUser } from "@/lib/current-user";
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Transaction from "@/models/Transaction";
@@ -7,14 +9,18 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const owner = await requireUser();
+    if (owner instanceof Response) return owner;
     const { id } = await params;
-    const body = await request.json();
+    const { name, category, subCategory, amount, date, paymentMethod } = await request.json();
+    const body = { name, category, subCategory, amount, date, paymentMethod };
+    if (!await ownedReferences(body, owner.scope)) return NextResponse.json({ error: "Invalid category or payment method" }, { status: 400 });
     
     await dbConnect();
-    const updatedTransaction = await Transaction.findByIdAndUpdate(
-      id,
+    const updatedTransaction = await Transaction.findOneAndUpdate(
+      { $and: [owner.scope, { _id: id }] },
       { ...body, date: body.date ? new Date(body.date) : undefined },
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     if (!updatedTransaction) {
@@ -33,9 +39,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const owner = await requireUser();
+    if (owner instanceof Response) return owner;
     const { id } = await params;
     await dbConnect();
-    const deletedTransaction = await Transaction.findByIdAndDelete(id);
+    const deletedTransaction = await Transaction.findOneAndDelete({ $and: [owner.scope, { _id: id }] });
     if (!deletedTransaction) {
       return NextResponse.json({ error: "Transaction not found" }, { status: 404 });
     }

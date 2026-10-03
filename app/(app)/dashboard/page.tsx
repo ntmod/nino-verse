@@ -1,5 +1,6 @@
 'use client'
 
+import { authClient } from "@/lib/auth-client";
 import LoadingScreen from "@/components/LoadingScreen";
 import styles from "./layout.module.css";
 import MasonryLayout from "./MasonryLayout";
@@ -34,6 +35,8 @@ import { playUISound, prepareUISound } from "@/lib/ui-sounds.mjs";
 import type { Transaction } from "@/lib/types";
 
 export default function Noripage() {
+  const { data: account } = authClient.useSession();
+  const resetKey = account?.user.id ? `fixedCostsResetDate:${account.user.id}` : null;
   const { openGlobalModal, openExpenseModal } = useModal();
   const { language, t } = useLanguage();
   const [isLoading, setIsLoading] = useState(true);
@@ -93,13 +96,15 @@ export default function Noripage() {
   }, [billingCycle, language]);
 
   useEffect(() => {
-    const resetDateStr = localStorage.getItem("fixedCostsResetDate");
+    const resetDateStr = resetKey ? localStorage.getItem(resetKey) : null;
     if (resetDateStr) {
       setLastResetTime(new Date(resetDateStr).getTime());
     }
-  }, []);
+    else setLastResetTime(null);
+  }, [resetKey]);
 
   const handleResetFixedCosts = () => {
+    if (!resetKey) return;
     openGlobalModal({
       header: t("reset_fixed_costs_header"),
       message: t("reset_fixed_costs_msg"),
@@ -108,7 +113,7 @@ export default function Noripage() {
         label: t("confirm_reset"),
         onClick: () => {
           const nowStr = new Date().toISOString();
-          localStorage.setItem("fixedCostsResetDate", nowStr);
+          localStorage.setItem(resetKey, nowStr);
           setLastResetTime(new Date(nowStr).getTime());
           
           setTimeout(() => {
@@ -134,15 +139,13 @@ export default function Noripage() {
   useEffect(() => {
     const fetchStaticData = async () => {
       try {
-        const [catData, payData, budData, fixedData] = await Promise.all([
+        const [catData, budData, fixedData] = await Promise.all([
           categoryService.getAll(),
-          paymentService.getAll(),
           budgetService.getAll(),
           fixedCostService.getAll()
         ]);
 
         setCategories(catData);
-        setPaymentMethods(payData);
         setBudgets(budData);
         setFixedCosts(fixedData);
         setStaticDataLoaded(true);
@@ -165,14 +168,16 @@ export default function Noripage() {
         const prevStartISO = previousBillingCycle.startDate.toISOString();
         const endISO = billingCycle.endDate.toISOString();
         
-        const [txData, avgRes] = await Promise.all([
+        const [txData, avgRes, payData] = await Promise.all([
           transactionService.getAll(prevStartISO, endISO),
-          fetch(`/api/nori/daily-average?startDate=${encodeURIComponent(billingCycle.startDate.toISOString())}&endDate=${encodeURIComponent(endISO)}`)
+          fetch(`/api/nori/daily-average?startDate=${encodeURIComponent(billingCycle.startDate.toISOString())}&endDate=${encodeURIComponent(endISO)}`),
+          paymentService.getAll()
         ]);
         
         if (!active) return;
         loadedCycle.current = cycleKey;
         setTransactions(txData);
+        setPaymentMethods(payData);
         setTransactionsLoaded(true);
         if (avgRes.ok) {
           const avgData = await avgRes.json();
