@@ -67,7 +67,7 @@ export default function RecentTransactionsCard({
   const { t, language } = useLanguage();
   const reducedMotion = useReducedMotion();
   return (
-    <div className="relative p-4 md:p-6 bg-[#fffdf5] shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] border border-[#e1d7c5]/80 min-h-[380px] flex flex-col justify-center">
+    <div data-paper-surface="" className="relative p-4 md:p-6 bg-[#fffdf7] rounded-2xl shadow-[0_2px_8px_rgba(78,62,36,0.03)] border border-[#e1d7c5]/80 min-h-[380px] flex flex-col justify-center">
       {!isLoading && <NoriPeek />}
       <AnimatePresence mode="wait">
         {isLoading ? (
@@ -122,7 +122,7 @@ export default function RecentTransactionsCard({
 
             {transactions.length === 0 ? (
               <div className="py-12 flex flex-col items-center justify-center text-center space-y-4 font-mono">
-                <div className="w-16 h-16 rounded-xl bg-[#fffdf5] border border-[#d9cebb] flex items-center justify-center">
+                <div className="w-16 h-16 rounded-xl bg-[#fffdf7] border border-[#d9cebb] flex items-center justify-center">
                   <ShoppingBag className="w-8 h-8 text-[#b6a68e]" />
                 </div>
                 <div className="space-y-1">

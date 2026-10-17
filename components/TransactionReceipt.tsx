@@ -11,14 +11,14 @@ export interface ReceiptData {
   categoryName: string;
   subCategoryName?: string;
   paymentName: string;
-  refreshOnClose: boolean;
+  walletName?: string;
 }
 
 export default function TransactionReceipt({ receipt, onClose }: { receipt: ReceiptData; onClose: () => void }) {
   const { language } = useLanguage();
   const th = language === "th";
   const locale = th ? "th-TH" : "en-US";
-  const { transaction, categoryName, subCategoryName, paymentName } = receipt;
+  const { transaction, categoryName, subCategoryName, paymentName, walletName } = receipt;
 
   return (
     <ReceiptPaper onClose={onClose} stampDelay={1.15} title={<><Check aria-hidden="true" className="h-4 w-4" />{th ? "บันทึกเรียบร้อย" : "Transaction saved"}</>}>
@@ -37,6 +37,7 @@ export default function TransactionReceipt({ receipt, onClose }: { receipt: Rece
                 [th ? "หมวดหมู่" : "Category", categoryName],
                 ...(subCategoryName ? [[th ? "หมวดย่อย" : "Subcategory", subCategoryName]] : []),
                 [th ? "ชำระด้วย" : "Payment", paymentName],
+                ...(walletName ? [[th ? "กระเป๋างบ" : "Budget wallet", walletName]] : []),
                 [th ? "วันที่" : "Date", new Date(transaction.date).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })],
               ].map(([label, value]) => (
                 <div key={label} className="grid grid-cols-[auto_1fr] gap-4">

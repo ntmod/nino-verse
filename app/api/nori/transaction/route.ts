@@ -33,8 +33,8 @@ export async function POST(request: Request) {
     const owner = await requireUser();
     if (owner instanceof Response) return owner;
     const body = await request.json();
-    if (!await ownedReferences(body, owner.scope)) return NextResponse.json({ error: "Invalid category or payment method" }, { status: 400 });
-    const { name, category, subCategory, amount, date, paymentMethod } = body;
+    if (!await ownedReferences(body, owner.scope)) return NextResponse.json({ error: "Invalid category, payment method or wallet" }, { status: 400 });
+    const { name, category, subCategory, amount, date, paymentMethod, walletId } = body;
 
     if (!name || !category || amount === undefined || !date || !paymentMethod) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -49,6 +49,7 @@ export async function POST(request: Request) {
       amount,
       date: new Date(date),
       paymentMethod,
+      walletId,
     });
 
     const savedTransaction = await newTransaction.save();

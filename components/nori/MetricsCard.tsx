@@ -77,7 +77,7 @@ export default function MetricsCard({
   const isOverLimit = dailyAverage > dailyLimit;
 
   return (
-    <div className="relative bg-[#fffdf5] shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] border border-[#e1d7c5]/80 flex flex-col w-full justify-between overflow-hidden">
+    <div data-paper-surface="" className="relative bg-[#fffdf7] rounded-2xl shadow-[0_2px_8px_rgba(78,62,36,0.03)] border border-[#e1d7c5]/80 flex flex-col w-full justify-between overflow-hidden">
       <AnimatePresence mode="wait">
         {isLoading ? (
           <motion.div
@@ -135,7 +135,7 @@ export default function MetricsCard({
                 <Link href="/settings/daily-average">
                   <button 
                     title={t("configure_daily_avg")}
-                    className="w-10 h-10 rounded-xl bg-[#fffdf5] border border-[#d9cebb] flex items-center justify-center hover:bg-[#f5eedf] text-[#292722] transition-all cursor-pointer shrink-0"
+                    className="w-10 h-10 rounded-xl bg-[#fffdf7] border border-[#d9cebb] flex items-center justify-center hover:bg-[#f5eedf] text-[#292722] transition-all cursor-pointer shrink-0"
                   >
                     <Settings className="w-4 h-4 transition-colors" />
                   </button>
@@ -192,7 +192,7 @@ export default function MetricsCard({
                               <span className="text-[8px] font-mono text-[#7f715d] font-bold select-none leading-none">
                                 {weight}%
                               </span>
-                              <div className="w-16 h-2 border border-[#d9cebb] bg-[#fffdf5] rounded-full overflow-hidden shrink-0">
+                              <div className="w-16 h-2 border border-[#d9cebb] bg-[#fffdf7] rounded-full overflow-hidden shrink-0">
                                 <div className={`h-full ${barColor} rounded-full`} style={{ width: `${Math.min(100, weight)}%` }}></div>
                               </div>
                             </div>

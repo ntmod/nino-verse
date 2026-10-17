@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { createHash } from 'node:crypto';
 import { requireUser } from '@/lib/current-user';
+import { initialCycleConfig } from '@/lib/cycle-config';
 import { onboardingPlan } from '@/lib/onboarding-presets.mjs';
 
 export async function POST(request: Request) {
@@ -15,8 +16,8 @@ export async function POST(request: Request) {
     if (profile.onboardingCompletedAt) return NextResponse.json({ success: true });
     const body = await request.json();
     if (body.skip !== true) {
-      let plan;
-      try { plan = onboardingPlan(body); }
+      let plan, cycle;
+      try { plan = onboardingPlan(body); cycle = initialCycleConfig(plan.cycle.mode, plan.cycle.fixedDay, plan.cycle.startDate); }
       catch { return NextResponse.json({ error: 'Invalid setup details' }, { status: 400 }); }
       await db.collection('user').updateOne({ _id: profileId }, { $set: { onboardingStartedAt: new Date() } });
       // Stable IDs make retries safe even when a request fails partway through setup.
@@ -27,6 +28,13 @@ export async function POST(request: Request) {
       }
       const _id = id('wallet');
       await db.collection('paymentmethods').updateOne({ _id, userId: owner.id }, { $set: plan.wallet, $setOnInsert: { userId: owner.id, order: 0, createdAt: new Date() } }, { upsert: true });
+      for (const [index, wallet] of plan.budgetWallets.entries()) {
+        await db.collection('wallets').updateOne({ _id: id(`budget-wallet:${index}`), userId: owner.id }, { $set: wallet, $setOnInsert: { userId: owner.id, revision: 0, createdAt: new Date() } }, { upsert: true });
+      }
+      // Only discard unselected wallets from this unfinished onboarding attempt.
+      const unusedWalletIds = Array.from({ length: 20 - plan.budgetWallets.length }, (_, index) => id(`budget-wallet:${index + plan.budgetWallets.length}`));
+      if (unusedWalletIds.length) await db.collection('wallets').deleteMany({ userId: owner.id, _id: { $in: unusedWalletIds } });
+      await db.collection('cyclesettings').updateOne({ userId: owner.id }, { $set: { ...cycle, starts: cycle.starts.map(start => new Date(start)), automaticFrom: cycle.automaticFrom ? new Date(cycle.automaticFrom) : null, updatedAt: new Date() }, $setOnInsert: { _id: id('cycle-settings'), userId: owner.id, createdAt: new Date() } }, { upsert: true });
     }
     await db.collection('user').updateOne({ _id: profileId }, { $set: { onboardingCompletedAt: new Date() } });
     return NextResponse.json({ success: true });

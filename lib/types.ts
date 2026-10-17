@@ -7,4 +7,6 @@ export interface Transaction {
   date: string;
   displayDate: string;
   paymentMethod: string;
+  walletId?: string;
+  refunds?: import('./refund').RefundRecord[];
 }

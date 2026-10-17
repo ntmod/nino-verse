@@ -1,5 +1,6 @@
 'use client'
 
+import { authClient } from "@/lib/auth-client";
 import { useLanguage } from "@/lib/language-context";
 
 import { useState, useMemo, useEffect, useRef } from "react";
@@ -19,7 +20,7 @@ import {
 import Link from "next/link";
 import { DropdownMenu } from "radix-ui";
 import styles from "./actions.module.css";
-import LoadingScreen from "@/components/LoadingScreen";
+import RefundExpense from "@/components/RefundExpense";
 import FloatingActionButton from "@/components/nori/FloatingActionButton";
 import { useModal } from "@/lib/modal-context";
 import { Transaction } from "@/lib/types";
@@ -31,6 +32,11 @@ import { paymentService } from "@/lib/services/paymentService";
 const INITIAL_TRANSACTIONS: Transaction[] = [];
 
 export default function NotePage() {
+  const { data: account } = authClient.useSession();
+  const userId = account?.user.id;
+  const [loadError, setLoadError] = useState(false);
+  const [metadataError, setMetadataError] = useState(false);
+  const [retry, setRetry] = useState(0);
   const { t, language } = useLanguage();
   const reducedMotion = useReducedMotion();
   const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
@@ -41,6 +47,8 @@ export default function NotePage() {
   const [selectedPayment, setSelectedPayment] = useState("All");
   const [dateFilter, setDateFilter] = useState("");
   const [loading, setLoading] = useState(true);
+  const [refunding, setRefunding] = useState<Transaction | null>(null);
+  const [refundNotice, setRefundNotice] = useState(false);
   const [expandedReceipt, setExpandedReceipt] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState(50);
 
@@ -50,30 +58,21 @@ export default function NotePage() {
 
   useEffect(() => {
     let active = true;
-    const fetchData = async () => {
-      try {
-        const [txData, catData, payData] = await Promise.all([
-          transactionService.getAll(),
-          categoryService.getAll(),
-          paymentService.getAll()
-        ]);
-        if (!active) return;
-
-        if (Array.isArray(txData)) {
-          setTransactions(txData);
-        }
-
-        if (Array.isArray(catData)) setCategories(catData);
-        if (Array.isArray(payData)) setPaymentMethods(payData);
-      } catch (error) {
-        console.error("Failed to fetch page data:", error);
-      } finally {
-        if (active) setLoading(false);
-      }
-    };
-    fetchData();
+    transactionService.getAll().then(txData => {
+      if (active) { setTransactions(previous => [...previous, ...txData.filter(item => !previous.some(saved => saved._id === item._id))]); setLoadError(false); }
+    }).catch(() => { if (active) setLoadError(true); })
+      .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, []);
+  }, [retry]);
+
+  useEffect(() => {
+    if (!userId) return;
+    let active = true;
+    Promise.all([categoryService.getAll(userId), paymentService.getAll(userId)]).then(([cats, methods]) => {
+      if (active) { setCategories(cats); setPaymentMethods(methods); setMetadataError(false); }
+    }).catch(() => { if (active) setMetadataError(true); });
+    return () => { active = false; };
+  }, [userId, retry]);
 
   const filteredTransactions = useMemo(() => {
     const selectedCatObj = categories.find(c => c._id === selectedCategory || c.name === selectedCategory);
@@ -143,14 +142,15 @@ export default function NotePage() {
   };
 
   const handleAddSuccess = (newTx: Transaction) => {
-    setTransactions([newTx, ...transactions]);
+    setTransactions(previous => [newTx, ...previous.filter(tx => tx._id !== newTx._id)]);
   };
 
   return (
     <main className="min-h-screen bg-[#f5f0e5] flex flex-col items-center p-0 md:p-6 pt-16 md:pt-24 pb-20">
-      <LoadingScreen mode="in" />
 
       <div className="w-full max-w-2xl px-4 md:px-0 space-y-6 md:space-y-8">
+        {refunding && <RefundExpense transaction={refunding} onClose={() => setRefunding(null)} onSaved={tx => { handleAddSuccess(tx); setRefundNotice(true); }} />}
+        {refundNotice && <p role="status" className="border border-[#c8d7bd] bg-[#eef4e8] p-4 text-xs text-[#416b54]">{language === 'th' ? 'บันทึกการคืนเงินแล้ว ยอดสุทธิในรอบเดิมปรับแล้ว' : 'Refund saved. The original cycle’s net spending is updated.'}</p>}
         {/* Compact Header */}
         <div className="flex items-center justify-between">
           <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
@@ -239,6 +239,7 @@ export default function NotePage() {
         {/* Floating Style Transaction List */}
         <div className="space-y-8">
           <AnimatePresence mode="popLayout">
+            {(loadError || metadataError) && <p role="alert" className="p-4 text-sm">{language === 'th' ? 'ข้อมูลบางส่วนโหลดไม่สำเร็จ' : 'Some data could not load.'} <button type="button" className="min-h-11 px-3 underline" onClick={() => setRetry(value => value + 1)}>{language === 'th' ? 'ลองอีกครั้ง' : 'Retry'}</button></p>}
             {loading ? (
               <p key="loading" role="status" className="py-20 text-center text-xs text-[#7f715d]">{language === 'th' ? "กำลังเปิดบันทึก…" : "Opening your notes…"}</p>
             ) :
@@ -329,6 +330,7 @@ export default function NotePage() {
                                 {tx.amount > 0 ? "+" : ""}{tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                               </p>
                               <p className="text-[9px] font-bold text-[#b6a68e] uppercase font-mono">THB</p>
+                              {Boolean(tx.refunds?.length) && <p className="mt-1 text-[9px] text-[#887b65]">{language === 'th' ? (tx.amount === 0 ? 'คืนเงินครบแล้ว' : 'หักคืนเงินแล้ว') : (tx.amount === 0 ? 'Fully returned' : 'After refund')}</p>}
                             </div>
 
                             <DropdownMenu.Root modal={false}>
@@ -346,16 +348,18 @@ export default function NotePage() {
                                 }}
                                 className={styles.paper}>
                             <DropdownMenu.Item
+                              disabled={Boolean(tx.refunds?.length)}
                               aria-label={t("edit_expense")}
                               onSelect={() => {
                                 menuActionSelected.current = true;
-                                openExpenseModal(undefined, tx);
+                                openExpenseModal(handleAddSuccess, tx);
                               }}
                               className={`${styles.item} text-[#7f715d] data-highlighted:bg-[#f5eedf] data-highlighted:text-[#b97423]`}
                             >
                               <Pencil className="w-3.5 h-3.5" />
                               {t("edit_expense")}
                             </DropdownMenu.Item>
+                            {tx.amount < 0 && <DropdownMenu.Item onSelect={() => { menuActionSelected.current = true; setRefunding(tx); }} className={`${styles.item} text-[#416b54]`}><ReceiptText className="h-3.5 w-3.5"/>{language === 'th' ? 'คืนเงิน / ยกเลิก' : 'Refund / Cancel'}</DropdownMenu.Item>}
                             <DropdownMenu.Item aria-label={t("delete")}
                               onSelect={() => {
                                 menuActionSelected.current = true;
@@ -369,6 +373,7 @@ export default function NotePage() {
                                     onClick: async () => {
                                       try {
                                         await transactionService.delete(tx._id);
+                                        setTransactions(previous => previous.filter(item => item._id !== tx._id));
                                         setTimeout(() => {
                                           openGlobalModal({
                                             header: t("ui_delete_completed"),
@@ -376,9 +381,7 @@ export default function NotePage() {
                                             type: "success",
                                             mainButton: {
                                               label: t("close"),
-                                              onClick: () => {
-                                                window.location.reload();
-                                              }
+                                              onClick: () => {}
                                             }
                                           });
                                         }, 300);
@@ -411,6 +414,7 @@ export default function NotePage() {
                               exit={{ height: 0, opacity: 0 }} transition={{ duration: reducedMotion ? 0 : 0.28, ease: [0.22, 1, 0.36, 1] }}
                               className="overflow-hidden">
                               <motion.div initial={{ y: reducedMotion ? 0 : -30 }} animate={{ y: 0 }} exit={{ y: reducedMotion ? 0 : -30 }} transition={{ duration: reducedMotion ? 0 : 0.28 }} className={styles.receipt}>
+                                {Boolean(tx.refunds?.length) && <div className="mb-4 border-b border-dashed border-[#d9cebb] pb-3 text-[11px] leading-6"><p>{language === 'th' ? 'ยอดเดิม' : 'Original expense'} {(Math.round(-tx.amount * 100) + (tx.refunds ?? []).reduce((sum, item) => sum + item.amountCents, 0)) / 100} ฿</p>{tx.refunds?.map(item => <p key={item.requestId}>{new Date(item.createdAt).toLocaleDateString(language === 'th' ? 'th-TH' : 'en-US', { timeZone: 'Asia/Bangkok' })} · {language === 'th' ? (item.kind === 'cancel' ? 'ยกเลิก' : 'คืนเงิน') : item.kind} {(item.amountCents / 100).toFixed(2)} ฿</p>)}</div>}
                                 <div className="mb-3 flex items-center justify-between border-b border-dashed border-[#d9cebb] pb-3">
                                   <span className="flex items-center gap-2 text-[10px] font-bold tracking-widest text-[#93846b]"><ReceiptText aria-hidden="true" className="h-4 w-4" />NORINOTE</span>
                                   <span className="text-[9px] text-[#93846b]">{language === 'th' ? 'บันทึกรายการ' : 'TRANSACTION NOTE'}</span>
@@ -422,7 +426,7 @@ export default function NotePage() {
                                   <div className="flex justify-between gap-4"><dt className="shrink-0">{language === 'th' ? 'ช่องทางจ่าย' : 'Payment'}</dt><dd className="min-w-0 break-words text-right">{paymentName}</dd></div>
                                 </dl>
                                 <div className="flex items-baseline justify-between gap-3 border-t border-dashed border-[#d9cebb] pt-3">
-                                  <span className="text-xs font-bold text-[#635744]">{language === 'th' ? (tx.amount < 0 ? 'รายจ่าย' : 'รายรับ') : (tx.amount < 0 ? 'Expense' : 'Income')}</span>
+                                  <span className="text-xs font-bold text-[#635744]">{language === 'th' ? (tx.refunds?.length ? 'รายจ่ายสุทธิ' : tx.amount < 0 ? 'รายจ่าย' : 'รายรับ') : (tx.refunds?.length ? 'Net expense' : tx.amount < 0 ? 'Expense' : 'Income')}</span>
                                   <span className="break-all text-right text-lg font-black text-[#403b32]">{Math.abs(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}<span className="ml-2 text-[9px] font-normal text-[#93846b]">THB</span></span>
                                 </div>
                               </motion.div>

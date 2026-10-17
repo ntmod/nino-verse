@@ -7,7 +7,6 @@ export interface IPaymentMethod extends Document {
   color: string;
   order: number;
   desc?: string;
-  initialBalance?: number | null;
   createdAt: Date;
 }
 
@@ -18,14 +17,8 @@ const PaymentMethodSchema: Schema = new Schema({
   color: { type: String, required: true },
   order: { type: Number, default: 0 },
   desc: { type: String },
-  initialBalance: { type: Number, default: null },
   createdAt: { type: Date, default: Date.now },
 });
-
-// Next.js development reloads can reuse the model compiled before this field existed.
-if (mongoose.models.PaymentMethod && !mongoose.models.PaymentMethod.schema.path("initialBalance")) {
-  mongoose.models.PaymentMethod.schema.add({ initialBalance: { type: Number, default: null } });
-}
 
 if (mongoose.models.PaymentMethod && !mongoose.models.PaymentMethod.schema.path("userId")) {
   mongoose.models.PaymentMethod.schema.add({ userId: { type: String, index: true } });

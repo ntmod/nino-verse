@@ -7,12 +7,15 @@ import Link from "next/link";
 import { useModal } from "@/lib/modal-context";
 import { useLanguage } from "@/lib/language-context";
 
+import type { Transaction } from "@/lib/types";
+
 interface FixedCostItem {
   id: string;
   name: string;
   amount: number;
   category?: string;
   paymentMethod?: string;
+  walletId?: string;
   isPaid?: boolean;
   icon?: string;
 }
@@ -22,6 +25,7 @@ interface FixedCostCardProps {
   currency?: string;
   isLoading?: boolean;
   onReset?: () => void;
+  onSuccess: (transaction: Transaction) => void;
 }
 
 // Custom component to scramble/roll values to their destination targets
@@ -61,7 +65,8 @@ export default function FixedCostCard({
   items = [], 
   currency = "THB",
   isLoading = false,
-  onReset
+  onReset,
+  onSuccess
 }: FixedCostCardProps) {
   const { openExpenseModal } = useModal();
   const { t } = useLanguage();
@@ -75,7 +80,7 @@ export default function FixedCostCard({
   const currentItems = items.slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1) * ITEMS_PER_PAGE);
 
   return (
-    <div className="relative bg-[#fffdf5] shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] border border-[#e1d7c5]/80 min-h-[380px] flex flex-col justify-between overflow-hidden">
+    <div data-paper-surface="" className="relative bg-[#fffdf7] rounded-2xl shadow-[0_2px_8px_rgba(78,62,36,0.03)] border border-[#e1d7c5]/80 min-h-[380px] flex flex-col justify-between overflow-hidden">
       <AnimatePresence mode="wait">
         {isLoading ? (
           <motion.div
@@ -141,7 +146,7 @@ export default function FixedCostCard({
 
               {items.length === 0 ? (
                 <div className="py-12 flex flex-col items-center justify-center text-center space-y-4 font-mono">
-                  <div className="w-16 h-16 rounded-xl bg-[#fffdf5] border border-[#d9cebb] flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-xl bg-[#fffdf7] border border-[#d9cebb] flex items-center justify-center">
                     <Home className="w-8 h-8 text-[#b6a68e]" />
                   </div>
                   <div className="space-y-1">
@@ -167,13 +172,12 @@ export default function FixedCostCard({
                               key={item.id || index}
                               onClick={() => {
                                 if (!item.isPaid) {
-                                  openExpenseModal(() => {
-                                    window.location.reload();
-                                  }, {
+                                  openExpenseModal(onSuccess, {
                                     name: item.name,
                                     amount: item.amount,
                                     category: item.category,
                                     paymentMethod: item.paymentMethod,
+                                    walletId: item.walletId,
                                   });
                                 }
                               }}
@@ -213,7 +217,7 @@ export default function FixedCostCard({
                       <button 
                         onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
                         disabled={currentPage === 0}
-                        className="w-7 h-7 flex items-center justify-center rounded-md border border-[#d9cebb] text-[#292722] hover:bg-[#f5eedf] disabled:opacity-30 disabled:hover:bg-[#fffdf5] disabled:hover:text-[#292722] transition-colors cursor-pointer"
+                        className="w-7 h-7 flex items-center justify-center rounded-md border border-[#d9cebb] text-[#292722] hover:bg-[#f5eedf] disabled:opacity-30 disabled:hover:bg-[#fffdf7] disabled:hover:text-[#292722] transition-colors cursor-pointer"
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </button>
@@ -223,7 +227,7 @@ export default function FixedCostCard({
                       <button 
                         onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
                         disabled={currentPage === totalPages - 1}
-                        className="w-7 h-7 flex items-center justify-center rounded-md border border-[#d9cebb] text-[#292722] hover:bg-[#f5eedf] disabled:opacity-30 disabled:hover:bg-[#fffdf5] disabled:hover:text-[#292722] transition-colors cursor-pointer"
+                        className="w-7 h-7 flex items-center justify-center rounded-md border border-[#d9cebb] text-[#292722] hover:bg-[#f5eedf] disabled:opacity-30 disabled:hover:bg-[#fffdf7] disabled:hover:text-[#292722] transition-colors cursor-pointer"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </button>

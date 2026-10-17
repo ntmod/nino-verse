@@ -1,6 +1,7 @@
 'use client';
 
 import { ReceiptText } from "lucide-react";
+import WalletOverview from "./WalletOverview";
 import ReceiptPaper from "@/components/ReceiptPaper";
 import ReceiptStamp from "@/components/ReceiptStamp";
 import { useLanguage } from "@/lib/language-context";
@@ -69,6 +70,7 @@ export default function CycleReceipt({ transactions, cycle, previousTotal, onClo
           </div>
         </>
       )}
+      <WalletOverview compact startDate={cycle.startDate.toISOString()} endDate={cycle.endDate.toISOString()} />
       {summary.status === 'complete' && <ReceiptStamp animated={false} label={th ? "ตรวจแล้ว · ปิดยอดแล้ว" : "Verified · Cycle closed"} />}
       <p className="mt-6 border-t border-dashed border-[#d9cebb] pt-4 text-center text-[10px] leading-relaxed text-[#7f715d]">{th ? "จดนิดหน่อย ใช้ชีวิตชัดขึ้น 🐱" : "Small notes. Clearer days. 🐱"}</p>
     </ReceiptPaper>

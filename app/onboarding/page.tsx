@@ -8,6 +8,6 @@ export default async function OnboardingPage() {
   const incoming = await headers();
   const session = await (await getAuth()).api.getSession({ headers: incoming });
   if (!session?.user.emailVerified) redirect('/login');
-  if (!await needsOnboarding(session.user)) redirect('/dashboard');
+  if (!await needsOnboarding(session.user)) redirect('/home');
   return <Onboarding name={session.user.name} />;
 }

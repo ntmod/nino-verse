@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     if (owner instanceof Response) return owner;
     const body = await request.json();
     if (!await ownedReferences(body, owner.scope)) return NextResponse.json({ error: "Invalid category or payment method" }, { status: 400 });
-    const { name, amount, category, paymentMethod, order } = body;
+    const { name, amount, category, paymentMethod, walletId, order } = body;
 
     if (!name || amount === undefined || !category || !paymentMethod) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -35,6 +35,7 @@ export async function POST(request: Request) {
       amount: Number(amount),
       category,
       paymentMethod,
+      walletId,
       order: order || 0,
     });
 

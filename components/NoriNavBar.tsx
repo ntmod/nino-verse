@@ -1,107 +1,85 @@
-"use client";
+'use client';
 
-import { motion, useReducedMotion } from "framer-motion";
-import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { Globe, LayoutDashboard, LogOut, NotebookPen, Settings } from "lucide-react";
-import LoadingScreen from "./LoadingScreen";
-import { useLanguage } from "@/lib/language-context";
-
-import { authClient } from "@/lib/auth-client";
-import Image from "next/image";
-import SoundToggle from "./SoundToggle";
+import { usePathname, useRouter } from 'next/navigation';
+import { useState, useEffect, useRef } from 'react';
+import { ChevronDown, Globe, House, LayoutDashboard, LoaderCircle, LogOut, NotebookPen, Settings } from 'lucide-react';
+import { DropdownMenu } from 'radix-ui';
+import { useLanguage } from '@/lib/language-context';
+import { authClient } from '@/lib/auth-client';
+import Image from 'next/image';
+import Link from 'next/link';
+import SoundToggle from './SoundToggle';
 
 const NAV_CONFIG = [
-  { key: "nav_home", path: "/dashboard", icon: LayoutDashboard },
-  { key: "nav_notes", path: "/note", icon: NotebookPen },
-  { key: "nav_settings", path: "/settings", icon: Settings },
+  { key: 'nav_home', path: '/home', icon: House },
+  { key: 'nav_dashboard', path: '/dashboard', icon: LayoutDashboard },
+  { key: 'nav_notes', path: '/note', icon: NotebookPen },
+  { key: 'nav_settings', path: '/settings', icon: Settings },
 ];
+const focus = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#879574]';
 
 export default function NoriNavBar() {
-  useEffect(() => { document.documentElement.classList.remove("dark"); }, []);
+  useEffect(() => { document.documentElement.classList.remove('dark'); }, []);
   const { data: account } = authClient.useSession();
   const [failedImage, setFailedImage] = useState<string | null>(null);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState(false);
+  const logoutPending = useRef(false);
   const profile = account?.user;
   const router = useRouter();
   const pathname = usePathname();
   const { language, toggleLanguage, t } = useLanguage();
-  const [showExitWipe, setShowExitWipe] = useState(false);
-  const reducedMotion = useReducedMotion();
-
-  const navigate = (path: string) => {
-    if (path === pathname) return;
-    setShowExitWipe(true);
-    window.setTimeout(() => {
-      setShowExitWipe(false);
-      router.push(path);
-    }, 800);
-  };
+  const th = language === 'th';
+  const activePath = NAV_CONFIG.find(item => pathname === item.path || pathname.startsWith(`${item.path}/`))?.path;
 
   const logout = async () => {
-    setShowExitWipe(true);
+    if (logoutPending.current) return;
+    logoutPending.current = true;
+    setLoggingOut(true); setLogoutError(false);
     try {
       const result = await authClient.signOut();
-      if (result.error) throw new Error("Logout failed");
-      window.setTimeout(() => {
-        setShowExitWipe(false);
-        router.push("/login");
-        router.refresh();
-      }, 800);
-    } catch {
-      setShowExitWipe(false);
-    }
+      if (result.error) throw new Error('Logout failed');
+      router.replace('/login');
+      router.refresh();
+    } catch { setLogoutError(true); }
+    finally { logoutPending.current = false; setLoggingOut(false); }
   };
 
-  return (
-    <>
-      {showExitWipe && <LoadingScreen mode="out" />}
-      <div className="fixed top-0 left-0 right-0 z-[10000] p-2 sm:p-4 flex justify-center pointer-events-none select-none">
-        <motion.nav
-          initial={reducedMotion ? false : { y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 350, damping: 26 }}
-          className="pointer-events-auto bg-[#fffdf5] border border-[#d9cebb] px-1 sm:px-2 h-14 flex items-center gap-0 sm:gap-1"
-          style={{ borderRadius: "5px 5px 12px 12px", boxShadow: "2px 4px 0 #e7dece, 0 8px 24px rgba(78,62,36,0.06)" }}
-          aria-label={t("nav_home")}
-        >
-          {NAV_CONFIG.map((item) => {
-            const active = pathname === item.path || (item.path === "/settings" && pathname.startsWith("/settings/"));
-            const Icon = item.icon;
-
-            return (
-              <motion.button
-                key={item.path}
-                aria-label={t(item.key)}
-                aria-current={active ? "page" : undefined}
-                onClick={() => navigate(item.path)}
-                animate={{ y: active ? 4 : 0, backgroundColor: active ? "#e9a342" : "#f5f0e5" }}
-                transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 400, damping: 25 }}
-                style={{ borderRadius: "3px 3px 9px 3px", border: "1px solid #d9cebb", background: "#f5f0e5", boxShadow: active ? "1px 3px 0 #bd8a45" : "1px 2px 0 #e7dece" }}
-                className={`relative isolate min-h-11 min-w-11 px-2 py-1.5 flex items-center gap-2 group cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b97423] ${active ? "text-[#372b1c]" : "text-[#93846b] hover:text-[#635744]"}`}
-              >
-                <Icon aria-hidden="true" className="w-4 h-4" />
-                <span className="text-[11px] font-bold uppercase tracking-wider hidden sm:block">{t(item.key)}</span>
-              </motion.button>
-            );
-          })}
-
-          <div className="w-px h-5 bg-[#e1d7c5]/60 mx-0.5 sm:mx-1" />
-          <button onClick={toggleLanguage} className="relative min-h-11 px-1.5 sm:px-2 py-1 flex items-center gap-1.5 rounded-full text-[#7f715d] hover:text-[#292722] border border-[#d9cebb]/70 hover:border-[#b6a68e] bg-[#f5eedf]/70 hover:bg-[#fffdf5] transition-all duration-200 group cursor-pointer text-[10px] font-mono font-black tracking-wider" title={language === "en" ? "Switch to Thai (TH)" : "Switch to English (EN)"}>
-            <Globe className="hidden sm:block w-3 h-3 text-[#93846b] group-hover:text-[#b97423] transition-colors" />
-            <span className="leading-none">{language.toUpperCase()}</span>
-          </button>
-
-          <div className="w-px h-5 bg-[#e1d7c5]/60 mx-0.5 sm:mx-1" />
+  return <>
+    <header className="fixed inset-x-0 top-0 z-[10000] h-16 border-b border-[#e1d9c9] bg-[#fffdf7]/95 text-[#635744] backdrop-blur-md">
+      <div className="mx-auto flex h-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+        <Link href="/home" aria-label={th ? 'NoriNote · หน้าแรก' : 'NoriNote · Home'} className={`flex shrink-0 items-center gap-2.5 rounded-lg ${focus}`}>
+          <span aria-hidden="true" className="flex h-9 w-9 -rotate-6 items-center justify-center rounded-xl border border-[#d7dfc9] bg-[#eaf0e1] text-[#5b7151]"><NotebookPen size={18} strokeWidth={1.7} /></span>
+          <span className="text-lg font-bold tracking-tight text-[#423c30]">NoriNote<span className="text-[#9ba985]">.</span></span>
+        </Link>
+        <nav aria-label={th ? 'เมนูหลัก' : 'Main navigation'} className="hidden items-center gap-1 rounded-full bg-[#f2eee4] p-1 lg:flex">
+          {NAV_CONFIG.map(({ key, path, icon: Icon }) => <Link key={path} href={path} aria-current={activePath === path ? 'page' : undefined}
+            className={`flex min-h-10 items-center gap-2 rounded-full px-4 text-xs font-medium transition-colors ${focus} ${activePath === path ? 'bg-[#4d654b] text-[#fffdf7] shadow-sm' : 'text-[#93846b] hover:bg-[#e8e3d7] hover:text-[#423c30]'}`}>
+            <Icon aria-hidden="true" size={15} strokeWidth={1.8} />{t(key)}
+          </Link>)}
+        </nav>
+        <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+          <button type="button" onClick={toggleLanguage} aria-label={th ? 'เปลี่ยนเป็นภาษาอังกฤษ' : 'Switch to Thai'} title={th ? 'เปลี่ยนเป็นภาษาอังกฤษ' : 'Switch to Thai'} className={`flex h-11 min-w-11 items-center justify-center gap-1 rounded-full text-[10px] font-bold text-[#8a7d65] hover:bg-[#f2eee4] ${focus}`}><Globe aria-hidden="true" size={14} className="hidden sm:block" />{language.toUpperCase()}</button>
           <SoundToggle />
-          {profile && <span title={`${profile.name} · ${profile.email}`} aria-label={`${language === 'th' ? 'บัญชีของ' : 'Account of'} ${profile.name}`} className="relative ml-1 flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#fffdf5] text-xs font-bold text-[#635744]" style={{ borderRadius: "50%", border: "3px solid #fffdf5", boxShadow: "0 0 0 1px #d9cebb, 1px 2px 0 #e7dece", transform: "rotate(-6deg)" }}>
-            {profile.image && failedImage !== profile.image ? <Image src={profile.image} alt={profile.name} width={28} height={28} unoptimized referrerPolicy="no-referrer" onError={() => setFailedImage(profile.image ?? null)} className="h-full w-full rounded-full object-cover" style={{ borderRadius: "50%" }} /> : <span aria-hidden="true">{Array.from(profile.name || profile.email)[0]?.toUpperCase()}</span>}
-          </span>}
-          <button aria-label={t("nav_logout")} onClick={logout} className="relative min-h-11 min-w-11 px-2 py-1.5 flex items-center gap-1.5 rounded-full text-red-400 hover:text-red-600 transition-all duration-300 group cursor-pointer">
-            <LogOut className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
-            <span className="text-[11px] font-bold uppercase tracking-wider hidden sm:block">{t("nav_logout")}</span>
-          </button>
-        </motion.nav>
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger aria-label={th ? 'เมนูบัญชี' : 'Account menu'} className={`ml-1 flex min-h-11 items-center gap-1 rounded-full px-1 ${focus}`}>
+              <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-[#ded5c5] bg-[#eee6d6] text-xs font-bold text-[#8b7858]">
+                {profile?.image && failedImage !== profile.image ? <Image src={profile.image} alt="" width={32} height={32} unoptimized referrerPolicy="no-referrer" onError={() => setFailedImage(profile.image ?? null)} className="h-full w-full object-cover" /> : <span aria-hidden="true">{Array.from(profile?.name || profile?.email || 'N')[0]?.toUpperCase()}</span>}
+              </span><ChevronDown aria-hidden="true" size={12} className="hidden sm:block text-[#a09278]" />
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal><DropdownMenu.Content align="end" sideOffset={10} collisionPadding={16} className="z-[11000] w-64 max-w-[calc(100vw-2rem)] rounded-2xl border border-[#ded5c5] bg-[#fffdf7] p-2 text-[#635744] shadow-xl">
+              <DropdownMenu.Label className="px-3 py-3"><span className="block truncate text-sm font-bold">{profile?.name || 'NoriNote'}</span><span className="mt-1 block truncate text-[11px] font-normal text-[#a09278]">{profile?.email}</span></DropdownMenu.Label>
+              <DropdownMenu.Separator className="mx-2 my-1 h-px bg-[#e9e1d2]" />
+              <DropdownMenu.Item asChild><Link href="/settings" className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-xs outline-none data-highlighted:bg-[#f2eee4]"><Settings aria-hidden="true" size={15} />{t('nav_settings')}</Link></DropdownMenu.Item>
+              <DropdownMenu.Item disabled={loggingOut} onSelect={() => { void logout(); }} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl px-3 text-xs text-[#a56350] outline-none data-highlighted:bg-[#f7ece6] data-disabled:opacity-50">{loggingOut ? <LoaderCircle aria-hidden="true" size={15} className="animate-spin motion-reduce:animate-none" /> : <LogOut aria-hidden="true" size={15} />}{loggingOut ? (th ? 'กำลังออก…' : 'Signing out…') : t('nav_logout')}</DropdownMenu.Item>
+            </DropdownMenu.Content></DropdownMenu.Portal>
+          </DropdownMenu.Root>
+        </div>
       </div>
-    </>
-  );
+      {logoutError && <p role="alert" className="border-b border-[#e5cbbd] bg-[#fff4ed] px-4 py-3 text-center text-xs text-[#a56350]">{th ? 'ออกจากระบบไม่สำเร็จ ลองอีกครั้งได้ที่เมนูบัญชี' : 'Could not sign out. Please retry from the account menu.'}</p>}
+    </header>
+    <nav aria-label={th ? 'เมนูหลักบนมือถือ' : 'Mobile navigation'} className="fixed inset-x-0 bottom-0 z-[10000] grid grid-cols-4 border-t border-[#e1d9c9] bg-[#fffdf7]/95 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] text-[#8a7d65] backdrop-blur-md lg:hidden">
+      {NAV_CONFIG.map(({ key, path, icon: Icon }) => <Link key={path} href={path} aria-current={activePath === path ? 'page' : undefined} className={`flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] transition-colors ${focus} ${activePath === path ? 'bg-[#eaf0e1] font-bold text-[#4d654b]' : 'hover:bg-[#f2eee4]'}`}><Icon aria-hidden="true" size={20} strokeWidth={activePath === path ? 2 : 1.6} /><span>{t(key)}</span></Link>)}
+    </nav>
+  </>;
 }

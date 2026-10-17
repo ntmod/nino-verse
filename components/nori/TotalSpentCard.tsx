@@ -17,6 +17,8 @@ interface TotalSpentCardProps {
   cumulativeData?: any;
   prevCumulativeData?: any;
   isLoading?: boolean;
+  defaultExpanded?: boolean;
+  openEnded?: boolean;
 }
 
 // Custom component to scramble/roll values to their destination targets
@@ -61,10 +63,13 @@ export default function TotalSpentCard({
   endDate,
   cumulativeData = [],
   prevCumulativeData = [],
-  isLoading = false
+  isLoading = false,
+  defaultExpanded = false,
+  openEnded = false
 }: TotalSpentCardProps) {
   const { t } = useLanguage();
-  const [isExpanded, setIsExpanded] = React.useState(false);
+  const reducedMotion = useReducedMotion();
+  const [isExpanded, setIsExpanded] = React.useState(defaultExpanded);
   const [showLastCycle, setShowLastCycle] = React.useState(false);
   const [hoveredPoint, setHoveredPoint] = React.useState<number | null>(null);
 
@@ -74,8 +79,10 @@ export default function TotalSpentCard({
   const now = new Date().getTime();
 
   const totalDays = Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)));
-  const daysElapsed = Math.max(1, Math.min(totalDays, Math.round((now - start) / (1000 * 60 * 60 * 24))));
+  const daysElapsed = Math.max(1, Math.min(totalDays, Math.floor((now - start) / (1000 * 60 * 60 * 24)) + 1));
   const cycleProgress = Math.min(100, Math.round((daysElapsed / totalDays) * 100));
+
+  const chartDays = Math.max(totalDays, showLastCycle ? prevCumulativeData.length : 0);
 
   // Chart preparation
   const currentMax = cumulativeData.length > 0 ? Math.max(...cumulativeData.map((d: any) => d.amount)) : 0;
@@ -92,23 +99,23 @@ export default function TotalSpentCard({
 
   const points = React.useMemo(() => {
     if (!cumulativeData || cumulativeData.length === 0) return [];
-    const step = availableWidth / Math.max(1, totalDays - 1);
+    const step = availableWidth / Math.max(1, chartDays - 1);
     return cumulativeData.map((d: any, i: number) => ({
       x: paddingX + (d.day - 1) * step,
       y: svgHeight - paddingY - (d.amount / yAxisMax) * availableHeight,
       ...d
     }));
-  }, [cumulativeData, yAxisMax, totalDays, availableWidth, availableHeight]);
+  }, [cumulativeData, yAxisMax, chartDays, availableWidth, availableHeight]);
 
   const prevPoints = React.useMemo(() => {
     if (!showLastCycle || !prevCumulativeData || prevCumulativeData.length === 0) return [];
-    const step = availableWidth / Math.max(1, totalDays - 1);
+    const step = availableWidth / Math.max(1, chartDays - 1);
     return prevCumulativeData.map((d: any, i: number) => ({
       x: paddingX + (d.day - 1) * step,
       y: svgHeight - paddingY - (d.amount / yAxisMax) * availableHeight,
       ...d
     }));
-  }, [prevCumulativeData, showLastCycle, yAxisMax, totalDays, availableWidth, availableHeight]);
+  }, [prevCumulativeData, showLastCycle, yAxisMax, chartDays, availableWidth, availableHeight]);
 
   const buildPaths = (pts: any[]) => {
     if (pts.length === 0) return { linePath: "", areaPath: "" };
@@ -124,14 +131,14 @@ export default function TotalSpentCard({
   const prevPaths = buildPaths(prevPoints);
 
   const tickIndices = React.useMemo(() => {
-    const targets = [1, 5, 10, 15, 20, 25, totalDays];
-    return targets.filter(t => t <= totalDays);
-  }, [totalDays]);
+    const targets = [1, 5, 10, 15, 20, 25, chartDays];
+    return [...new Set(targets.filter(t => t <= chartDays))];
+  }, [chartDays]);
 
   return (
     <div className="relative">
       {!isLoading && <NoriPeek />}
-    <div className="relative overflow-hidden bg-[#fffdf5] shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] border border-[#e1d7c5] text-left flex flex-col justify-between min-h-[140px]">
+    <div data-paper-surface="" className="relative overflow-hidden bg-[#fffdf7] rounded-2xl shadow-[0_2px_8px_rgba(78,62,36,0.03)] border border-[#e1d7c5] text-left flex flex-col justify-between min-h-[140px]">
       <AnimatePresence mode="wait">
         {isLoading ? (
           <motion.div
@@ -168,7 +175,7 @@ export default function TotalSpentCard({
           >
             {/* Top Section */}
             <div className="p-6 pb-4">
-              <p className="text-[#93846b] text-xs font-bold uppercase tracking-[0.2em] font-mono mb-2">{t("total_spent")}</p>
+              <p data-paper-title="" className="text-[#93846b] text-xs font-bold uppercase tracking-[0.2em] font-mono mb-2">{t("total_spent")}</p>
               <div className="flex flex-wrap items-baseline gap-2">
                 <span className="text-[#b97423] text-sm font-bold font-mono">{currency}</span>
                 <h2 className="text-4xl md:text-5xl font-black text-[#292722] tracking-tighter tabular-nums">
@@ -185,7 +192,7 @@ export default function TotalSpentCard({
               className="border-t border-dashed border-[#d9cebb] bg-[#f5eedf] text-[#292722] p-3 px-6 flex flex-wrap gap-2 items-center justify-between text-[10px] font-mono select-none cursor-pointer hover:bg-[#efe4cf] focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-[#d58a2b] transition-colors group"
             >
               <span className="text-[#93846b] font-bold flex items-center gap-2">
-                <span>{daysElapsed}/{totalDays} {t("day")} ({cycleProgress}%)</span>
+                <span>{openEnded ? `${daysElapsed} ${t("day")}` : `${daysElapsed}/${totalDays} ${t("day")} (${cycleProgress}%)`}</span>
                 <span className="text-[#b39a73] group-hover:text-[#292722] transition-colors text-xs">
                   {isExpanded ? "▲" : "▼"}
                 </span>
@@ -232,7 +239,7 @@ export default function TotalSpentCard({
                       className={`px-3 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
                         showLastCycle 
                           ? "bg-[#292722] border-[#292722] text-white shadow-sm"
-                          : "bg-[#fffdf5] border-[#d9cebb] text-[#93846b] hover:text-[#292722] hover:border-[#b39a73]"
+                          : "bg-[#fffdf7] border-[#d9cebb] text-[#93846b] hover:text-[#292722] hover:border-[#b39a73]"
                       }`}
                     >
                       {showLastCycle ? t("ui_comparing_last_cycle") : t("ui_compare_last_cycle")}
@@ -293,10 +300,16 @@ export default function TotalSpentCard({
 
                       {/* Current Cycle Area & Line */}
                       {currentPaths.areaPath && (
-                        <path d={currentPaths.areaPath} fill="url(#v2CumulativeGrad)" />
+                        <motion.path key={`area-${start}-${end}`} d={currentPaths.areaPath} fill="url(#v2CumulativeGrad)"
+                          initial={reducedMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }}
+                          transition={{ duration: reducedMotion ? 0 : 0.9, delay: reducedMotion ? 0 : 0.3 }} />
                       )}
                       {currentPaths.linePath && (
-                        <path
+                        <motion.path
+                          key={`line-${start}-${end}`}
+                          initial={reducedMotion ? false : { pathLength: 0 }}
+                          animate={{ pathLength: 1 }}
+                          transition={{ duration: reducedMotion ? 0 : 1.2, ease: "easeInOut" }}
                           d={currentPaths.linePath}
                           fill="none"
                           stroke="#292722"
@@ -310,8 +323,11 @@ export default function TotalSpentCard({
                       {points.map((pt: any, i: number) => {
                         const isHovered = hoveredPoint === i;
                         return (
-                          <g key={i}>
-                            <circle
+                          <g key={`${start}-${end}-${i}`}>
+                            <motion.circle
+                              initial={reducedMotion ? false : { opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ duration: reducedMotion ? 0 : 0.15, delay: reducedMotion ? 0 : (i / Math.max(1, points.length - 1)) * 1.2 }}
                               cx={pt.x}
                               cy={pt.y}
                               r={isHovered ? 5 : 2.5}
@@ -336,7 +352,7 @@ export default function TotalSpentCard({
 
                       {/* X Axis Ticks */}
                       {tickIndices.map((dayNum) => {
-                        const pt = points.find((p: any) => p.day === dayNum);
+                        const pt = points.find((p: any) => p.day === dayNum) ?? prevPoints.find((p: any) => p.day === dayNum);
                         if (!pt) return null;
                         return (
                           <text

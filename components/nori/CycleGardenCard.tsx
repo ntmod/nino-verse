@@ -85,7 +85,7 @@ export default function CycleGardenCard({ transactions, cycle, isLoading, ready,
   const selected = days.find(day => day.date === selectedDate);
   const dateLabel = (date: string) => new Date(`${date}T00:00:00Z`).toLocaleDateString(th ? 'th-TH' : 'en-US', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 
-  return <section className="min-w-0 border border-[#e1d7c5] bg-[#fffdf5] p-4 text-[#635744] shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] sm:p-6">
+  return <section data-paper-surface="" className="min-w-0 border border-[#e1d7c5] bg-[#fffdf7] p-4 text-[#635744] rounded-2xl shadow-[0_2px_8px_rgba(78,62,36,0.03)] sm:p-6">
     <div className="flex flex-wrap items-center justify-between gap-2">
       <h2 className="flex items-center gap-2 font-mono text-[10px] font-black uppercase tracking-wider text-[#7f715d]"><Sprout aria-hidden="true" className="h-4 w-4" />{th ? 'สวนของรอบนี้' : 'Your cycle garden'}</h2>
       <span className="text-[10px] text-[#93846b]">{atmosphere === 'day' ? (th ? 'แสงกลางวัน ☀️' : 'Daylight ☀️') : atmosphere === 'evening' ? (th ? 'ยามเย็น 🌅' : 'Evening 🌅') : (th ? 'ราตรีในสวน 🌙' : 'Garden at night 🌙')}</span>
@@ -128,7 +128,7 @@ export default function CycleGardenCard({ transactions, cycle, isLoading, ready,
           <g fill={colors.leaves}><ellipse cx="42" cy="370" rx="13" ry="33" transform="rotate(-25 42 370)" /><ellipse cx="113" cy="383" rx="14" ry="28" transform="rotate(28 113 383)" /><ellipse cx="885" cy="377" rx="15" ry="34" transform="rotate(-30 885 377)" /><ellipse cx="957" cy="361" rx="13" ry="37" transform="rotate(30 957 361)" /></g>
           <g fill="#e6b49c"><circle cx="63" cy="370" r="7" /><circle cx="934" cy="370" r="9" /></g>
         </svg>
-        <span className="absolute bottom-3 left-1/2 z-[150] -translate-x-1/2 rounded-full bg-[#fffdf5]/80 px-3 py-1 font-mono text-[9px] text-[#6f8057]">{dateLabel(days[0].date)} — {dateLabel(days[days.length - 1].date)}</span>
+        <span className="absolute bottom-3 left-1/2 z-[150] -translate-x-1/2 rounded-full bg-[#fffdf7]/80 px-3 py-1 font-mono text-[9px] text-[#6f8057]">{dateLabel(days[0].date)} — {dateLabel(days[days.length - 1].date)}</span>
       </div>
       </div>
       <p className="mt-3 text-[10px] text-[#93846b]">{planted === 0 ? (th ? 'สวนยังเงียบอยู่ จดวันไหนก็ปลูกต้นแรกได้เลย 🌱' : 'A quiet garden. Your first recorded day will plant a seed 🌱') : (th ? 'สวนโตจากวันที่บันทึก ไม่ได้โตตามยอดเงิน' : 'Grown from recorded days, never from how much you spend')}</p>

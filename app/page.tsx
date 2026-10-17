@@ -25,7 +25,7 @@ export default function Home() {
     enteringRef.current = true;
     playUISound("save");
     setIsTransitioning(true);
-    timerRef.current = window.setTimeout(() => router.push("/dashboard"), reducedMotion ? 0 : 700);
+    timerRef.current = window.setTimeout(() => router.push("/home"), reducedMotion ? 0 : 700);
   }, [reducedMotion, router]);
 
   useEffect(() => {

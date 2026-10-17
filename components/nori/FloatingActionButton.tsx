@@ -47,7 +47,7 @@ export default function FloatingActionButton({ onSuccess }: FloatingActionButton
   };
 
   return (
-    <div ref={containerRef} className="fixed bottom-8 right-4 md:bottom-12 md:right-6 z-[10030] h-12 w-12">
+    <div ref={containerRef} className="fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] right-4 lg:bottom-12 lg:right-6 z-[10030] h-12 w-12">
       {/* Submenu */}
       <AnimatePresence>
         {isOpen && (

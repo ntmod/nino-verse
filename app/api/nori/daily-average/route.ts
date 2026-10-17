@@ -4,7 +4,7 @@ import dbConnect from "@/lib/db";
 import Transaction from "@/models/Transaction";
 import Category from "@/models/Category";
 import DailyAverageConfig from "@/models/DailyAverageConfig";
-import { getSpendingCycle } from "@/lib/spending-cycle.js";
+import { userCycle } from "@/lib/cycle-server";
 
 export async function GET(request: Request) {
   try {
@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     if (Boolean(startDateStr) !== Boolean(endDateStr)) {
       return NextResponse.json({ error: "startDate and endDate must be provided together" }, { status: 400 });
     }
-    const cycle = getSpendingCycle();
+    const cycle = await userCycle(owner.id);
     const startDate = startDateStr ? new Date(startDateStr) : cycle.startDate;
     const endDate = endDateStr ? new Date(endDateStr) : cycle.endDate;
     if (!Number.isFinite(startDate.getTime()) || !Number.isFinite(endDate.getTime()) || startDate > endDate) {

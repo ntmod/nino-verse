@@ -24,7 +24,7 @@ export default function LoginPage() {
     if (loading || !config?.ready || !config.google) return;
     setLoading(true); setError('');
     try {
-      const result = await authClient.signIn.social({ provider: 'google', callbackURL: '/dashboard', errorCallbackURL: '/login' });
+      const result = await authClient.signIn.social({ provider: 'google', callbackURL: '/home', errorCallbackURL: '/login' });
       if (result.error) throw new Error(result.error.message);
     } catch {
       setError(th ? 'เข้าสู่ระบบด้วย Google ไม่สำเร็จ ลองอีกครั้งนะ' : 'Google sign-in failed. Please try again.');

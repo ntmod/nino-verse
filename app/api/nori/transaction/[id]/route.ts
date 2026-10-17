@@ -12,13 +12,17 @@ export async function PATCH(
     const owner = await requireUser();
     if (owner instanceof Response) return owner;
     const { id } = await params;
-    const { name, category, subCategory, amount, date, paymentMethod } = await request.json();
-    const body = { name, category, subCategory, amount, date, paymentMethod };
-    if (!await ownedReferences(body, owner.scope)) return NextResponse.json({ error: "Invalid category or payment method" }, { status: 400 });
+    await dbConnect();
+    const original = await Transaction.findOne({ $and: [owner.scope, { _id: id }] });
+    if (!original) return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
+    if (original.refunds?.length) return NextResponse.json({ error: 'Refunded expenses cannot be edited' }, { status: 409 });
+    const { name, category, subCategory, amount, date, paymentMethod, walletId } = await request.json();
+    const body = { name, category, subCategory, amount, date, paymentMethod, walletId };
+    if (!await ownedReferences({ ...body, walletId: walletId === original.walletId ? undefined : walletId }, owner.scope)) return NextResponse.json({ error: "Invalid category, payment method or wallet" }, { status: 400 });
     
     await dbConnect();
     const updatedTransaction = await Transaction.findOneAndUpdate(
-      { $and: [owner.scope, { _id: id }] },
+      { $and: [owner.scope, { _id: id, 'refunds.0': { $exists: false } }] },
       { ...body, date: body.date ? new Date(body.date) : undefined },
       { new: true, runValidators: true }
     );

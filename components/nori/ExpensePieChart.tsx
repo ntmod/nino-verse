@@ -84,7 +84,7 @@ export default function ExpensePieChart({
   const activeSegment = hoveredCategory ? segments.find(s => s.name === hoveredCategory) : null;
 
   return (
-    <div className="relative bg-[#fffdf5] shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] border border-[#e1d7c5]/80 min-h-[380px] flex flex-col justify-between overflow-hidden">
+    <div data-paper-surface="" className="relative bg-[#fffdf7] rounded-2xl shadow-[0_2px_8px_rgba(78,62,36,0.03)] border border-[#e1d7c5]/80 min-h-[380px] flex flex-col justify-between overflow-hidden">
       <AnimatePresence mode="wait">
         {isLoading ? (
           <motion.div
@@ -137,7 +137,7 @@ export default function ExpensePieChart({
                   className={`min-h-11 px-2.5 py-1 rounded-lg border text-[9px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
                     showCompare 
                       ? "bg-[#292722] border-[#292722] text-white shadow-sm"
-                      : "bg-[#fffdf5] border-[#d9cebb] text-[#7f715d] hover:text-[#292722] hover:border-[#b6a68e]"
+                      : "bg-[#fffdf7] border-[#d9cebb] text-[#7f715d] hover:text-[#292722] hover:border-[#b6a68e]"
                   }`}
                 >
                   {showCompare ? t("ui_comparing_last_cycle") : t("ui_compare_last_cycle")}
@@ -146,7 +146,7 @@ export default function ExpensePieChart({
 
               {data.length === 0 ? (
                 <div className="py-12 flex flex-col items-center justify-center text-center space-y-4 font-mono">
-                  <div className="w-16 h-16 rounded-xl bg-[#fffdf5] border border-[#d9cebb] flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-xl bg-[#fffdf7] border border-[#d9cebb] flex items-center justify-center">
                     <PieChart className="w-8 h-8 text-[#b6a68e]" />
                   </div>
                   <div className="space-y-1">
@@ -158,7 +158,7 @@ export default function ExpensePieChart({
                   
                   {/* HORIZONTAL PROGRESS RIBBON */}
                   <div className="w-full flex flex-col gap-3 font-mono">
-                    <div className="w-full h-8 border border-[#d9cebb] bg-[#fffdf5] flex overflow-hidden select-none rounded-md">
+                    <div className="w-full h-8 border border-[#d9cebb] bg-[#fffdf7] flex overflow-hidden select-none rounded-md">
                       {segments.map((seg) => (
                         <button
                           type="button"
@@ -266,7 +266,7 @@ export default function ExpensePieChart({
                         <button 
                           onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
                           disabled={currentPage === 0}
-                          className="w-7 h-7 flex items-center justify-center rounded-md border border-[#d9cebb] text-[#292722] hover:bg-[#f5eedf] disabled:opacity-30 disabled:hover:bg-[#fffdf5] disabled:hover:text-[#292722] transition-colors cursor-pointer"
+                          className="w-7 h-7 flex items-center justify-center rounded-md border border-[#d9cebb] text-[#292722] hover:bg-[#f5eedf] disabled:opacity-30 disabled:hover:bg-[#fffdf7] disabled:hover:text-[#292722] transition-colors cursor-pointer"
                         >
                           <ChevronLeft className="w-4 h-4" />
                         </button>
@@ -276,7 +276,7 @@ export default function ExpensePieChart({
                         <button 
                           onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
                           disabled={currentPage === totalPages - 1}
-                          className="w-7 h-7 flex items-center justify-center rounded-md border border-[#d9cebb] text-[#292722] hover:bg-[#f5eedf] disabled:opacity-30 disabled:hover:bg-[#fffdf5] disabled:hover:text-[#292722] transition-colors cursor-pointer"
+                          className="w-7 h-7 flex items-center justify-center rounded-md border border-[#d9cebb] text-[#292722] hover:bg-[#f5eedf] disabled:opacity-30 disabled:hover:bg-[#fffdf7] disabled:hover:text-[#292722] transition-colors cursor-pointer"
                         >
                           <ChevronRight className="w-4 h-4" />
                         </button>

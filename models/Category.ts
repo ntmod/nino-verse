@@ -10,6 +10,7 @@ export interface ICategory extends Document {
   name: string;
   icon: string;
   type: "income" | "expense";
+  defaultWalletId?: string;
   subcategories: ISubcategory[];
   createdAt: Date;
 }
@@ -19,6 +20,7 @@ const CategorySchema: Schema = new Schema({
   name: { type: String, required: true },
   icon: { type: String, required: true },
   type: { type: String, enum: ["income", "expense"], default: "expense" },
+  defaultWalletId: { type: String, default: '' },
   subcategories: [{
     name: { type: String, required: true }
   }],
@@ -29,5 +31,7 @@ const CategorySchema: Schema = new Schema({
 if (mongoose.models.Category && !mongoose.models.Category.schema.path("userId")) {
   mongoose.models.Category.schema.add({ userId: { type: String, index: true } });
 }
+
+if (mongoose.models.Category && !mongoose.models.Category.schema.path('defaultWalletId')) mongoose.models.Category.schema.add({ defaultWalletId: { type: String, default: '' } });
 
 export default mongoose.models.Category || mongoose.model<ICategory>("Category", CategorySchema);

@@ -24,7 +24,7 @@ export default async function NoriLayout({
   return (
     <div className={`relative min-h-screen ${chakraPetch.className}`}>
       <NoriNavBar />
-      <div className="pt-20">
+      <div className="pt-16 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0">
         {children}
       </div>
     </div>

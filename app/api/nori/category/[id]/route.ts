@@ -1,3 +1,4 @@
+import { ownedReferences } from "@/lib/owned-references";
 import { requireUser } from "@/lib/current-user";
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
@@ -12,12 +13,13 @@ export async function PATCH(
     if (owner instanceof Response) return owner;
     const { id } = await params;
     const body = await request.json();
-    const { name, icon, type } = body;
+    const { name, icon, type, defaultWalletId } = body;
+    if (!await ownedReferences({ walletId: defaultWalletId }, owner.scope)) return NextResponse.json({ error: 'Invalid wallet' }, { status: 400 });
 
     await dbConnect();
     const category = await Category.findOneAndUpdate(
       { $and: [owner.scope, { _id: id }] },
-      { name, icon, type },
+      { name, icon, type, defaultWalletId },
       { new: true, runValidators: true }
     );
 

@@ -12,8 +12,8 @@ export async function PATCH(
     const owner = await requireUser();
     if (owner instanceof Response) return owner;
     const { id } = await params;
-    const { name, amount, category, paymentMethod, order } = await request.json();
-    const body = { name, amount, category, paymentMethod, order };
+    const { name, amount, category, paymentMethod, walletId, order } = await request.json();
+    const body = { name, amount, category, paymentMethod, walletId, order };
     if (!await ownedReferences(body, owner.scope)) return NextResponse.json({ error: "Invalid category or payment method" }, { status: 400 });
     
     await dbConnect();

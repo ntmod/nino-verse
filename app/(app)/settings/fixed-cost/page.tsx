@@ -1,6 +1,7 @@
 "use client";
 import { useLanguage } from "@/lib/language-context";
 
+import WalletPicker from "@/components/WalletPicker";
 import LoadingScreen from "@/components/LoadingScreen";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -16,7 +17,7 @@ export default function FixedCostSettings() {
   const [fixedCosts, setFixedCosts] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCost, setEditingCost] = useState<any>(null);
-  const [newCost, setNewCost] = useState({ name: "", amount: "", category: "", paymentMethod: "" });
+  const [newCost, setNewCost] = useState({ name: "", amount: "", category: "", paymentMethod: "", walletId: "" });
   const [categories, setCategories] = useState<any[]>([]);
   const [methods, setMethods] = useState<any[]>([]);
 
@@ -75,7 +76,7 @@ export default function FixedCostSettings() {
       if (res.ok) {
         setIsModalOpen(false);
         setEditingCost(null);
-        setNewCost({ name: "", amount: "", category: "", paymentMethod: "" });
+        setNewCost({ name: "", amount: "", category: "", paymentMethod: "", walletId: "" });
         fetchFixedCosts();
 
         openGlobalModal({
@@ -235,7 +236,7 @@ export default function FixedCostSettings() {
                   <button aria-label={t("edit")}
                     onClick={() => {
                       setEditingCost(cost);
-                      setNewCost({ name: cost.name, amount: cost.amount.toString(), category: cost.category || "", paymentMethod: cost.paymentMethod || "" });
+                      setNewCost({ name: cost.name, amount: cost.amount.toString(), category: cost.category || "", paymentMethod: cost.paymentMethod || "", walletId: cost.walletId || "" });
                       setIsModalOpen(true);
                     }}
                     className="w-11 h-11 shrink-0 rounded-xl bg-[#fffdf5] flex items-center justify-center hover:bg-[#fffdf5] transition-all group/btn cursor-pointer"
@@ -266,7 +267,7 @@ export default function FixedCostSettings() {
               onClick={() => {
                 setIsModalOpen(false);
                 setEditingCost(null);
-                setNewCost({ name: "", amount: "", category: "", paymentMethod: "" });
+                setNewCost({ name: "", amount: "", category: "", paymentMethod: "", walletId: "" });
               }}
               className="absolute inset-0 bg-[#292722]/20 backdrop-blur-md"
             />
@@ -284,13 +285,14 @@ export default function FixedCostSettings() {
                   <button aria-label={t("close")} onClick={() => {
                     setIsModalOpen(false);
                     setEditingCost(null);
-                    setNewCost({ name: "", amount: "", category: "", paymentMethod: "" });
+                    setNewCost({ name: "", amount: "", category: "", paymentMethod: "", walletId: "" });
                   }} className="w-11 h-11 shrink-0 rounded-xl bg-[#fffdf5] flex items-center justify-center hover:bg-[#fffdf5] transition-colors cursor-pointer">
                     <X className="w-5 h-5 text-[#7f715d]" />
                   </button>
                 </div>
 
                 <div className="space-y-6">
+                  <WalletPicker value={newCost.walletId} onChange={walletId => setNewCost({ ...newCost, walletId })} />
 
 
                   <div className="space-y-2">
@@ -355,7 +357,7 @@ export default function FixedCostSettings() {
                     onClick={() => {
                       setIsModalOpen(false);
                       setEditingCost(null);
-                      setNewCost({ name: "", amount: "", category: "", paymentMethod: "" });
+                      setNewCost({ name: "", amount: "", category: "", paymentMethod: "", walletId: "" });
                     }}
                     className="py-4 rounded-xl bg-[#f5eedf]/70 text-xs font-black text-[#7f715d] uppercase tracking-widest hover:bg-[#fffdf5] transition-all cursor-pointer"
                   >

@@ -1,7 +1,6 @@
 import { requireUser } from "@/lib/current-user";
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
-import { validInitialBalance } from "@/lib/payment-balance.mjs";
 import PaymentMethod from "@/models/PaymentMethod";
 
 export async function PATCH(
@@ -14,13 +13,8 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
-    if (!validInitialBalance(body.initialBalance)) {
-      return NextResponse.json({ error: "Invalid initial balance" }, { status: 400 });
-    }
-    const { name, icon, color, desc, order, initialBalance } = body;
-    const updates = { name, icon, color, desc, order, ...(initialBalance !== undefined ? {
-      initialBalance: initialBalance === null ? null : Math.round(initialBalance * 100) / 100,
-    } : {}) };
+    const { name, icon, color, desc, order } = body;
+    const updates = { name, icon, color, desc, order };
     await dbConnect();
     const updatedMethod = await PaymentMethod.findOneAndUpdate({ $and: [owner.scope, { _id: id }] }, updates, { new: true, runValidators: true });
     
@@ -28,8 +22,10 @@ export async function PATCH(
       return NextResponse.json({ error: "Payment method not found" }, { status: 404 });
     }
     
-    return NextResponse.json(updatedMethod);
-  } catch (error) {
+    const data = updatedMethod.toObject?.() ?? { ...updatedMethod };
+    delete data.initialBalance;
+    return NextResponse.json(data);
+  } catch {
     return NextResponse.json({ error: "Failed to update payment method" }, { status: 500 });
   }
 }
@@ -50,7 +46,7 @@ export async function DELETE(
     }
     
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to delete payment method" }, { status: 500 });
   }
 }

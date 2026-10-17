@@ -1,0 +1,29 @@
+.card {
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid #e6e7de;
+  border-radius: 16px;
+  background: #fffffb;
+  box-shadow: 0 3px 12px -8px #414c3020;
+}
+
+.focus {
+  border-color: #93aa82;
+  box-shadow: 0 0 0 2px #a6ba9733;
+}
+
+@media (max-width: 639px) {
+  .card { padding: 20px; }
+}
+
+.legacyCard { min-width: 0; }
+.legacyCard > section {
+  border-color: #e6e7de;
+  border-radius: 16px;
+  background-color: #fffffb;
+  box-shadow: 0 3px 12px -8px #414c3020;
+}
+.legacyCard h2 { font-size: 13px; letter-spacing: 0; text-transform: none; }
+
+.calendarCard > section { height: 100%; }
+.calendarCard h2 { font-size: 15px; font-weight: 600; }

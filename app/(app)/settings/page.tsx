@@ -6,7 +6,7 @@ import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Tags, CreditCard, Target, CalendarClock, ChevronRight, Calculator, Globe } from "lucide-react";
+import { Tags, CreditCard, Target, CalendarClock, ChevronRight, Calculator, Globe, Wallet, CalendarDays } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { playUISound } from "@/lib/ui-sounds.mjs";
 import styles from "./index.module.css";
@@ -35,6 +35,16 @@ export default function SettingsPage() {
       path: "/settings/method", 
       icon: CreditCard,
       color: "#648295"
+    },
+    {
+      name: th ? 'รอบการใช้จ่าย' : 'Spending cycles',
+      desc: th ? 'วันที่คงที่ หรือเริ่มรอบเองเมื่อเงินเดือนเข้า' : 'Fixed dates or manual payday cycles',
+      path: '/settings/cycle', icon: CalendarDays, color: '#8b7696'
+    },
+    {
+      name: th ? 'กระเป๋างบ' : 'Budget wallets',
+      desc: th ? 'แบ่งงบต่อ cycle และย้ายงบระหว่างกระเป๋า' : 'Set cycle budgets and transfer between wallets',
+      path: '/wallets', icon: Wallet, color: '#ad823f'
     },
     { 
       name: t("settings_budgets"), 
@@ -117,7 +127,7 @@ export default function SettingsPage() {
           </div>
         </div>
         <div className="px-4 pb-4 pt-2 sm:px-6 sm:pb-6">
-          <p className="mb-3 font-mono text-[9px] font-bold tracking-widest text-[#93846b]">{th ? 'สารบัญ' : 'CONTENTS'} / 01—05</p>
+          <p className="mb-3 font-mono text-[9px] font-bold tracking-widest text-[#93846b]">{th ? 'สารบัญ' : 'CONTENTS'} / 01—07</p>
           {SETTINGS_OPTIONS.map((option, index) => {
             const Icon = option.icon;
             const selected = selectedPath === option.path;

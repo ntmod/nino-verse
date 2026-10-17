@@ -9,7 +9,6 @@ interface PaymentMethod {
   _id: string;
   name: string;
   amount: number;
-  balance?: number | null;
   icon: string;
   color: string;
 }
@@ -61,7 +60,7 @@ export default function PaymentMethodsCard({
   const total = useMemo(() => methods.reduce((sum, item) => sum + (item.amount || 0), 0), [methods]);
 
   return (
-    <div className="relative bg-[#fffdf5] shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] border border-[#e1d7c5]/80 min-h-[200px] flex flex-col justify-between overflow-hidden">
+    <div data-paper-surface="" className="relative bg-[#fffdf7] rounded-2xl shadow-[0_2px_8px_rgba(78,62,36,0.03)] border border-[#e1d7c5]/80 min-h-[200px] flex flex-col justify-between overflow-hidden">
       <AnimatePresence mode="wait">
         {isLoading ? (
           <motion.div
@@ -106,12 +105,12 @@ export default function PaymentMethodsCard({
 
               {methods.length === 0 ? (
                 <div className="py-12 flex flex-col items-center justify-center text-center space-y-4 font-mono">
-                  <div className="w-16 h-16 rounded-xl bg-[#fffdf5] border border-[#d9cebb] flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-xl bg-[#fffdf7] border border-[#d9cebb] flex items-center justify-center">
                     <CreditCard className="w-8 h-8 text-[#b6a68e]" />
                   </div>
                   <div className="space-y-1">
                     <p className="text-[10px] font-bold text-[#292722] uppercase tracking-wider">{t("ui_no_methods_linked")}</p>
-                    <p className="text-[10px] text-[#7f715d]">{t("ui_add_a_card_or_wallet_to_see_your_balance")}</p>
+                    <p className="text-[10px] text-[#7f715d]">{t("ui_add_payment_method_to_see_spending")}</p>
                   </div>
                 </div>
               ) : (
@@ -133,9 +132,7 @@ export default function PaymentMethodsCard({
                           <p className="text-xs font-black text-[#292722] italic font-mono">
                             {currency} <AnimatedNumber value={method.amount || 0} decimals={2} />
                           </p>
-                          {method.balance != null && <p className="mt-1 text-[10px] font-mono text-[#416b54]">
-                            {language === 'th' ? 'คงเหลือทั้งหมด' : 'Current balance'} {method.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
-                          </p>}
+
                         </div>
                       </div>
                     );

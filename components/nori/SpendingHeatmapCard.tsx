@@ -40,7 +40,7 @@ export default function SpendingHeatmapCard({ transactions, cycle, isLoading, re
   const dateLabel = (value: string) => new Date(`${value}T00:00:00Z`).toLocaleDateString(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' });
 
   return (
-    <section className="relative border border-[#e1d7c5] bg-[#fffdf5] p-4 text-left shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] sm:p-6">
+    <section data-paper-surface="" className="relative border border-[#e1d7c5] bg-[#fffdf7] p-4 text-left rounded-2xl shadow-[0_2px_8px_rgba(78,62,36,0.03)] sm:p-6">
       {ready && !isLoading && <NoriPeek />}
       <h2 className="flex items-center gap-2 font-mono text-[10px] font-black uppercase tracking-wider text-[#7f715d]"><CalendarDays aria-hidden="true" className="h-4 w-4" />{th ? 'ปฏิทินการใช้เงิน' : 'Spending calendar'}</h2>
       <p className="mt-2 text-xs text-[#93846b]">{th ? 'ชี้หรือแตะค้างดูสรุป · แตะวันเพื่อดูรายการ' : 'Hover or hold for a preview · Tap a day for expenses'}</p>
@@ -82,7 +82,7 @@ export default function SpendingHeatmapCard({ transactions, cycle, isLoading, re
             style={{ backgroundColor: COLORS[day.level] }}
             className={`relative min-h-11 touch-manipulation select-none rounded-md border text-xs font-bold transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#292722] ${previewDate === day.date ? "z-20" : ""} ${selectedDate === day.date ? 'border-[#292722] ring-2 ring-[#292722]' : 'border-transparent'} ${day.level >= 4 ? 'text-white' : 'text-[#635744]'}`}>
             {Number(day.date.slice(-2))}{day.date === today && <span aria-hidden="true" className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-current" />}
-            {previewDate === day.date && <span id={tooltipId} role="tooltip" className={`pointer-events-none absolute bottom-full mb-2 flex w-44 max-w-[calc(100vw-3rem)] flex-col gap-1 rounded-lg border border-[#d9cebb] bg-[#fffdf5] p-3 text-left text-[#292722] shadow-lg ${(index + offset) % 7 < 2 ? 'left-0' : (index + offset) % 7 > 4 ? 'right-0' : 'left-1/2 -translate-x-1/2'}`}>
+            {previewDate === day.date && <span id={tooltipId} role="tooltip" className={`pointer-events-none absolute bottom-full mb-2 flex w-44 max-w-[calc(100vw-3rem)] flex-col gap-1 rounded-lg border border-[#d9cebb] bg-[#fffdf7] p-3 text-left text-[#292722] shadow-lg ${(index + offset) % 7 < 2 ? 'left-0' : (index + offset) % 7 > 4 ? 'right-0' : 'left-1/2 -translate-x-1/2'}`}>
               <span className="font-mono text-[10px] text-[#7f715d]">{dateLabel(day.date)}</span>
               <span className="text-sm font-black">{money(day.amount)}</span>
               <span className="text-[10px] font-normal text-[#93846b]">{day.records.length} {th ? 'รายการ' : 'expenses'}</span>

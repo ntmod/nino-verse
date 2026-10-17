@@ -1,14 +1,12 @@
 'use client'
 
 import { authClient } from "@/lib/auth-client";
-import LoadingScreen from "@/components/LoadingScreen";
-import styles from "./layout.module.css";
-import MasonryLayout from "./MasonryLayout";
 import Link from "next/link";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, useReducedMotion, useAnimationControls } from "framer-motion";
+import WalletOverview from "@/components/nori/WalletOverview";
 import CycleReceipt from "@/components/nori/CycleReceipt";
-import { ReceiptText } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Plus, ReceiptText } from "lucide-react";
 import TotalSpentCard from "@/components/nori/TotalSpentCard";
 import { getGardenSaveFeedback } from "@/lib/cycle-garden.mjs";
 import CycleGardenCard from "@/components/nori/CycleGardenCard";
@@ -29,10 +27,15 @@ import { paymentService } from "@/lib/services/paymentService";
 import { budgetService, fixedCostService } from "@/lib/services/dashboardService";
 import { useModal } from "@/lib/modal-context";
 import { useLanguage } from "@/lib/language-context";
+import CycleEditor from "@/components/CycleEditor";
+import { useSpendingCycles } from "@/lib/use-spending-cycles";
 import { getSpendingCycle } from "@/lib/spending-cycle.js";
 
 import { playUISound, prepareUISound } from "@/lib/ui-sounds.mjs";
 import type { Transaction } from "@/lib/types";
+import { isFixedCostPaid } from "@/lib/fixed-cost-status";
+import { budgetProgress } from "@/lib/budget-progress.mjs";
+import styles from "./dashboard.module.css";
 
 export default function Noripage() {
   const { data: account } = authClient.useSession();
@@ -40,7 +43,14 @@ export default function Noripage() {
   const { openGlobalModal, openExpenseModal } = useModal();
   const { language, t } = useLanguage();
   const [isLoading, setIsLoading] = useState(true);
-  const [staticDataLoaded, setStaticDataLoaded] = useState(false);
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
+  const [paymentsLoaded, setPaymentsLoaded] = useState(false);
+  const [budgetsLoaded, setBudgetsLoaded] = useState(false);
+  const [fixedCostsLoaded, setFixedCostsLoaded] = useState(false);
+  const [averageLoading, setAverageLoading] = useState(true);
+  const [loadErrors, setLoadErrors] = useState<string[]>([]);
+  const [loadRetry, setLoadRetry] = useState(0);
+  const staticDataLoaded = categoriesLoaded && paymentsLoaded && budgetsLoaded && fixedCostsLoaded;
   const [transactionsLoaded, setTransactionsLoaded] = useState(false);
   const [transactions, setTransactions] = useState<any[]>([]);
   const gardenRecords = useRef<Transaction[]>([]);
@@ -52,7 +62,6 @@ export default function Noripage() {
   const [lastResetTime, setLastResetTime] = useState<number | null>(null);
   const [showCycleReceipt, setShowCycleReceipt] = useState(false);
   const [cycleOffset, setCycleOffset] = useState(0);
-  const [view, setView] = useState<"bento" | "masonry">("bento");
   const [isCycleChanging, setIsCycleChanging] = useState(false);
   const cycleChanging = useRef(false);
   const reducedMotion = useReducedMotion();
@@ -84,16 +93,30 @@ export default function Noripage() {
   const [savedTransaction, setSavedTransaction] = useState<Transaction | null>(null);
   const [gardenFeedback, setGardenFeedback] = useState<ReturnType<typeof getGardenSaveFeedback>>(null);
   const loadedCycle = useRef<string | null>(null);
+  const loadedAverageCycle = useRef<string | null>(null);
+  const transactionRevision = useRef(0);
 
-  const billingCycle = useMemo(() => getSpendingCycle(cycleOffset), [cycleOffset]);
-  const previousBillingCycle = useMemo(() => getSpendingCycle(cycleOffset - 1), [cycleOffset]);
+  const { state: cycles, setState: setCycles, error: cyclesError, retry: retryCycles } = useSpendingCycles();
+  const [cycleEditor, setCycleEditor] = useState<'start' | 'edit' | null>(null);
+  const cycleIndex = cycles ? Math.min(cycles.currentIndex, Math.max(1, cycles.currentIndex + cycleOffset)) : 0;
+  const manual = cycles?.config.mode === 'manual';
+  const savedTimeline = Boolean(manual || cycles?.config.automaticFrom);
+  const billingCycle = useMemo(() => {
+    const range = savedTimeline && cycles ? cycles.cycles[cycleIndex] : null;
+    return range ? { startDate: new Date(range.startDate), endDate: new Date(range.endDate) } : getSpendingCycle(cycleOffset);
+  }, [cycles, savedTimeline, cycleIndex, cycleOffset]);
+  const previousBillingCycle = useMemo(() => {
+    const range = savedTimeline && cycles ? cycles.cycles[cycleIndex - 1] : null;
+    return range ? { startDate: new Date(range.startDate), endDate: new Date(range.endDate) } : getSpendingCycle(cycleOffset - 1);
+  }, [cycles, savedTimeline, cycleIndex, cycleOffset]);
+  const openCycle = Boolean(manual && cycles.cycles[cycleIndex]?.isOpen);
 
   const billingCycleStr = useMemo(() => {
     const locale = language === "th" ? "th-TH" : "en-US";
     const start = billingCycle.startDate.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
     const end = billingCycle.endDate.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
-    return `${start} - ${end}`;
-  }, [billingCycle, language]);
+    return `${start} - ${openCycle ? (language === "th" ? "ปัจจุบัน" : "Present") : end}`;
+  }, [billingCycle, language, openCycle]);
 
   useEffect(() => {
     const resetDateStr = resetKey ? localStorage.getItem(resetKey) : null;
@@ -137,64 +160,76 @@ export default function Noripage() {
   };
 
   useEffect(() => {
-    const fetchStaticData = async () => {
+    const userId = account?.user.id;
+    if (!userId) return;
+    let active = true;
+    const load = async <T,>(label: string, request: Promise<T[]>, apply: (data: T[]) => void, done: (ready: boolean) => void) => {
       try {
-        const [catData, budData, fixedData] = await Promise.all([
-          categoryService.getAll(),
-          budgetService.getAll(),
-          fixedCostService.getAll()
-        ]);
-
-        setCategories(catData);
-        setBudgets(budData);
-        setFixedCosts(fixedData);
-        setStaticDataLoaded(true);
-      } catch (error) {
-        console.error("Failed to fetch static dashboard data:", error);
+        const data = await request;
+        if (active) { apply(data); done(true); setLoadErrors(previous => previous.filter(item => item !== label)); }
+      } catch {
+        if (active) { done(true); setLoadErrors(previous => [...new Set([...previous, label])]); }
       }
     };
-    fetchStaticData();
-  }, []);
+    void load("categories", categoryService.getAll(userId), setCategories, setCategoriesLoaded);
+    void load("budgets", budgetService.getAll(), setBudgets, setBudgetsLoaded);
+    void load("fixed costs", fixedCostService.getAll(), setFixedCosts, setFixedCostsLoaded);
+    return () => { active = false; };
+  }, [account?.user.id, loadRetry]);
+
+  useEffect(() => {
+    const userId = account?.user.id;
+    if (!userId) return;
+    let active = true;
+    paymentService.getAll(userId).then(data => {
+      if (active) { setPaymentMethods(data); setPaymentsLoaded(true); setLoadErrors(previous => previous.filter(item => item !== "payments")); }
+    }).catch(() => {
+      if (active) { setPaymentsLoaded(true); setLoadErrors(previous => [...new Set([...previous, "payments"])]); }
+    });
+    return () => { active = false; };
+  }, [account?.user.id, loadRetry]);
 
   useEffect(() => {
     let active = true;
-    const cycleKey = billingCycle.startDate.toISOString();
-    const fetchTransactionsAndAverage = async () => {
-      try {
-        if (loadedCycle.current !== cycleKey) {
-          setIsLoading(true);
-          setTransactionsLoaded(false);
-        }
-        const prevStartISO = previousBillingCycle.startDate.toISOString();
-        const endISO = billingCycle.endDate.toISOString();
-        
-        const [txData, avgRes, payData] = await Promise.all([
-          transactionService.getAll(prevStartISO, endISO),
-          fetch(`/api/nori/daily-average?startDate=${encodeURIComponent(billingCycle.startDate.toISOString())}&endDate=${encodeURIComponent(endISO)}`),
-          paymentService.getAll()
-        ]);
-        
+    if (!cycles) return;
+    const cycleKey = `${billingCycle.startDate.toISOString()}:${billingCycle.endDate.toISOString()}`;
+    if (loadedCycle.current !== cycleKey) {
+      setIsLoading(true);
+      setTransactionsLoaded(false);
+    }
+    const revision = transactionRevision.current;
+    transactionService.getAll(previousBillingCycle.startDate.toISOString(), billingCycle.endDate.toISOString())
+      .then(data => {
         if (!active) return;
         loadedCycle.current = cycleKey;
-        setTransactions(txData);
-        setPaymentMethods(payData);
+        if (revision === transactionRevision.current) setTransactions(data);
         setTransactionsLoaded(true);
-        if (avgRes.ok) {
-          const avgData = await avgRes.json();
-          if (!active) return;
-          setDailyAverage(avgData.dailyAverage || 0);
-          setTodayUsage(avgData.todayUsage || 0);
-          setDailyAverageBreakdown(avgData.breakdown || []);
-        }
-      } catch (error) {
-        console.error("Failed to fetch transactions or daily average:", error);
-      } finally {
-        if (active) setIsLoading(false);
-      }
-    };
-    fetchTransactionsAndAverage();
+        setLoadErrors(previous => previous.filter(item => item !== "transactions"));
+      }).catch(() => {
+        if (active) setLoadErrors(previous => [...new Set([...previous, "transactions"])]);
+      }).finally(() => { if (active) setIsLoading(false); });
     return () => { active = false; };
-  }, [billingCycle, previousBillingCycle, refreshTrigger]);
+  }, [cycles, billingCycle, previousBillingCycle, refreshTrigger, loadRetry]);
+
+  useEffect(() => {
+    let active = true;
+    if (!cycles) return;
+    const cycleKey = `${billingCycle.startDate.toISOString()}:${billingCycle.endDate.toISOString()}`;
+    if (loadedAverageCycle.current !== cycleKey) setAverageLoading(true);
+    fetch(`/api/nori/daily-average?startDate=${encodeURIComponent(billingCycle.startDate.toISOString())}&endDate=${encodeURIComponent(billingCycle.endDate.toISOString())}`)
+      .then(response => { if (!response.ok) throw new Error("Daily average unavailable"); return response.json(); })
+      .then(data => {
+        if (!active) return;
+        loadedAverageCycle.current = cycleKey;
+        setDailyAverage(data.dailyAverage || 0);
+        setTodayUsage(data.todayUsage || 0);
+        setDailyAverageBreakdown(data.breakdown || []);
+        setLoadErrors(previous => previous.filter(item => item !== "daily average"));
+      }).catch(() => {
+        if (active) setLoadErrors(previous => [...new Set([...previous, "daily average"])]);
+      }).finally(() => { if (active) setAverageLoading(false); });
+    return () => { active = false; };
+  }, [cycles, billingCycle, refreshTrigger, loadRetry]);
 
   const currentPeriodTransactions = useMemo(() => {
     const start = billingCycle.startDate.getTime();
@@ -399,13 +434,8 @@ export default function Noripage() {
   }, [currentPeriodTransactions, paymentMethods]);
 
   const fixedCostsWithStatus = useMemo(() => {
-    const filterSinceTime = lastResetTime ? Math.max(billingCycle.startDate.getTime(), lastResetTime) : billingCycle.startDate.getTime();
-    
     return fixedCosts.map(fc => {
-      const isPaid = currentPeriodTransactions.some(tx => 
-        tx.name.toLowerCase() === fc.name.toLowerCase() && 
-        new Date(tx.date).getTime() >= filterSinceTime
-      );
+      const isPaid = isFixedCostPaid(fc.name, currentPeriodTransactions, billingCycle, lastResetTime);
       const cat = categories.find(c => c.name === fc.category);
       
       return { 
@@ -417,6 +447,7 @@ export default function Noripage() {
   }, [fixedCosts, currentPeriodTransactions, categories, lastResetTime, billingCycle]);
 
   const handleExpenseAdded = (transaction: Transaction) => {
+    transactionRevision.current += 1;
     setGardenFeedback(getGardenSaveFeedback(gardenRecords.current, transaction));
     gardenRecords.current = [...gardenRecords.current.filter(item => item._id !== transaction._id), transaction];
     setTransactions(previous => [...previous.filter(item => item._id !== transaction._id), transaction]);
@@ -424,123 +455,97 @@ export default function Noripage() {
     setRefreshTrigger(prev => prev + 1);
   };
 
+  const budgetsWithSpending = useMemo(() => budgetProgress(budgets, categories, currentPeriodTransactions), [budgets, categories, currentPeriodTransactions]);
+  const th = language === "th";
+  const expenseCount = currentPeriodTransactions.filter(transaction => transaction.amount < 0).length;
+
   const cards = {
-    TotalSpentCard: <TotalSpentCard amount={totalSpent} currency="THB" percentageChange={percentageChange} dailyAverage={dailyAverage} startDate={billingCycle.startDate} endDate={billingCycle.endDate} cumulativeData={cumulativeSpending} prevCumulativeData={prevCumulativeSpending} isLoading={isLoading} />,
+    CycleGardenCard: <CycleGardenCard key={`garden-${cycleOffset}`} transactions={currentPeriodTransactions} cycle={billingCycle} feedback={gardenFeedback} isLoading={isLoading} ready={transactionsLoaded} onEdit={transaction => openExpenseModal(handleExpenseAdded, transaction)} />,
+    TotalSpentCard: <TotalSpentCard openEnded={openCycle} defaultExpanded amount={totalSpent} currency="THB" percentageChange={percentageChange} dailyAverage={dailyAverage} startDate={billingCycle.startDate} endDate={billingCycle.endDate} cumulativeData={cumulativeSpending} prevCumulativeData={prevCumulativeSpending} isLoading={isLoading} />,
     SpendingHeatmapCard: <SpendingHeatmapCard key={cycleOffset} transactions={currentPeriodTransactions} cycle={billingCycle} savedTransaction={savedTransaction} isLoading={isLoading} ready={transactionsLoaded} onEdit={transaction => openExpenseModal(handleExpenseAdded, transaction)} />,
-    ExpensePieChart: <ExpensePieChart data={categoryBreakdown} prevData={prevCategoryBreakdown} isLoading={isLoading} />,
-    BudgetListCard: <BudgetListCard budgets={budgets} isLoading={isLoading} />,
-    MetricsCard: <MetricsCard dailyAverage={dailyAverage} todayUsage={todayUsage} breakdown={dailyAverageBreakdown} startDate={billingCycle.startDate} endDate={billingCycle.endDate} isLoading={isLoading} />,
-    PaymentMethodsCard: <PaymentMethodsCard methods={paymentMethodBreakdown} isLoading={isLoading} />,
+    ExpensePieChart: <ExpensePieChart data={categoryBreakdown} prevData={prevCategoryBreakdown} isLoading={isLoading || !categoriesLoaded} />,
+    BudgetListCard: <BudgetListCard budgets={budgetsWithSpending} isLoading={isLoading || !categoriesLoaded || !budgetsLoaded} />,
+    MetricsCard: <MetricsCard dailyAverage={dailyAverage} todayUsage={todayUsage} breakdown={dailyAverageBreakdown} startDate={billingCycle.startDate} endDate={billingCycle.endDate} isLoading={averageLoading} />,
+    PaymentMethodsCard: <PaymentMethodsCard methods={paymentMethodBreakdown} isLoading={isLoading || !paymentsLoaded} />,
     RecentTransactionsCard: <RecentTransactionsCard transactions={recentTransactions} isLoading={isLoading} savedId={savedTransaction?._id} />,
-    FixedCostCard: <FixedCostCard items={fixedCostsWithStatus} isLoading={isLoading} onReset={handleResetFixedCosts} />,
+    FixedCostCard: <FixedCostCard items={fixedCostsWithStatus} isLoading={isLoading || !fixedCostsLoaded} onReset={handleResetFixedCosts} onSuccess={handleExpenseAdded} />,
+  };
+  const cardErrors: Record<keyof typeof cards, string[]> = {
+    CycleGardenCard: ["transactions"], TotalSpentCard: ["transactions"], SpendingHeatmapCard: ["transactions"],
+    ExpensePieChart: ["transactions", "categories"], BudgetListCard: ["transactions", "categories", "budgets"],
+    MetricsCard: ["daily average"], PaymentMethodsCard: ["transactions", "payments"],
+    RecentTransactionsCard: ["transactions"], FixedCostCard: ["transactions", "fixed costs"],
   };
   const renderCard = (name: keyof typeof cards) => (
-    <motion.div key={name} data-home-card={name} className={view === "masonry" ? styles.item : undefined}
-      initial={reducedMotion ? false : { opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: reducedMotion ? 0 : 0.3, ease: "easeOut" }}>
-      {cards[name]}
-    </motion.div>
+    <div data-dashboard-card={name} className={styles.card}>
+      {cardErrors[name].some(error => loadErrors.includes(error)) ? <p role="status" className="border border-[#ddd4c4] bg-[#fffdf7] p-6 text-sm">{th ? 'ส่วนนี้โหลดไม่สำเร็จ กดลองอีกครั้งด้านบนได้เลย' : 'This section could not load. Use Retry above.'}</p> : cards[name]}
+    </div>
   );
 
   return (
-    <div className="relative min-h-screen bg-[#f5f0e5] flex flex-col pb-20 select-none">
-      <LoadingScreen mode="in" />
-
-      <div className="max-w-7xl w-full mx-auto px-6 md:px-8 mt-8 flex flex-col gap-4 relative z-10">
-        
-        <div className="text-left font-mono">
-          <Link href="/" className="text-[10px] uppercase font-bold tracking-wider hover:underline text-[#7f715d]">
-            ← BACK TO TITLE SCREEN
-          </Link>
-        </div>
-
-        {/* Nori Header Control Card */}
-        <div className="flex flex-col bg-[#fffdf5] shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] border border-[#e1d7c5]/85 overflow-hidden">
-          {/* Top Alert Banner */}
-          <div className="border-b border-dashed border-[#d9cebb] bg-[#f5eedf] text-[#7f715d] px-4 py-1.5 text-[9px] font-mono font-bold tracking-wider sm:tracking-[3px] uppercase text-left flex flex-wrap gap-2 justify-between">
-            <span>{t("ui_norinote_personal_ledger")}</span>
-            <span className="font-bold"><span className="text-[#416b54] animate-pulse mr-1 inline-block">●</span>{t("ui_online")}</span>
-          </div>
-          {/* Banner Core Row */}
-          <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-5 p-4 sm:p-5">
-            <NoriHeader
-              key={cycleOffset}
-              total={totalSpent}
-              count={currentPeriodTransactions.filter(tx => tx.amount < 0).length}
-              previousTotal={prevTotalSpent}
-              topCategory={categoryBreakdown[0]}
-              bills={fixedCostsWithStatus.length}
-              paidBills={fixedCostsWithStatus.filter(bill => bill.isPaid).length}
-              loading={isLoading}
-              ready={staticDataLoaded && transactionsLoaded}
-            />
-            <div className="flex items-center justify-between w-full xl:w-auto gap-2 font-mono self-start xl:self-center">
-              <button disabled={isCycleChanging} aria-label={t("previous_cycle")} onClick={() => changeCycle(-1)} className="w-11 h-11 shrink-0 rounded-lg border border-[#d9cebb] flex items-center justify-center font-bold hover:bg-[#f5eedf] bg-[#fffdf5] text-[#292722] transition-colors cursor-pointer shrink-0">&lt;</button>
-              <motion.span 
-                key={billingCycleStr}
-                initial={reducedMotion ? false : { opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.15, ease: "easeOut" }}
-                className="text-xs sm:text-sm font-bold text-[#292722] text-center flex-1 inline-block"
-              >
-                {billingCycleStr}
-              </motion.span>
-              <button disabled={isCycleChanging} aria-label={t("next_cycle")} onClick={() => changeCycle(1)} className="w-11 h-11 shrink-0 rounded-lg border border-[#d9cebb] flex items-center justify-center font-bold hover:bg-[#f5eedf] bg-[#fffdf5] text-[#292722] transition-colors cursor-pointer shrink-0">&gt;</button>
+    <main className={styles.canvas}>
+      <div className={styles.content}>
+        {loadErrors.length > 0 && <p role="alert" className="mb-4 border border-[#ddd4c4] bg-[#fffdf7] p-4 text-sm">{th ? 'ข้อมูลบางส่วนโหลดไม่สำเร็จ' : 'Some sections could not load'} ({loadErrors.join(', ')}) <button type="button" className="min-h-11 px-3 underline" onClick={() => setLoadRetry(value => value + 1)}>{th ? 'ลองอีกครั้ง' : 'Retry'}</button></p>}
+          <header className={styles.cover}>
+          <div className={styles.coverRow}>
+            <div><p className={styles.eyebrow}>NoriNote / Your spending journal</p><h1 className={styles.title}>{th ? "ภาพรวมการใช้เงิน" : "Your spending journal"}</h1><p className={styles.subtitle}>{th ? "เปิดดูบันทึกของรอบนี้ ทีละวัน ทีละหมวด" : "A clearer view of your cycle, one day and category at a time."}</p></div>
+            <div className={styles.actions}>
+              <Link href="/home" className={styles.noteButton}><Plus aria-hidden="true" size={15}/>{th ? "จดรายการใหม่" : "Quick note"}</Link>
+              <button type="button" disabled={isLoading || averageLoading || loadErrors.length > 0 || !staticDataLoaded || !transactionsLoaded} onClick={() => { prepareUISound(); setShowCycleReceipt(true); }} className={styles.printButton}><ReceiptText aria-hidden="true" size={15}/>{t("cycle_receipt_open")}</button>
             </div>
           </div>
-        </div>
+        </header>
 
-        <button
-          type="button"
-          disabled={isLoading || !staticDataLoaded || !transactionsLoaded}
-          onClick={() => { prepareUISound(); setShowCycleReceipt(true); }}
-          className="flex min-h-11 items-center justify-center gap-2 self-end border border-[#d9cebb] bg-[#fffdf5] px-4 py-3 font-mono text-xs font-bold text-[#7f715d] shadow-[2px_3px_0_#e7dece] transition-colors hover:bg-[#f5eedf] hover:text-[#b97423] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#b97423]"
-        >
-          <ReceiptText aria-hidden="true" className="h-4 w-4" />{t("cycle_receipt_open")}
-        </button>
-        {showCycleReceipt && <CycleReceipt
-          cycle={billingCycle}
-          previousTotal={prevTotalSpent}
-          transactions={currentPeriodTransactions.map(tx => ({
-            ...tx,
-            category: categories.find(category => category._id === tx.category || category.name === tx.category)?.name || tx.category,
-          }))}
-          onClose={() => setShowCycleReceipt(false)}
-        />}
-
-        <div role="group" aria-label={language === "th" ? "รูปแบบการวางการ์ด" : "Card layout"} className="flex self-end border border-[#d9cebb] bg-[#fffdf5] p-1 font-mono">
-          {(["bento", "masonry"] as const).map(option => (
-            <button key={option} type="button" aria-pressed={view === option} onClick={() => setView(option)}
-              className="min-h-11 px-4 text-xs font-bold focus-visible:outline-2 focus-visible:outline-[#b97423]"
-              style={{ background: view === option ? "#e9a342" : "transparent", color: "#635744" }}>
-              {option === "bento" ? "Bento" : "Masonry"}
-            </button>
-          ))}
+        {cyclesError && <p role="alert" className="mb-4 text-sm">{th ? 'โหลดรอบไม่สำเร็จ' : 'Could not load cycles.'} <button type="button" onClick={retryCycles} className="min-h-11 px-3 underline">{th ? 'ลองอีกครั้ง' : 'Retry'}</button></p>}
+        <div className={styles.toolbar}>
+          <div className={styles.cycleNav}>
+            <button type="button" disabled={isCycleChanging || !cycles || (savedTimeline && cycleIndex <= 1)} aria-label={t("previous_cycle")} onClick={() => changeCycle(-1)} className={styles.iconButton}><ChevronLeft aria-hidden="true" size={17}/></button>
+            <div className={styles.cycleLabel}><p className={styles.cycleCaption}>{th ? "รอบการใช้จ่าย" : "Spending cycle"}<span className={styles.mobileCount}> · {transactionsLoaded ? expenseCount : "—"} {th ? "รายการ" : "records"}</span></p><p aria-live="polite" className={styles.cycleDate}>{billingCycleStr}</p></div>
+            <button type="button" disabled={isCycleChanging || !cycles || (savedTimeline && cycleIndex >= cycles.currentIndex)} aria-label={t("next_cycle")} onClick={() => changeCycle(1)} className={styles.iconButton}><ChevronRight aria-hidden="true" size={17}/></button>
+            {cycleOffset !== 0 && <button type="button" disabled={isCycleChanging} onClick={() => { setGardenFeedback(null); setCycleOffset(0); }} className={styles.currentButton}>{th ? "รอบปัจจุบัน" : "Current cycle"}</button>}
+          </div>
+          {cycles && <div className="flex flex-wrap gap-2">{manual ? <>{cycleOffset === 0 && <button type="button" onClick={() => setCycleEditor('start')} className="min-h-11 border border-[#ddd4c4] bg-[#eaf0e1] px-3 text-xs text-[#4d654b]">{th ? 'เริ่มรอบใหม่' : 'Start new cycle'}</button>}<button type="button" onClick={() => setCycleEditor('edit')} className="min-h-11 px-3 text-xs text-[#88714a] underline">{th ? 'แก้ไขรอบนี้' : 'Edit cycle'}</button></> : <Link href="/settings/cycle" className="inline-flex min-h-11 items-center text-xs text-[#88714a] underline">{th ? 'ตั้งค่ารอบ' : 'Cycle settings'}</Link>}</div>}
+          <Link href="/note" className={styles.recordLink}>{transactionsLoaded ? expenseCount : "—"} {th ? "รายการรายจ่ายในรอบนี้" : "expense records this cycle"}<ArrowRight aria-hidden="true" size={12}/></Link>
         </div>
 
         <div aria-busy={isCycleChanging} className={`relative isolate -m-2 p-2 ${isCycleChanging ? "overflow-hidden" : "overflow-visible"}`}>
-          <motion.div animate={cycleAnimation} className="space-y-6">
-            <CycleGardenCard key={`garden-${cycleOffset}`} transactions={currentPeriodTransactions} cycle={billingCycle} feedback={gardenFeedback} isLoading={isLoading} ready={transactionsLoaded} onEdit={transaction => openExpenseModal(handleExpenseAdded, transaction)} />
-            {view === "masonry" ? (
-              <MasonryLayout>
-                {(["TotalSpentCard", "SpendingHeatmapCard", "ExpensePieChart", "BudgetListCard", "MetricsCard", "PaymentMethodsCard", "RecentTransactionsCard", "FixedCostCard"] as const).map(renderCard)}
-              </MasonryLayout>
-            ) : (
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-start">
-                <div className="space-y-6">
-                  {(["TotalSpentCard", "MetricsCard", "BudgetListCard", "FixedCostCard"] as const).map(renderCard)}
-                </div>
-                <div className="space-y-6">
-                  {(["SpendingHeatmapCard", "ExpensePieChart", "PaymentMethodsCard", "RecentTransactionsCard"] as const).map(renderCard)}
-                </div>
-              </div>
-            )}
+          <motion.div animate={cycleAnimation}>
+            <section aria-labelledby="cycle-overview" className={styles.section}>
+              <div className={styles.sectionHeader}><div className={styles.sectionHeading}><span aria-hidden="true" className={styles.sectionNumber}>01</span><div><h2 id="cycle-overview" className={styles.sectionTitle}>{th ? "รอบนี้ ใช้ไปเท่าไหร่แล้ว" : "Your cycle at a glance"}</h2><p className={styles.sectionHint}>{th ? "ยอดรวม แนวโน้มสะสม และวันที่มีการใช้เงิน" : "Total spending, its running trend, and each day along the way"}</p></div></div></div>
+              <WalletOverview key={`${billingCycle.startDate.toISOString()}:${billingCycle.endDate.toISOString()}`} startDate={billingCycle.startDate.toISOString()} endDate={billingCycle.endDate.toISOString()} refresh={refreshTrigger + loadRetry} />
+              <div className={styles.columns}>{renderCard("TotalSpentCard")}{renderCard("SpendingHeatmapCard")}</div>
+            </section>
+
+            <section aria-labelledby="category-plans" className={styles.section}>
+              <div className={styles.sectionHeader}><div className={styles.sectionHeading}><span aria-hidden="true" className={styles.sectionNumber}>02</span><div><h2 id="category-plans" className={styles.sectionTitle}>{th ? "เงินไปกับอะไร และเหลืองบแค่ไหน" : "Where it went, and room in the budget"}</h2><p className={styles.sectionHint}>{th ? "รายจ่ายแยกหมวด คู่กับวงเงินที่ตั้งไว้" : "Spending by category, alongside your category limits"}</p></div></div><Link href="/settings/budget" className={styles.sectionLink}>{th ? "จัดการงบ" : "Manage budgets"}<ArrowRight aria-hidden="true" size={12}/></Link></div>
+              <div className={styles.columns}>{renderCard("ExpensePieChart")}{renderCard("BudgetListCard")}</div>
+            </section>
+
+            <section aria-labelledby="everyday-spending" className={styles.section}>
+              <div className={styles.sectionHeader}><div className={styles.sectionHeading}><span aria-hidden="true" className={styles.sectionNumber}>03</span><div><h2 id="everyday-spending" className={styles.sectionTitle}>{th ? "เฉลี่ยต่อวัน และจ่ายผ่านช่องทางไหน" : "Daily averages and payment methods"}</h2><p className={styles.sectionHint}>{th ? "ค่าเฉลี่ยรายหมวด และยอดใช้จ่ายผ่านแต่ละวิธีชำระเงิน" : "Category averages and cycle spending by payment method"}</p></div></div></div>
+              <div className={styles.columns}>{renderCard("MetricsCard")}{renderCard("PaymentMethodsCard")}</div>
+            </section>
+
+            <section aria-labelledby="records-and-commitments" className={styles.section}>
+              <div className={styles.sectionHeader}><div className={styles.sectionHeading}><span aria-hidden="true" className={styles.sectionNumber}>04</span><div><h2 id="records-and-commitments" className={styles.sectionTitle}>{th ? "รายการที่จด และเรื่องประจำที่ต้องดูแล" : "Recent notes and regular commitments"}</h2><p className={styles.sectionHint}>{th ? "เปิดรายการล่าสุด หรือจดค่าใช้จ่ายประจำต่อได้เลย" : "Revisit a recent record or note a regular payment"}</p></div></div><Link href="/note" className={styles.sectionLink}>{th ? "ดูบันทึกทั้งหมด" : "View all notes"}<ArrowRight aria-hidden="true" size={12}/></Link></div>
+              <div className={styles.columns}>{renderCard("RecentTransactionsCard")}{renderCard("FixedCostCard")}</div>
+            </section>
+
+            <section aria-labelledby="garden-corner" className={styles.section}>
+              <div className={styles.sectionHeader}><div className={styles.sectionHeading}><span aria-hidden="true" className={styles.sectionNumber}>05</span><div><h2 id="garden-corner" className={styles.sectionTitle}>{th ? "สวนเล็ก ๆ ข้างสมุด" : "A garden beside your notes"}</h2><p className={styles.sectionHint}>{th ? "โตจากวันที่กลับมาจด ไม่ได้โตตามยอดเงิน" : "Grown from recorded days, never from spending more"}</p></div></div></div>
+              <div className={styles.columns}>{renderCard("CycleGardenCard")}<aside className={styles.noriNote}><p className={styles.noriLabel}>A little note from Nori</p><NoriHeader key={cycleOffset} total={totalSpent} count={expenseCount} previousTotal={prevTotalSpent} topCategory={categoryBreakdown[0]} bills={fixedCostsWithStatus.length} paidBills={fixedCostsWithStatus.filter(bill => bill.isPaid).length} loading={isLoading} ready={staticDataLoaded && transactionsLoaded}/></aside></div>
+            </section>
           </motion.div>
         </div>
+        <footer className={styles.footer}><span>NoriNote / Spending journal</span><span>{billingCycleStr}</span></footer>
+        {showCycleReceipt && <CycleReceipt cycle={billingCycle} previousTotal={prevTotalSpent} transactions={currentPeriodTransactions.map(tx => ({ ...tx, category: categories.find(category => category._id === tx.category || category.name === tx.category)?.name || tx.category }))} onClose={() => setShowCycleReceipt(false)}/>}
       </div>
-
-      {/* Floating Action Button */}
-      <FloatingActionButton onSuccess={handleExpenseAdded} />
-    </div>
+      <FloatingActionButton onSuccess={handleExpenseAdded}/>
+      {cycleEditor && cycles && <CycleEditor state={cycles} action={cycleEditor} boundary={billingCycle.startDate.toISOString()} onClose={() => setCycleEditor(null)} onSaved={state => {
+        const selectedId = cycles.cycles[cycleIndex]?.cycleId;
+        const selected = state.cycles.findIndex(cycle => cycle.cycleId === selectedId);
+        setCycles(state); setCycleOffset(cycleEditor === 'start' || selected < 0 ? 0 : selected - state.currentIndex); setGardenFeedback(null);
+      }}/>}
+    </main>
   );
 }
