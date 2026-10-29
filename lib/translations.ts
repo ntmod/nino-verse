@@ -154,6 +154,7 @@ export const translations = {
     // Navigation
     nav_home: "Home",
     nav_dashboard: "Dashboard",
+    nav_analytics: "Analytics",
     nav_notes: "Notes",
     nav_settings: "Settings",
     nav_logout: "Logout",
@@ -419,6 +420,7 @@ export const translations = {
     // Navigation
     nav_home: "หน้าแรก",
     nav_dashboard: "ภาพรวม",
+    nav_analytics: "Analytics",
     nav_notes: "บันทึก",
     nav_settings: "ตั้งค่า",
     nav_logout: "ออกจากระบบ",

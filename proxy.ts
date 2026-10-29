@@ -10,7 +10,7 @@ export function proxy(request: NextRequest) {
     const origin = request.headers.get('origin');
     if (origin && origin !== request.nextUrl.origin) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   }
-  if ((pathname === '/onboarding' || pathname === '/dashboard' || pathname.startsWith('/note') || pathname.startsWith('/settings')) && !hasCookie) {
+  if ((pathname === '/onboarding' || pathname === '/dashboard' || pathname.startsWith('/analytics') || pathname.startsWith('/note') || pathname.startsWith('/settings')) && !hasCookie) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
   if (pathname.startsWith('/api/nori/') && !['/api/nori/login', '/api/nori/logout', '/api/nori/auth-config'].includes(pathname)) {
@@ -27,4 +27,4 @@ export function proxy(request: NextRequest) {
   }
   return NextResponse.next();
 }
-export const config = { matcher: ['/onboarding', '/dashboard/:path*', '/note/:path*', '/settings/:path*', '/login', '/api/nori/:path*'] };
+export const config = { matcher: ['/onboarding', '/dashboard/:path*', '/analytics/:path*', '/note/:path*', '/settings/:path*', '/login', '/api/nori/:path*'] };

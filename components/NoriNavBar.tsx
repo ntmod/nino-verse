@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, Globe, House, LayoutDashboard, LoaderCircle, LogOut, NotebookPen, Settings } from 'lucide-react';
+import { ChartNoAxesCombined, ChevronDown, Globe, House, LayoutDashboard, LoaderCircle, LogOut, NotebookPen, Settings } from 'lucide-react';
 import { DropdownMenu } from 'radix-ui';
 import { useLanguage } from '@/lib/language-context';
 import { authClient } from '@/lib/auth-client';
@@ -13,6 +13,7 @@ import SoundToggle from './SoundToggle';
 const NAV_CONFIG = [
   { key: 'nav_home', path: '/home', icon: House },
   { key: 'nav_dashboard', path: '/dashboard', icon: LayoutDashboard },
+  { key: 'nav_analytics', path: '/analytics', icon: ChartNoAxesCombined },
   { key: 'nav_notes', path: '/note', icon: NotebookPen },
   { key: 'nav_settings', path: '/settings', icon: Settings },
 ];
@@ -78,7 +79,7 @@ export default function NoriNavBar() {
       </div>
       {logoutError && <p role="alert" className="border-b border-[#e5cbbd] bg-[#fff4ed] px-4 py-3 text-center text-xs text-[#a56350]">{th ? 'ออกจากระบบไม่สำเร็จ ลองอีกครั้งได้ที่เมนูบัญชี' : 'Could not sign out. Please retry from the account menu.'}</p>}
     </header>
-    <nav aria-label={th ? 'เมนูหลักบนมือถือ' : 'Mobile navigation'} className="fixed inset-x-0 bottom-0 z-[10000] grid grid-cols-4 border-t border-[#e1d9c9] bg-[#fffdf7]/95 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] text-[#8a7d65] backdrop-blur-md lg:hidden">
+    <nav aria-label={th ? 'เมนูหลักบนมือถือ' : 'Mobile navigation'} className="fixed inset-x-0 bottom-0 z-[10000] grid grid-cols-5 border-t border-[#e1d9c9] bg-[#fffdf7]/95 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] text-[#8a7d65] backdrop-blur-md lg:hidden">
       {NAV_CONFIG.map(({ key, path, icon: Icon }) => <Link key={path} href={path} aria-current={activePath === path ? 'page' : undefined} className={`flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] transition-colors ${focus} ${activePath === path ? 'bg-[#eaf0e1] font-bold text-[#4d654b]' : 'hover:bg-[#f2eee4]'}`}><Icon aria-hidden="true" size={20} strokeWidth={activePath === path ? 2 : 1.6} /><span>{t(key)}</span></Link>)}
     </nav>
   </>;
