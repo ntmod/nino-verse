@@ -1,0 +1,169 @@
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--type-body);
+  --font-mono: var(--type-numbers);
+  --font-heading: var(--type-heading);
+  --font-display: var(--type-heading);
+
+  --color-paper-edge: var(--paper-edge);
+  --color-ink-soft: var(--ink-soft);
+  --color-border-strong: var(--border-strong);
+  --color-primary-hover: var(--primary-hover);
+  --color-highlight: var(--highlight);
+  --color-highlight-hover: var(--highlight-hover);
+  --color-highlight-ink: var(--highlight-ink);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-destructive-border: var(--destructive-border);
+  --color-primary: var(--primary);
+  --color-primary-focus: var(--primary-hover);
+  --color-primary-on-dark: var(--primary-foreground);
+  --color-ink: var(--foreground);
+  --color-ink-muted-80: var(--ink-soft);
+  --color-ink-muted-48: var(--muted-foreground);
+  --color-canvas-white: var(--card);
+  --color-canvas-parchment: var(--background);
+  --color-surface-pearl: var(--card);
+  --color-surface-tile-1: var(--secondary);
+  --color-surface-tile-2: var(--muted);
+  --color-surface-tile-3: var(--paper-edge);
+  --color-surface-black: var(--foreground);
+  --color-divider-soft: var(--border);
+  --color-hairline: var(--border);
+  --radius-xs: calc(var(--radius) * 0.25);
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) * 1.5);
+  --radius-pill: 9999px;
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --animate-rippling: rippling var(--duration) ease-out;
+
+  @keyframes rippling {
+    from { opacity: 1; }
+    to { transform: scale(2); opacity: 0; }
+  }
+}
+
+/* NoriNote uses rice paper, fern ink and ochre highlights. */
+:root {
+  --background: #f5f2e8;
+  --card: #fffdf7;
+  --secondary: #f0ebdc;
+  --muted: #e8e2d1;
+  --paper-edge: #dbd4bf;
+  --journal-margin: #a8664830;
+  --journal-rule: #6c745b14;
+  --foreground: #262f28;
+  --ink-soft: #465147;
+  --muted-foreground: #605e4e;
+  --border: #d5cdb6;
+  --border-strong: #b8af96;
+
+  --primary: #305742;
+  --primary-hover: #234534;
+  --primary-foreground: #fffdf7;
+  --accent: #e1ead9;
+  --accent-foreground: #3d5c45;
+  --ring: #537853;
+  --highlight: #e6ba70;
+  --highlight-hover: #efc989;
+  --highlight-ink: #855216;
+  --highlight-foreground: #36280f;
+  --destructive: #9b3e32;
+  --destructive-soft: #fbefe9;
+  --destructive-border: #e8c6bb;
+
+  --card-foreground: var(--foreground);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --secondary-foreground: var(--foreground);
+  --input: var(--border);
+  --sidebar: var(--card);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+
+  --chart-1: #467058;
+  --chart-2: #ab7337;
+  --chart-3: #56758c;
+  --chart-4: #926b84;
+  --chart-5: #777645;
+
+  --type-body: var(--font-geist-sans), "Noto Sans Thai", system-ui, sans-serif;
+  --type-heading: Georgia, "Noto Serif Thai", Tahoma, serif;
+  --type-numbers: var(--font-geist-mono), ui-monospace, monospace;
+  --radius: 0.375rem;
+  --shadow-page: 2px 3px 0 var(--paper-edge), 0 8px 20px -14px #3d372b40;
+  --motion-page: 200ms;
+  --ease-page: cubic-bezier(0.2, 0.7, 0.25, 1);
+}
+
+:root.dark {
+  color-scheme: dark;
+  --background: #1c1b19;
+  --card: #262523;
+  --secondary: #302e2b;
+  --muted: #383633;
+  --paper-edge: #151412;
+  --journal-margin: #c0805c50;
+  --journal-rule: #c6bfae1c;
+  --foreground: #f2ecdd;
+  --ink-soft: #dbd5ca;
+  --muted-foreground: #bfb8ac;
+  --border: #504c46;
+  --border-strong: #80796f;
+
+  --primary: #abd0ac;
+  --primary-hover: #c2dfbc;
+  --primary-foreground: #15291c;
+  --accent: #403d37;
+  --accent-foreground: #e2dbce;
+  --ring: #adcc9e;
+  --highlight: #dfae63;
+  --highlight-hover: #efc17d;
+  --highlight-ink: #edc185;
+  --highlight-foreground: #36280f;
+  --destructive: #f0a99e;
+  --destructive-soft: #412e2a;
+  --destructive-border: #80524c;
+
+  --chart-1: #a3ccaa;
+  --chart-2: #dfae74;
+  --chart-3: #99b9d6;
+  --chart-4: #d4a3c5;
+  --chart-5: #d0c78f;
+  --shadow-page: 2px 3px 0 var(--paper-edge), 0 8px 20px -14px #0009;
+}

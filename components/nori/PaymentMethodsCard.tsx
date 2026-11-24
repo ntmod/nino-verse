@@ -60,7 +60,7 @@ export default function PaymentMethodsCard({
   const total = useMemo(() => methods.reduce((sum, item) => sum + (item.amount || 0), 0), [methods]);
 
   return (
-    <div data-paper-surface="" className="relative bg-[#fffdf7] rounded-2xl shadow-[0_2px_8px_rgba(78,62,36,0.03)] border border-[#e1d7c5]/80 min-h-[200px] flex flex-col justify-between overflow-hidden">
+    <div data-paper-surface="" className="relative bg-card rounded-md shadow-[0_2px_8px_rgba(78,62,36,0.03)] border border-border/80 min-h-[200px] flex flex-col justify-between overflow-hidden">
       <AnimatePresence mode="wait">
         {isLoading ? (
           <motion.div
@@ -73,16 +73,16 @@ export default function PaymentMethodsCard({
           >
             <div>
               <div className="flex items-center justify-between mb-6 animate-pulse">
-                <div className="h-3.5 bg-[#e1d7c5] rounded-md w-36" />
+                <div className="h-3.5 bg-border rounded-md w-36" />
               </div>
               <div className="space-y-4">
                 {[...Array(3)].map((_, i) => (
-                  <div key={i} className="flex items-center justify-between py-2.5 border-b border-dashed border-[#e1d7c5] last:border-none animate-pulse">
+                  <div key={i} className="flex items-center justify-between py-2.5 border-b border-dashed border-border last:border-none animate-pulse">
                     <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 bg-[#e1d7c5] rounded-md shrink-0" />
-                      <div className="h-3.5 bg-[#e1d7c5] rounded-md w-20 md:w-28" />
+                      <div className="w-6 h-6 bg-border rounded-md shrink-0" />
+                      <div className="h-3.5 bg-border rounded-md w-20 md:w-28" />
                     </div>
-                    <div className="h-3.5 bg-[#e1d7c5] rounded-md w-16" />
+                    <div className="h-3.5 bg-border rounded-md w-16" />
                   </div>
                 ))}
               </div>
@@ -99,18 +99,18 @@ export default function PaymentMethodsCard({
           >
             {/* Top Segment */}
             <div className="p-4 md:p-6 pb-4">
-              <h3 className="text-[10px] font-black text-[#7f715d] uppercase tracking-[0.2em] mb-6 select-none font-mono">
+              <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-6 select-none font-mono">
                 {t("payment_methods")}
               </h3>
 
               {methods.length === 0 ? (
                 <div className="py-12 flex flex-col items-center justify-center text-center space-y-4 font-mono">
-                  <div className="w-16 h-16 rounded-xl bg-[#fffdf7] border border-[#d9cebb] flex items-center justify-center">
-                    <CreditCard className="w-8 h-8 text-[#b6a68e]" />
+                  <div className="w-16 h-16 rounded-md bg-card border border-border flex items-center justify-center">
+                    <CreditCard className="w-8 h-8 text-muted-foreground" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[10px] font-bold text-[#292722] uppercase tracking-wider">{t("ui_no_methods_linked")}</p>
-                    <p className="text-[10px] text-[#7f715d]">{t("ui_add_payment_method_to_see_spending")}</p>
+                    <p className="text-[10px] font-bold text-foreground uppercase tracking-wider">{t("ui_no_methods_linked")}</p>
+                    <p className="text-[10px] text-muted-foreground">{t("ui_add_payment_method_to_see_spending")}</p>
                   </div>
                 </div>
               ) : (
@@ -119,17 +119,17 @@ export default function PaymentMethodsCard({
                     return (
                       <div 
                         key={method._id || index}
-                        className="flex flex-wrap gap-2 items-center justify-between py-2.5 border-b-2 border-dashed border-[#e1d7c5] last:border-none last:pb-0"
+                        className="flex flex-wrap gap-2 items-center justify-between py-2.5 border-b-2 border-dashed border-border last:border-none last:pb-0"
                       >
                         <div className="flex items-center gap-3">
                           {/* Floating emoji icon matching lists */}
                           <span className="text-lg select-none shrink-0">{method.icon || "💳"}</span>
                           <div className="flex flex-col justify-center">
-                            <p className="text-xs font-bold text-[#292722] uppercase tracking-wide">{method.name}</p>
+                            <p className="text-xs font-bold text-foreground uppercase tracking-wide">{method.name}</p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-xs font-black text-[#292722] italic font-mono">
+                          <p className="text-xs font-black text-foreground italic font-mono">
                             {currency} <AnimatedNumber value={method.amount || 0} decimals={2} />
                           </p>
 
@@ -142,11 +142,11 @@ export default function PaymentMethodsCard({
             </div>
 
             {/* Dark Status Bottom Bar */}
-            <div className="border-t border-dashed border-[#d9cebb] bg-[#f5eedf] text-[#292722] p-3 px-6 flex flex-wrap gap-2 items-center justify-between text-[10px] font-mono select-none">
-              <span className="text-[#7f715d] font-bold">
+            <div className="border-t border-dashed border-border bg-secondary text-foreground p-3 px-6 flex flex-wrap gap-2 items-center justify-between text-[10px] font-mono select-none">
+              <span className="text-muted-foreground font-bold">
                 {t("total_tracked")}
               </span>
-              <span className="text-[#292722] font-bold uppercase text-[9px]">
+              <span className="text-foreground font-bold uppercase text-[9px]">
                 {t("ui_total")} <AnimatedNumber value={total} decimals={0} /> {currency}
               </span>
             </div>

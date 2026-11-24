@@ -33,6 +33,11 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `try {
+          document.documentElement.classList.toggle("dark", localStorage.getItem("nori-theme") === "dark");
+        } catch {}` }} />
+      </head>
       <body className="min-h-full flex flex-col">
         <LanguageProvider>
           <ModalProvider>

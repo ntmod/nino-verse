@@ -77,7 +77,7 @@ export default function MetricsCard({
   const isOverLimit = dailyAverage > dailyLimit;
 
   return (
-    <div data-paper-surface="" className="relative bg-[#fffdf7] rounded-2xl shadow-[0_2px_8px_rgba(78,62,36,0.03)] border border-[#e1d7c5]/80 flex flex-col w-full justify-between overflow-hidden">
+    <div data-paper-surface="" className="relative bg-card rounded-md shadow-[0_2px_8px_rgba(78,62,36,0.03)] border border-border/80 flex flex-col w-full justify-between overflow-hidden">
       <AnimatePresence mode="wait">
         {isLoading ? (
           <motion.div
@@ -90,18 +90,18 @@ export default function MetricsCard({
           >
             {/* Top Segment Loading */}
             <div className="p-6 pb-4 space-y-4">
-              <div className="h-3 bg-[#e1d7c5] w-24 animate-pulse rounded-md" />
+              <div className="h-3 bg-border w-24 animate-pulse rounded-md" />
               <div className="flex gap-2 items-baseline">
-                <div className="h-6 bg-[#e1d7c5] w-10 animate-pulse rounded-md" />
-                <div className="h-10 bg-[#e1d7c5] w-36 animate-pulse rounded-md" />
+                <div className="h-6 bg-border w-10 animate-pulse rounded-md" />
+                <div className="h-10 bg-border w-36 animate-pulse rounded-md" />
               </div>
-              <div className="h-4 bg-[#e1d7c5] w-48 animate-pulse rounded-md mt-2" />
+              <div className="h-4 bg-border w-48 animate-pulse rounded-md mt-2" />
             </div>
 
             {/* Bottom Segment Loading */}
-            <div className="border-t border-dashed border-[#d9cebb] bg-[#f5eedf] p-3.5 px-6 flex items-center justify-between min-h-[44px]">
-              <div className="h-2.5 bg-[#d9cebb] w-32 animate-pulse rounded-md" />
-              <div className="h-2.5 bg-[#d9cebb] w-16 animate-pulse rounded-md" />
+            <div className="border-t border-dashed border-border bg-secondary p-3.5 px-6 flex items-center justify-between min-h-[44px]">
+              <div className="h-2.5 bg-border w-32 animate-pulse rounded-md" />
+              <div className="h-2.5 bg-border w-16 animate-pulse rounded-md" />
             </div>
           </motion.div>
         ) : (
@@ -117,25 +117,25 @@ export default function MetricsCard({
             <div className="p-6 pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[#7f715d] text-[10px] font-black uppercase tracking-[0.2em] mb-1">{t("daily_average")}</p>
-                  <p className="text-2xl md:text-3xl font-black text-[#292722] italic leading-none">
+                  <p className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mb-1">{t("daily_average")}</p>
+                  <p className="text-2xl md:text-3xl font-black text-foreground italic leading-none">
                     THB <AnimatedNumber value={dailyAverage} decimals={2} />
                   </p>
                   {/* Projected cycle total and today's usage */}
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2.5">
-                    <p className="text-[10px] font-mono text-[#7f715d] font-bold select-none">
-                      {t("today")}: <span className="text-[#292722]">THB <AnimatedNumber value={todayUsage || 0} decimals={2} /></span>
+                    <p className="text-[10px] font-mono text-muted-foreground font-bold select-none">
+                      {t("today")}: <span className="text-foreground">THB <AnimatedNumber value={todayUsage || 0} decimals={2} /></span>
                     </p>
-                    <span className="text-[#b6a68e] select-none text-[10px]">•</span>
-                    <p className="text-[10px] font-mono text-[#7f715d] font-bold select-none">
-                      {t("est_cycle_end")}: <span className="text-[#292722]">THB <AnimatedNumber value={estimatedEnd} decimals={0} /></span>
+                    <span className="text-muted-foreground select-none text-[10px]">•</span>
+                    <p className="text-[10px] font-mono text-muted-foreground font-bold select-none">
+                      {t("est_cycle_end")}: <span className="text-foreground">THB <AnimatedNumber value={estimatedEnd} decimals={0} /></span>
                     </p>
                   </div>
                 </div>
                 <Link href="/settings/daily-average">
                   <button 
                     title={t("configure_daily_avg")}
-                    className="w-10 h-10 rounded-xl bg-[#fffdf7] border border-[#d9cebb] flex items-center justify-center hover:bg-[#f5eedf] text-[#292722] transition-all cursor-pointer shrink-0"
+                    className="w-10 h-10 rounded-md bg-card border border-border flex items-center justify-center hover:bg-secondary text-foreground transition-all cursor-pointer shrink-0"
                   >
                     <Settings className="w-4 h-4 transition-colors" />
                   </button>
@@ -143,8 +143,8 @@ export default function MetricsCard({
               </div>
 
               {breakdown.length > 0 && (
-                <div className="mt-6 pt-6 border-t border-[#e1d7c5]">
-                  <p className="text-[9px] font-black text-[#7f715d] uppercase tracking-[0.15em] mb-3">{t("by_category")}</p>
+                <div className="mt-6 pt-6 border-t border-border">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.15em] mb-3">{t("by_category")}</p>
                   <motion.div 
                     className={`flex flex-col gap-1.5 ${
                       breakdown.length > 4 ? "max-h-[192px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-black scrollbar-track-transparent" : ""
@@ -164,10 +164,10 @@ export default function MetricsCard({
                     {breakdown.map((item) => {
                       const weight = dailyAverage > 0 ? Math.round((item.dailyAverage / dailyAverage) * 100) : 0;
                       const barColor = weight > 50 
-                        ? "bg-[#b0523b]"
+                        ? "bg-destructive"
                         : weight > 20 
-                        ? "bg-[#c98a35]"
-                        : "bg-[#416b54]";
+                        ? "bg-highlight-hover"
+                        : "bg-primary";
 
                       return (
                         <motion.div 
@@ -176,23 +176,23 @@ export default function MetricsCard({
                             hidden: { opacity: 0, y: 8 },
                             show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 350, damping: 25 } }
                           }}
-                          className="flex items-center justify-between py-2.5 border-b border-dashed border-[#e1d7c5] last:border-none last:pb-0 font-bold text-[#403b32]"
+                          className="flex items-center justify-between py-2.5 border-b border-dashed border-border last:border-none last:pb-0 font-bold text-foreground"
                         >
                           <div className="flex items-center gap-3">
                             <span className="text-lg">{item.categoryIcon}</span>
                             <div className="flex flex-col text-left">
-                              <span className="text-[#7f715d] uppercase text-[9px] font-black tracking-wider leading-none">{item.categoryName}</span>
+                              <span className="text-muted-foreground uppercase text-[9px] font-black tracking-wider leading-none">{item.categoryName}</span>
                             </div>
                           </div>
                           <div className="flex flex-col items-end">
-                            <span className="text-[#292722] font-mono text-[11px] leading-none mb-1">
+                            <span className="text-foreground font-mono text-[11px] leading-none mb-1">
                               THB <AnimatedNumber value={item.dailyAverage} decimals={2} />
                             </span>
                             <div className="flex items-center gap-1.5">
-                              <span className="text-[8px] font-mono text-[#7f715d] font-bold select-none leading-none">
+                              <span className="text-[8px] font-mono text-muted-foreground font-bold select-none leading-none">
                                 {weight}%
                               </span>
-                              <div className="w-16 h-2 border border-[#d9cebb] bg-[#fffdf7] rounded-full overflow-hidden shrink-0">
+                              <div className="w-16 h-2 border border-border bg-card rounded-full overflow-hidden shrink-0">
                                 <div className={`h-full ${barColor} rounded-full`} style={{ width: `${Math.min(100, weight)}%` }}></div>
                               </div>
                             </div>
@@ -206,8 +206,8 @@ export default function MetricsCard({
             </div>
 
             {/* Warning/Limits bottom indicator */}
-            <div className={`border-t border-dashed border-[#d9cebb] p-3 px-6 flex flex-wrap gap-2 items-center justify-between text-[10px] font-mono select-none font-black ${
-              isOverLimit ? "bg-[#fae7dc] text-[#a3452f]" : "bg-[#f5eedf] text-[#416b54]"
+            <div className={`border-t border-dashed border-border p-3 px-6 flex flex-wrap gap-2 items-center justify-between text-[10px] font-mono select-none font-black ${
+              isOverLimit ? "bg-[#fae7dc] text-[#a3452f]" : "bg-secondary text-primary"
             }`}>
               <span>{t("limits_check")}</span>
               <span>

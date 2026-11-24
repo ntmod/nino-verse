@@ -39,7 +39,7 @@ export default function NoriPeek() {
         initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 28 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
         whileTap={{ scale: 0.92 }}
-        className="pointer-events-auto absolute bottom-0 right-0 h-11 w-16 overflow-hidden rounded-t-full focus-visible:outline-2 focus-visible:outline-[#b97423]"
+        className="pointer-events-auto absolute bottom-0 right-0 h-11 w-16 overflow-hidden rounded-t-full focus-visible:outline-2 focus-visible:outline-highlight-ink"
       >
         <motion.div animate={phase === 'hello' ? { rotate: [0, -8, 8, 0] } : { rotate: 0 }} transition={{ duration: 0.4 }}>
           <Image src="/animations/nori/cat-idle.webp" alt="" width={64} height={64} unoptimized />
@@ -47,7 +47,7 @@ export default function NoriPeek() {
       </motion.button>}
     </AnimatePresence>
     <AnimatePresence>
-      {seen && phase === 'hello' && <motion.p role="status" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="absolute right-[72px] bottom-1 w-max max-w-[170px] rounded-xl border border-[#d9cebb] bg-[#fffdf5] px-3 py-2 text-xs text-[#635744] shadow-sm">
+      {seen && phase === 'hello' && <motion.p role="status" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="absolute right-[72px] bottom-1 w-max max-w-[170px] rounded-md border border-border bg-card px-3 py-2 text-xs text-ink-soft shadow-sm">
         {language === 'th' ? 'อ๊ะ เจอแล้ว! แอบดูสมุดอยู่ 🍙' : 'Found me! Just peeking 🍙'}
       </motion.p>}
     </AnimatePresence>

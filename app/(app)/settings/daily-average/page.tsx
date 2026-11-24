@@ -96,7 +96,7 @@ export default function DailyAverageSettings() {
   };
 
   return (
-    <main className="relative min-h-screen bg-[#f5f0e5] flex flex-col items-center px-4 sm:px-6 py-8 pt-24 pb-28">
+    <main className="notebook-page notebook-page--app relative min-h-screen flex flex-col items-center px-4 sm:px-6 pt-8 pb-20">
       <LoadingScreen mode="in" />
       {showExitWipe && <LoadingScreen mode="out" />}
 
@@ -105,13 +105,13 @@ export default function DailyAverageSettings() {
           <div className="flex min-w-0 items-center gap-3 sm:gap-4">
             <button aria-label={t("back")}
               onClick={handleBack}
-              className="w-11 h-11 shrink-0 rounded-xl bg-[#fffdf5] border border-[#d9cebb] flex items-center justify-center hover:bg-[#f5eedf] transition-colors cursor-pointer shadow-sm"
+              className="w-11 h-11 shrink-0 rounded-md bg-card border border-border flex items-center justify-center hover:bg-secondary transition-colors cursor-pointer shadow-sm"
             >
-              <ArrowLeft className="w-5 h-5 text-[#7f715d]" />
+              <ArrowLeft className="w-5 h-5 text-muted-foreground" />
             </button>
             <div className="min-w-0 text-left font-mono">
-              <h1 className="text-2xl font-black text-[#292722] italic tracking-tighter uppercase leading-snug mb-1.5">{t("ui_daily_average_config")}</h1>
-              <p className="text-xs font-bold text-[#7f715d] uppercase tracking-widest leading-snug">{t("settings_daily_avg_desc")}</p>
+              <h1 className="notebook-title">{t("ui_daily_average_config")}</h1>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest leading-snug">{t("settings_daily_avg_desc")}</p>
             </div>
           </div>
         </header>
@@ -119,7 +119,7 @@ export default function DailyAverageSettings() {
         {isLoading ? (
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-[#fffdf5] border border-[#e1d7c5] rounded-none animate-pulse shadow-sm" />
+              <div key={i} className="h-16 bg-card border border-border rounded-md animate-pulse shadow-sm" />
             ))}
           </div>
         ) : (
@@ -127,14 +127,14 @@ export default function DailyAverageSettings() {
             <div className="flex justify-end gap-3 font-mono">
               <button
                 onClick={handleSelectAll}
-                className="text-[10px] font-black text-[#b97423] uppercase tracking-widest cursor-pointer hover:underline"
+                className="text-[10px] font-black text-highlight-ink uppercase tracking-widest cursor-pointer hover:underline"
               >
                 {t("ui_select_all")}
               </button>
-              <span className="text-[#b6a68e]">|</span>
+              <span className="text-muted-foreground">|</span>
               <button
                 onClick={handleClearAll}
-                className="text-[10px] font-black text-[#7f715d] uppercase tracking-widest cursor-pointer hover:underline"
+                className="text-[10px] font-black text-muted-foreground uppercase tracking-widest cursor-pointer hover:underline"
               >
                 {t("ui_clear_all")}
               </button>
@@ -152,28 +152,28 @@ export default function DailyAverageSettings() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                     onClick={() => handleToggleCategory(category._id)}
-                    className={`p-5 rounded-none border transition-all duration-300 flex items-center justify-between cursor-pointer ${
+                    className={`p-5 rounded-md border transition-all duration-300 flex items-center justify-between cursor-pointer ${
                       isSelected
-                        ? "bg-[#fffdf5] border-[#e1d7c5] shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)]"
-                        : "bg-[#fffdf5]/40 border-[#e1d7c5] opacity-60 hover:opacity-80 shadow-none"
+                        ? "bg-card border-border shadow-[3px_4px_0_var(--paper-edge),0_8px_24px_rgba(78,62,36,0.06)]"
+                        : "bg-card/40 border-border opacity-60 hover:opacity-80 shadow-none"
                     }`}
                   >
                     <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-[#fffdf5] border border-[#d9cebb] flex items-center justify-center text-xl shrink-0">
+                      <div className="w-12 h-12 rounded-md bg-card border border-border flex items-center justify-center text-xl shrink-0">
                         {category.icon || "🏷️"}
                       </div>
                       <div className="min-w-0 text-left font-mono">
-                        <h3 className="text-sm font-black text-[#292722] italic uppercase leading-snug mb-1.5">{category.name}</h3>
-                        <p className="text-[10px] font-bold text-[#7f715d] uppercase tracking-wider leading-none">
+                        <h3 className="text-sm font-black text-foreground italic uppercase leading-snug mb-1.5">{category.name}</h3>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider leading-none">
                           {t("ui_type")} {t(category.type === "income" ? "ui_income" : "ui_expense")}
                         </p>
                       </div>
                     </div>
 
-                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${
+                    <div className={`w-6 h-6 rounded-md flex items-center justify-center transition-all ${
                       isSelected
-                        ? "bg-[#e9a342] text-[#372b1c] scale-100"
-                        : "border-2 border-[#d9cebb] scale-95"
+                        ? "bg-highlight text-highlight-foreground scale-100"
+                        : "border-2 border-border scale-95"
                     }`}>
                       {isSelected && <Check className="w-4 h-4" />}
                     </div>
@@ -186,7 +186,7 @@ export default function DailyAverageSettings() {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-widest rounded-xl text-center font-mono"
+                className="p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-widest rounded-md text-center font-mono"
               >
                 {t("ui_configuration_saved_successfully")}
               </motion.div>
@@ -195,7 +195,7 @@ export default function DailyAverageSettings() {
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="w-full py-4 rounded-xl bg-[#e9a342] text-[#372b1c] text-xs font-black uppercase tracking-widest hover:bg-[#e9a342] disabled:bg-[#b6a68e] transition-all shadow-md shadow-black/10 cursor-pointer text-center font-mono"
+              className="w-full py-4 rounded-md bg-highlight text-highlight-foreground text-xs font-black uppercase tracking-widest hover:bg-highlight disabled:bg-muted-foreground transition-all shadow-md shadow-black/10 cursor-pointer text-center font-mono"
             >
               {isSaving ? t("ui_saving") : t("ui_save_configurations")}
             </button>

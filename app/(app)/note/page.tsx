@@ -146,38 +146,37 @@ export default function NotePage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#f5f0e5] flex flex-col items-center p-0 md:p-6 pt-16 md:pt-24 pb-20">
+    <main className="notebook-page notebook-page--app min-h-screen flex flex-col items-center p-0 md:p-6 pt-8 md:pt-8 pb-20">
 
       <div className="w-full max-w-2xl px-4 md:px-0 space-y-6 md:space-y-8">
         {refunding && <RefundExpense transaction={refunding} onClose={() => setRefunding(null)} onSaved={tx => { handleAddSuccess(tx); setRefundNotice(true); }} />}
-        {refundNotice && <p role="status" className="border border-[#c8d7bd] bg-[#eef4e8] p-4 text-xs text-[#416b54]">{language === 'th' ? 'บันทึกการคืนเงินแล้ว ยอดสุทธิในรอบเดิมปรับแล้ว' : 'Refund saved. The original cycle’s net spending is updated.'}</p>}
-        {/* Compact Header */}
-        <div className="flex items-center justify-between">
+        {refundNotice && <p role="status" className="border border-[#c8d7bd] bg-accent p-4 text-xs text-primary">{language === 'th' ? 'บันทึกการคืนเงินแล้ว ยอดสุทธิในรอบเดิมปรับแล้ว' : 'Refund saved. The original cycle’s net spending is updated.'}</p>}
+        <div className="notebook-heading flex items-end justify-between gap-3">
           <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
-            <Link href="/dashboard" className="flex items-center gap-1.5 text-[#7f715d] hover:text-[#292722] transition-colors mb-2 text-[10px] font-bold uppercase tracking-widest font-mono">
+            <Link href="/dashboard" className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors mb-2 text-[10px] font-bold uppercase tracking-widest font-mono">
               <ArrowLeft className="w-3 h-3" />
               {t("ui_back_to_dashboard")}
             </Link>
-            <h1 className="text-2xl md:text-3xl font-black text-[#292722] tracking-tight uppercase font-mono">
-              {t("nav_notes")}<span className="text-[#93846b]">/</span><span className="text-[#b97423]">{t("ui_expense")}</span>
+            <h1 className="notebook-title">
+              {language === "th" ? "รายการที่จด" : "Ledger entries"}
             </h1>
           </motion.div>
 
           <div className="text-right font-mono">
-            <p className="text-[10px] font-bold text-[#7f715d] uppercase tracking-widest">{filteredTransactions.length} {t("ui_items")}</p>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{filteredTransactions.length} {t("ui_items")}</p>
           </div>
         </div>
 
         {/* Minimal Filters Card in Floating Style */}
-        <div className="bg-[#fffdf5] shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] border border-[#e1d7c5]/80 rounded-none p-4 md:p-6 space-y-4">
+        <div className="notebook-leaf space-y-4 p-4 md:p-6">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#93846b]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
               placeholder={t("ui_search_transactions")}
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.target.value); setVisibleCount(50); }}
-              className="w-full pl-10 pr-4 py-3 bg-[#f5eedf]/70 border border-[#e1d7c5] rounded-xl text-sm font-bold text-[#292722] focus:bg-[#fffdf5] focus:border-[#d9cebb] focus:ring-4 focus:ring-[#d9cebb]/50 transition-all placeholder:text-[#93846b]"
+              className="w-full pl-10 pr-4 py-3 bg-secondary/70 border border-border rounded-md text-sm font-bold text-foreground focus:bg-card focus:border-border focus:ring-4 focus:ring-border/50 transition-all placeholder:text-muted-foreground"
             />
           </div>
 
@@ -193,44 +192,44 @@ export default function NotePage() {
               <select
                 value={selectedCategory}
                 onChange={(e) => { setSelectedCategory(e.target.value); setVisibleCount(50); }}
-                className="w-full pl-9 pr-8 py-2.5 bg-[#f5eedf]/70 border border-[#e1d7c5] rounded-xl text-[11px] font-bold text-[#635744] appearance-none focus:bg-[#fffdf5] focus:border-[#d9cebb] focus:ring-4 focus:ring-[#d9cebb]/50 transition-all"
+                className="w-full pl-9 pr-8 py-2.5 bg-secondary/70 border border-border rounded-md text-[11px] font-bold text-ink-soft appearance-none focus:bg-card focus:border-border focus:ring-4 focus:ring-border/50 transition-all"
               >
                 <option value="All">{t("ui_all_categories")}</option>
                 {categories.map(cat => <option key={cat._id} value={cat._id}>{cat.name}</option>)}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#93846b] pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
             </div>
 
             <div className="relative">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                <CreditCard className="w-3.5 h-3.5 text-[#93846b]" />
+                <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
               </div>
               <select
                 value={selectedPayment}
                 onChange={(e) => { setSelectedPayment(e.target.value); setVisibleCount(50); }}
-                className="w-full pl-9 pr-8 py-2.5 bg-[#f5eedf]/70 border border-[#e1d7c5] rounded-xl text-[11px] font-bold text-[#635744] appearance-none focus:bg-[#fffdf5] focus:border-[#d9cebb] focus:ring-4 focus:ring-[#d9cebb]/50 transition-all"
+                className="w-full pl-9 pr-8 py-2.5 bg-secondary/70 border border-border rounded-md text-[11px] font-bold text-ink-soft appearance-none focus:bg-card focus:border-border focus:ring-4 focus:ring-border/50 transition-all"
               >
                 <option value="All">{t("ui_all_payments")}</option>
                 {paymentMethods.map(pm => <option key={pm._id} value={pm._id}>{pm.name}</option>)}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#93846b] pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
             </div>
 
             <div className="relative col-span-2 md:col-span-1">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                <Calendar className="w-3.5 h-3.5 text-[#93846b]" />
+                <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
               </div>
               <input
                 type="date"
                 value={dateFilter}
                 onChange={(e) => { setDateFilter(e.target.value); setVisibleCount(50); }}
-                className="w-full pl-9 pr-3 py-2.5 bg-[#f5eedf]/70 border border-[#e1d7c5] rounded-xl text-[11px] font-bold text-[#635744] focus:bg-[#fffdf5] focus:border-[#d9cebb] focus:ring-4 focus:ring-[#d9cebb]/50 transition-all font-mono"
+                className="w-full pl-9 pr-3 py-2.5 bg-secondary/70 border border-border rounded-md text-[11px] font-bold text-ink-soft focus:bg-card focus:border-border focus:ring-4 focus:ring-border/50 transition-all font-mono"
               />
             </div>
           </div>
 
           {(searchQuery || selectedCategory !== "All" || selectedPayment !== "All" || dateFilter) && (
-            <button onClick={resetFilters} className="text-[10px] font-bold text-[#b97423] hover:text-[#9d601c] uppercase tracking-widest flex items-center gap-1 cursor-pointer transition-colors font-mono">
+            <button onClick={resetFilters} className="text-[10px] font-bold text-highlight-ink hover:text-[#9d601c] uppercase tracking-widest flex items-center gap-1 cursor-pointer transition-colors font-mono">
               <X className="w-3 h-3" /> {t("ui_reset_filters")}
             </button>
           )}
@@ -241,16 +240,16 @@ export default function NotePage() {
           <AnimatePresence mode="popLayout">
             {(loadError || metadataError) && <p role="alert" className="p-4 text-sm">{language === 'th' ? 'ข้อมูลบางส่วนโหลดไม่สำเร็จ' : 'Some data could not load.'} <button type="button" className="min-h-11 px-3 underline" onClick={() => setRetry(value => value + 1)}>{language === 'th' ? 'ลองอีกครั้ง' : 'Retry'}</button></p>}
             {loading ? (
-              <p key="loading" role="status" className="py-20 text-center text-xs text-[#7f715d]">{language === 'th' ? "กำลังเปิดบันทึก…" : "Opening your notes…"}</p>
+              <p key="loading" role="status" className="py-20 text-center text-xs text-muted-foreground">{language === 'th' ? "กำลังเปิดบันทึก…" : "Opening your notes…"}</p>
             ) :
             groupedTransactions.length > 0 ? (
               groupedTransactions.map(([dateGroup, txList]) => (
                 <motion.div key={dateGroup} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reducedMotion ? 0 : 0.18 }} className="relative space-y-2">
                   {/* Sticky Date Header */}
-                  <div className="sticky top-[56px] md:top-[72px] bg-[#f5f0e5]/95 backdrop-blur-md py-2.5 z-10 flex items-center justify-between border-b border-[#d9cebb]/60 font-mono">
-                    <span className="text-[10px] font-black text-[#7f715d] uppercase tracking-[0.15em]">{dateGroup}</span>
+                  <div className="sticky top-[56px] md:top-[72px] bg-background/95 backdrop-blur-md py-2.5 z-10 flex items-center justify-between border-b border-border/60 font-mono">
+                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.15em]">{dateGroup}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-bold text-[#7f715d] uppercase tracking-wider bg-[#fffdf5] border border-[#e1d7c5] rounded-md px-2 py-0.5 shadow-sm">
+                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider bg-card border border-border rounded-md px-2 py-0.5 shadow-sm">
                         {txList.length} {t("ui_items")}
                       </span>
                       <button
@@ -259,7 +258,7 @@ export default function NotePage() {
                           const dateObj = txList[0]?.date ? new Date(txList[0].date) : new Date();
                           openExpenseModal(handleAddSuccess, { date: dateObj });
                         }}
-                        className="w-11 h-11 shrink-0 rounded-md bg-[#fffdf5] border border-[#d9cebb] text-[#292722] hover:bg-[#292722] hover:text-white transition-all flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+                        className="w-11 h-11 shrink-0 rounded-md bg-card border border-border text-foreground hover:bg-foreground hover:text-card transition-all flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
                       >
                         <span className="text-xs font-bold leading-none">+</span>
                       </button>
@@ -267,7 +266,7 @@ export default function NotePage() {
                   </div>
 
                   {/* Inner list of items */}
-                  <div className="relative divide-y divide-[#e1d7c5]">
+                  <div className="relative divide-y divide-border">
                     <AnimatePresence mode="popLayout">
                     {txList.map((tx) => {
                       const categoryData = categories.find(c => c._id === tx.category || c.name === tx.category);
@@ -292,30 +291,30 @@ export default function NotePage() {
                           <button type="button" aria-expanded={receiptOpen} aria-controls={receiptId}
                             aria-label={`${language === 'th' ? 'ใบเสร็จ' : 'Receipt'} · ${tx.name}`}
                             onClick={() => setExpandedReceipt(receiptOpen ? null : tx._id)}
-                            className="absolute inset-0 rounded-xl focus-visible:outline-2 focus-visible:outline-[#b97423]"
-                            style={{ background: receiptOpen ? '#eee5d655' : undefined }} />
+                            className="absolute inset-0 cursor-pointer rounded-md hover:bg-[color-mix(in_srgb,var(--muted)_30.2%,transparent)] focus-visible:outline-2 focus-visible:outline-highlight-ink"
+                            style={{ background: receiptOpen ? 'color-mix(in srgb, var(--muted) 33%, transparent)' : undefined }} />
                           <div className="pointer-events-none relative flex min-w-0 items-center gap-2 sm:gap-3">
                             <span className="hidden w-3 shrink-0 items-center justify-center sm:flex">
-                              <span className="text-[10px] text-[#292722] font-black opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                              <span className="text-[10px] text-foreground font-black opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                 ▶
                               </span>
                             </span>
-                            <div className="w-10 h-10 rounded-xl bg-[#fffdf5] flex items-center justify-center border border-[#d9cebb] shadow-sm group-hover:bg-[#f5eedf] transition-all duration-300 shrink-0">
+                            <div className="w-10 h-10 rounded-md bg-card flex items-center justify-center border border-border shadow-sm group-hover:bg-secondary transition-all duration-300 shrink-0">
                               <span className="text-xl group-hover:scale-110 transition-transform">{categoryIcon}</span>
                             </div>
                             <div className="min-w-0 text-left">
-                              <h3 className="text-sm font-bold text-[#292722] tracking-tight truncate leading-tight mb-1.5" title={tx.name}>{tx.name}</h3>
+                              <h3 className="text-sm font-bold text-foreground tracking-tight truncate leading-tight mb-1.5" title={tx.name}>{tx.name}</h3>
                               <div className="flex flex-col gap-0.5">
-                                <p title={`${categoryData ? categoryData.name : tx.category}${subCategoryName ? ` / ${subCategoryName}` : ""}`} className="truncate text-[10px] font-bold text-[#b97423] uppercase tracking-wider font-mono leading-tight">
+                                <p title={`${categoryData ? categoryData.name : tx.category}${subCategoryName ? ` / ${subCategoryName}` : ""}`} className="truncate text-[10px] font-bold text-highlight-ink uppercase tracking-wider font-mono leading-tight">
                                   <span>{categoryData ? categoryData.name : tx.category}</span>
                                   {subCategoryName && (
                                     <>
-                                      <span className="mx-1 text-[#b6a68e]">/</span>
-                                      <span className="text-[#93846b] lowercase font-medium">{subCategoryName}</span>
+                                      <span className="mx-1 text-muted-foreground">/</span>
+                                      <span className="text-muted-foreground lowercase font-medium">{subCategoryName}</span>
                                     </>
                                   )}
                                 </p>
-                                <div className="flex min-w-0 items-center gap-2 text-[9px] font-bold text-[#93846b] uppercase tracking-wider font-mono">
+                                <div className="flex min-w-0 items-center gap-2 text-[9px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
                                   <span className="truncate">{(() => {
                                     const payData = paymentMethods.find(p => p._id === tx.paymentMethod || p.name === tx.paymentMethod);
                                     return payData ? payData.name : tx.paymentMethod;
@@ -325,18 +324,19 @@ export default function NotePage() {
                             </div>
                           </div>
                           <div className="pointer-events-none relative flex shrink-0 items-center gap-1 sm:gap-3">
+                            <ChevronDown aria-hidden="true" size={14} className={`text-ink-soft transition-transform motion-reduce:transition-none ${receiptOpen ? "rotate-180" : ""}`} />
                             <div className="pointer-events-none shrink-0 text-right">
                               <p className={`whitespace-nowrap text-sm md:text-base font-black italic font-mono ${tx.amount < 0 ? "text-red-500" : "text-emerald-500"}`}>
                                 {tx.amount > 0 ? "+" : ""}{tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                               </p>
-                              <p className="text-[9px] font-bold text-[#b6a68e] uppercase font-mono">THB</p>
-                              {Boolean(tx.refunds?.length) && <p className="mt-1 text-[9px] text-[#887b65]">{language === 'th' ? (tx.amount === 0 ? 'คืนเงินครบแล้ว' : 'หักคืนเงินแล้ว') : (tx.amount === 0 ? 'Fully returned' : 'After refund')}</p>}
+                              <p className="text-[9px] font-bold text-muted-foreground uppercase font-mono">THB</p>
+                              {Boolean(tx.refunds?.length) && <p className="mt-1 text-[9px] text-muted-foreground">{language === 'th' ? (tx.amount === 0 ? 'คืนเงินครบแล้ว' : 'หักคืนเงินแล้ว') : (tx.amount === 0 ? 'Fully returned' : 'After refund')}</p>}
                             </div>
 
                             <DropdownMenu.Root modal={false}>
                               <DropdownMenu.Trigger
                                 aria-label={`${language === "th" ? "เมนูรายการ" : "Transaction actions"} · ${tx.name}`}
-                                className="pointer-events-auto flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl text-[#93846b] transition-colors hover:bg-[#f5eedf] focus-visible:outline-2 focus-visible:outline-[#b97423]"
+                                className="pointer-events-auto flex h-11 w-11 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary focus-visible:outline-2 focus-visible:outline-highlight-ink"
                               >
                                 <MoreVertical className="h-4 w-4" />
                               </DropdownMenu.Trigger>
@@ -354,12 +354,12 @@ export default function NotePage() {
                                 menuActionSelected.current = true;
                                 openExpenseModal(handleAddSuccess, tx);
                               }}
-                              className={`${styles.item} text-[#7f715d] data-highlighted:bg-[#f5eedf] data-highlighted:text-[#b97423]`}
+                              className={`${styles.item} text-muted-foreground data-highlighted:bg-secondary data-highlighted:text-highlight-ink`}
                             >
                               <Pencil className="w-3.5 h-3.5" />
                               {t("edit_expense")}
                             </DropdownMenu.Item>
-                            {tx.amount < 0 && <DropdownMenu.Item onSelect={() => { menuActionSelected.current = true; setRefunding(tx); }} className={`${styles.item} text-[#416b54]`}><ReceiptText className="h-3.5 w-3.5"/>{language === 'th' ? 'คืนเงิน / ยกเลิก' : 'Refund / Cancel'}</DropdownMenu.Item>}
+                            {tx.amount < 0 && <DropdownMenu.Item onSelect={() => { menuActionSelected.current = true; setRefunding(tx); }} className={`${styles.item} text-primary`}><ReceiptText className="h-3.5 w-3.5"/>{language === 'th' ? 'คืนเงิน / ยกเลิก' : 'Refund / Cancel'}</DropdownMenu.Item>}
                             <DropdownMenu.Item aria-label={t("delete")}
                               onSelect={() => {
                                 menuActionSelected.current = true;
@@ -401,7 +401,7 @@ export default function NotePage() {
                               <Trash2 className="w-3.5 h-3.5" />
                               {t("delete")}
                             </DropdownMenu.Item>
-                                <DropdownMenu.Arrow width={12} height={6} className="fill-[#fffdf5]" />
+                                <DropdownMenu.Arrow width={12} height={6} className="fill-card" />
                               </DropdownMenu.Content>
                               </DropdownMenu.Portal>
                             </DropdownMenu.Root>
@@ -414,20 +414,20 @@ export default function NotePage() {
                               exit={{ height: 0, opacity: 0 }} transition={{ duration: reducedMotion ? 0 : 0.28, ease: [0.22, 1, 0.36, 1] }}
                               className="overflow-hidden">
                               <motion.div initial={{ y: reducedMotion ? 0 : -30 }} animate={{ y: 0 }} exit={{ y: reducedMotion ? 0 : -30 }} transition={{ duration: reducedMotion ? 0 : 0.28 }} className={styles.receipt}>
-                                {Boolean(tx.refunds?.length) && <div className="mb-4 border-b border-dashed border-[#d9cebb] pb-3 text-[11px] leading-6"><p>{language === 'th' ? 'ยอดเดิม' : 'Original expense'} {(Math.round(-tx.amount * 100) + (tx.refunds ?? []).reduce((sum, item) => sum + item.amountCents, 0)) / 100} ฿</p>{tx.refunds?.map(item => <p key={item.requestId}>{new Date(item.createdAt).toLocaleDateString(language === 'th' ? 'th-TH' : 'en-US', { timeZone: 'Asia/Bangkok' })} · {language === 'th' ? (item.kind === 'cancel' ? 'ยกเลิก' : 'คืนเงิน') : item.kind} {(item.amountCents / 100).toFixed(2)} ฿</p>)}</div>}
-                                <div className="mb-3 flex items-center justify-between border-b border-dashed border-[#d9cebb] pb-3">
-                                  <span className="flex items-center gap-2 text-[10px] font-bold tracking-widest text-[#93846b]"><ReceiptText aria-hidden="true" className="h-4 w-4" />NORINOTE</span>
-                                  <span className="text-[9px] text-[#93846b]">{language === 'th' ? 'บันทึกรายการ' : 'TRANSACTION NOTE'}</span>
+                                {Boolean(tx.refunds?.length) && <div className="mb-4 border-b border-dashed border-border pb-3 text-[11px] leading-6"><p>{language === 'th' ? 'ยอดเดิม' : 'Original expense'} {(Math.round(-tx.amount * 100) + (tx.refunds ?? []).reduce((sum, item) => sum + item.amountCents, 0)) / 100} ฿</p>{tx.refunds?.map(item => <p key={item.requestId}>{new Date(item.createdAt).toLocaleDateString(language === 'th' ? 'th-TH' : 'en-US', { timeZone: 'Asia/Bangkok' })} · {language === 'th' ? (item.kind === 'cancel' ? 'ยกเลิก' : 'คืนเงิน') : item.kind} {(item.amountCents / 100).toFixed(2)} ฿</p>)}</div>}
+                                <div className="mb-3 flex items-center justify-between border-b border-dashed border-border pb-3">
+                                  <span className="flex items-center gap-2 text-[10px] font-bold tracking-widest text-muted-foreground"><ReceiptText aria-hidden="true" className="h-4 w-4" />NORINOTE</span>
+                                  <span className="text-[9px] text-muted-foreground">{language === 'th' ? 'บันทึกรายการ' : 'TRANSACTION NOTE'}</span>
                                 </div>
-                                <h3 className="break-words text-sm font-bold text-[#403b32]">{tx.name}</h3>
-                                <p className="mt-1 text-[10px] text-[#93846b]">{new Date(tx.date).toLocaleDateString(language === 'th' ? 'th-TH' : 'en-US', { timeZone: 'Asia/Bangkok', day: 'numeric', month: 'long', year: 'numeric' })}</p>
-                                <dl className="my-4 space-y-2 text-xs text-[#7f715d]">
+                                <h3 className="break-words text-sm font-bold text-foreground">{tx.name}</h3>
+                                <p className="mt-1 text-[10px] text-muted-foreground">{new Date(tx.date).toLocaleDateString(language === 'th' ? 'th-TH' : 'en-US', { timeZone: 'Asia/Bangkok', day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                                <dl className="my-4 space-y-2 text-xs text-muted-foreground">
                                   <div className="flex justify-between gap-4"><dt className="shrink-0">{language === 'th' ? 'หมวดหมู่' : 'Category'}</dt><dd className="min-w-0 break-words text-right">{categoryIcon} {categoryData?.name || tx.category}{subCategoryName ? ` / ${subCategoryName}` : ''}</dd></div>
                                   <div className="flex justify-between gap-4"><dt className="shrink-0">{language === 'th' ? 'ช่องทางจ่าย' : 'Payment'}</dt><dd className="min-w-0 break-words text-right">{paymentName}</dd></div>
                                 </dl>
-                                <div className="flex items-baseline justify-between gap-3 border-t border-dashed border-[#d9cebb] pt-3">
-                                  <span className="text-xs font-bold text-[#635744]">{language === 'th' ? (tx.refunds?.length ? 'รายจ่ายสุทธิ' : tx.amount < 0 ? 'รายจ่าย' : 'รายรับ') : (tx.refunds?.length ? 'Net expense' : tx.amount < 0 ? 'Expense' : 'Income')}</span>
-                                  <span className="break-all text-right text-lg font-black text-[#403b32]">{Math.abs(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}<span className="ml-2 text-[9px] font-normal text-[#93846b]">THB</span></span>
+                                <div className="flex items-baseline justify-between gap-3 border-t border-dashed border-border pt-3">
+                                  <span className="text-xs font-bold text-ink-soft">{language === 'th' ? (tx.refunds?.length ? 'รายจ่ายสุทธิ' : tx.amount < 0 ? 'รายจ่าย' : 'รายรับ') : (tx.refunds?.length ? 'Net expense' : tx.amount < 0 ? 'Expense' : 'Income')}</span>
+                                  <span className="break-all text-right text-lg font-black text-foreground">{Math.abs(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}<span className="ml-2 text-[9px] font-normal text-muted-foreground">THB</span></span>
                                 </div>
                               </motion.div>
                             </motion.div>}
@@ -441,14 +441,14 @@ export default function NotePage() {
               ))
             ) : (
               <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reducedMotion ? 0 : 0.18 }} className="py-20 text-center">
-                <p className="text-sm font-bold text-[#b6a68e] uppercase tracking-widest font-mono">{t("ui_empty_note")}</p>
+                <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest font-mono">{t("ui_empty_note")}</p>
               </motion.div>
             )}
           </AnimatePresence>
           {!loading && visibleCount < sortedTransactions.length && (
             <div className="space-y-3 text-center">
-              <p className="text-[10px] text-[#7f715d]">{language === 'th' ? `แสดง ${visibleCount} จาก ${sortedTransactions.length} รายการ` : `Showing ${visibleCount} of ${sortedTransactions.length} records`}</p>
-              <button type="button" onClick={() => setVisibleCount(count => count + 50)} className="min-h-11 border border-[#d9cebb] bg-[#fffdf5] px-6 py-3 text-xs font-bold text-[#635744] shadow-sm focus-visible:outline-2 focus-visible:outline-[#b97423]">
+              <p className="text-[10px] text-muted-foreground">{language === 'th' ? `แสดง ${visibleCount} จาก ${sortedTransactions.length} รายการ` : `Showing ${visibleCount} of ${sortedTransactions.length} records`}</p>
+              <button type="button" onClick={() => setVisibleCount(count => count + 50)} className="min-h-11 border border-border bg-card px-6 py-3 text-xs font-bold text-ink-soft shadow-sm focus-visible:outline-2 focus-visible:outline-highlight-ink">
                 {language === 'th' ? "ดูรายการเพิ่ม" : "Show more records"}
               </button>
             </div>

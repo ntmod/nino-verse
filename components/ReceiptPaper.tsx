@@ -71,15 +71,15 @@ export default function ReceiptPaper({ title, children, onClose, stampDelay }: {
       onClick={event => { if (event.target === event.currentTarget) void requestClose(); }}
       aria-busy={closing}
       style={{ overflowY: closing ? 'hidden' : 'auto' }}
-      className="fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none items-center justify-center overflow-y-auto border-0 bg-transparent p-4 open:flex backdrop:bg-[#292722]/40 backdrop:backdrop-blur-sm"
+      className="fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none items-center justify-center overflow-y-auto border-0 bg-transparent p-4 open:flex backdrop:bg-foreground/40 backdrop:backdrop-blur-sm"
     >
       <div className="pointer-events-none relative my-auto w-full max-w-[360px] py-3">
-        <div aria-hidden="true" className="absolute inset-x-2 top-0 z-10 h-3 rounded-[6px] bg-[#252525] shadow-lg" style={{ opacity: closing ? 0 : 1, transition: 'opacity 150ms' }} />
+        <div aria-hidden="true" className="absolute inset-x-2 top-0 z-10 h-3 rounded-md bg-[#252525] shadow-lg" style={{ opacity: closing ? 0 : 1, transition: 'opacity 150ms' }} />
         <div className={`${closing ? "overflow-visible" : "overflow-hidden"} px-1 pb-6`}>
           <motion.div
             initial={reducedMotion ? false : { y: "-100%" }}
             animate={paperAnimation}
-            className="pointer-events-auto relative bg-[#fffdf5] px-5 pb-10 pt-8 font-mono text-[#292722] shadow-xl sm:px-7"
+            className="pointer-events-auto relative bg-card px-5 pb-10 pt-8 font-mono text-foreground shadow-xl sm:px-7"
             style={{ transformPerspective: 700, transformOrigin: '50% 40%', clipPath: "polygon(0 0,100% 0,100% 98%,95% 100%,90% 98%,85% 100%,80% 98%,75% 100%,70% 98%,65% 100%,60% 98%,55% 100%,50% 98%,45% 100%,40% 98%,35% 100%,30% 98%,25% 100%,20% 98%,15% 100%,10% 98%,5% 100%,0 98%)" }}
           >
             <motion.div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-[44%] h-10"
@@ -87,10 +87,10 @@ export default function ReceiptPaper({ title, children, onClose, stampDelay }: {
               style={{ background: 'linear-gradient(to bottom, transparent, rgba(78,62,36,0.12), rgba(255,253,245,0.65), transparent)' }} />
             <div className="text-center">
               <p className="text-2xl font-black italic tracking-tighter">NORINOTE</p>
-              <h2 id={titleId} className="mt-2 flex items-center justify-center gap-1.5 text-xs text-[#416b54]">{title}</h2>
+              <h2 id={titleId} className="mt-2 flex items-center justify-center gap-1.5 text-xs text-primary">{title}</h2>
             </div>
             {children}
-            <button autoFocus type="button" disabled={closing} onClick={() => void requestClose()} className="mt-5 min-h-11 w-full bg-[#292722] px-4 py-3 text-xs font-bold text-white transition-colors hover:bg-[#b97423] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-500">
+            <button autoFocus type="button" disabled={closing} onClick={() => void requestClose()} className="mt-5 min-h-11 w-full bg-foreground px-4 py-3 text-xs font-bold text-card transition-colors hover:bg-highlight-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-500">
               {language === "th" ? "เสร็จแล้ว" : "Done"}
             </button>
           </motion.div>

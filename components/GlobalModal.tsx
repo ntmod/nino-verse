@@ -24,16 +24,16 @@ export default function GlobalModal() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeGlobalModal}
-            className="absolute inset-0 bg-[#292722]/60 backdrop-blur-md"
+            className="absolute inset-0 bg-foreground/60 backdrop-blur-md"
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="max-h-[85dvh] relative w-full max-w-sm bg-[#fffdf5] rounded-none shadow-2xl overflow-y-auto"
+            className="max-h-[85dvh] relative w-full max-w-sm bg-card rounded-md shadow-2xl overflow-y-auto"
           >
             <div className="p-8 flex flex-col items-center text-center space-y-6">
-              <div className="w-48 h-48 relative rounded-3xl overflow-hidden mb-2 bg-[#f5eedf] flex items-center justify-center">
+              <div className="w-48 h-48 relative rounded-md overflow-hidden mb-2 bg-secondary flex items-center justify-center">
                 <img
                   src={animationPath}
                   alt={header}
@@ -42,8 +42,8 @@ export default function GlobalModal() {
               </div>
 
               <div className="space-y-3">
-                <h2 className="text-2xl font-black text-[#292722] tracking-tighter uppercase leading-none">{header}</h2>
-                <p className="text-[13px] font-bold text-[#7f715d] leading-relaxed px-2">
+                <h2 className="text-2xl font-black text-foreground tracking-tighter uppercase leading-none">{header}</h2>
+                <p className="text-[13px] font-bold text-muted-foreground leading-relaxed px-2">
                   {message}
                 </p>
               </div>
@@ -54,8 +54,8 @@ export default function GlobalModal() {
                     mainButton.onClick();
                     closeGlobalModal();
                   }}
-                  className={`w-full py-4 rounded-none font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-black/5 hover:scale-[1.02] active:scale-[0.98] ${
-                    mainButton.color || "bg-[#e9a342] text-[#372b1c] hover:bg-[#403b32]"
+                  className={`w-full py-4 rounded-md font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-black/5 hover:scale-[1.02] active:scale-[0.98] ${
+                    mainButton.color || "bg-highlight text-highlight-foreground hover:bg-foreground"
                   }`}
                 >
                   {mainButton.label}
@@ -67,7 +67,7 @@ export default function GlobalModal() {
                       subButton.onClick();
                       closeGlobalModal();
                     }}
-                    className="w-full py-3 rounded-xl font-bold text-[10px] text-[#93846b] uppercase tracking-[0.2em] hover:text-[#292722] transition-colors"
+                    className="w-full py-3 rounded-md font-bold text-[10px] text-muted-foreground uppercase tracking-[0.2em] hover:text-foreground transition-colors"
                   >
                     {subButton.label}
                   </button>
@@ -77,9 +77,9 @@ export default function GlobalModal() {
 
             <button 
               onClick={closeGlobalModal} 
-              className="absolute top-6 right-6 p-2 hover:bg-[#eee5d6] rounded-full transition-colors"
+              className="absolute top-6 right-6 p-2 hover:bg-muted rounded-md transition-colors"
             >
-              <X className="w-4 h-4 text-[#93846b]" />
+              <X className="w-4 h-4 text-muted-foreground" />
             </button>
           </motion.div>
         </div>

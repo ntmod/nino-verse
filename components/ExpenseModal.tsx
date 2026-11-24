@@ -35,22 +35,22 @@ export default function ExpenseModal() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => { if (!savingRef.current) closeExpenseModal(); }}
-            className="absolute inset-0 bg-[#292722]/30 backdrop-blur-md"
+            className="absolute inset-0 bg-foreground/30 backdrop-blur-md"
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ type: "spring", stiffness: 380, damping: 30 }}
-            className="max-h-[calc(100dvh-2rem)] relative w-full max-w-md bg-[#fffdf5] rounded-none shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-[#e1d7c5] overflow-y-auto"
+            className="max-h-[calc(100dvh-2rem)] relative w-full max-w-md bg-card rounded-md shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-border overflow-y-auto"
           >
             <div className="p-5 sm:p-6 space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-black text-[#292722] tracking-tight uppercase font-mono">
+                <h2 className="text-lg font-black text-foreground tracking-tight uppercase font-mono">
                   {editingTransaction && editingTransaction._id ? t("edit_expense") : t("add_expense")}
                 </h2>
-                <button disabled={isSaving} aria-label={language === "th" ? "ปิด" : t("close")} onClick={closeExpenseModal} className="w-11 h-11 shrink-0 rounded-full border border-[#e1d7c5] hover:border-[#d9cebb] hover:bg-[#f5eedf] flex items-center justify-center transition-colors disabled:opacity-40">
-                  <X className="w-4 h-4 text-[#635744]" />
+                <button disabled={isSaving} aria-label={language === "th" ? "ปิด" : t("close")} onClick={closeExpenseModal} className="w-11 h-11 shrink-0 rounded-md border border-border hover:border-border hover:bg-secondary flex items-center justify-center transition-colors disabled:opacity-40">
+                  <X className="w-4 h-4 text-ink-soft" />
                 </button>
               </div>
 

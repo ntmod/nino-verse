@@ -159,7 +159,7 @@ export default function MethodSettings() {
   };
 
   return (
-    <main className="relative min-h-screen bg-[#f5f0e5] flex flex-col items-center px-4 sm:px-6 py-8 pt-24 pb-28">
+    <main className="notebook-page notebook-page--app relative min-h-screen flex flex-col items-center px-4 sm:px-6 pt-8 pb-20">
       <LoadingScreen mode="in" />
       {showExitWipe && <LoadingScreen mode="out" />}
 
@@ -168,18 +168,18 @@ export default function MethodSettings() {
           <div className="flex min-w-0 items-center gap-3 sm:gap-4">
             <button aria-label={t("back")}
               onClick={handleBack}
-              className="w-11 h-11 shrink-0 rounded-xl bg-[#fffdf5] hover:bg-[#f5eedf]/70 transition-colors cursor-pointer"
+              className="w-11 h-11 shrink-0 rounded-md bg-card hover:bg-secondary/70 transition-colors cursor-pointer"
             >
-              <ArrowLeft className="w-5 h-5 text-[#7f715d]" />
+              <ArrowLeft className="w-5 h-5 text-muted-foreground" />
             </button>
             <div>
-              <h1 className="text-2xl font-black text-[#292722] italic tracking-tighter uppercase">{t("settings_methods")}</h1>
-              <p className="text-xs font-bold text-[#7f715d] uppercase tracking-widest">{t("ui_manage_your_cards_and_cash_wallets")}</p>
+              <h1 className="notebook-title">{t("settings_methods")}</h1>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t("ui_manage_your_cards_and_cash_wallets")}</p>
             </div>
           </div>
           <button
             onClick={() => { setSaveError(""); setIsModalOpen(true); }}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#e9a342] text-[#372b1c] text-xs font-black uppercase tracking-widest hover:bg-[#403b32] transition-all shadow-none shadow-black/10 cursor-pointer"
+            className="flex items-center gap-2 px-6 py-3 rounded-md bg-highlight text-highlight-foreground text-xs font-black uppercase tracking-widest hover:bg-foreground transition-all shadow-none shadow-black/10 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             {t("ui_add_method")}
@@ -195,33 +195,33 @@ export default function MethodSettings() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="p-4 md:p-4 sm:p-6 rounded-none bg-[#fffdf5] shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] flex flex-wrap gap-3 items-center justify-between group select-none"
+                className="p-4 md:p-4 sm:p-6 rounded-md bg-card shadow-[3px_4px_0_var(--paper-edge),0_8px_24px_rgba(78,62,36,0.06)] flex flex-wrap gap-3 items-center justify-between group select-none"
               >
                 <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                   <div className="flex flex-col gap-0.5 -ml-1">
                     <button aria-label={t("move_up")}
                       onClick={() => handleMove(method, "up")}
-                      className="p-1 rounded hover:bg-[#fffdf5] text-[#b6a68e] hover:text-[#403b32] transition-colors cursor-pointer"
+                      className="p-1 rounded-md hover:bg-card text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                     >
                       <ChevronUp className="w-4 h-4" />
                     </button>
                     <button aria-label={t("move_down")}
                       onClick={() => handleMove(method, "down")}
-                      className="p-1 rounded hover:bg-[#fffdf5] text-[#b6a68e] hover:text-[#403b32] transition-colors cursor-pointer"
+                      className="p-1 rounded-md hover:bg-card text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                     >
                       <ChevronDown className="w-4 h-4" />
                     </button>
                   </div>
                   <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-6">
                     <div
-                      className="w-10 h-10 sm:w-14 sm:h-14 shrink-0 rounded-xl flex items-center justify-center text-2xl"
+                      className="w-10 h-10 sm:w-14 sm:h-14 shrink-0 rounded-md flex items-center justify-center text-2xl"
                       style={{ backgroundColor: `${method.color}10` }}
                     >
                       {method.icon}
                     </div>
                     <div className="min-w-0">
-                      <h3 className="break-words text-base font-black text-[#292722] italic uppercase">{method.name}</h3>
-                      <p className="text-[10px] font-bold text-[#7f715d] uppercase tracking-widest mt-0.5">{method.desc}</p>
+                      <h3 className="break-words text-base font-black text-foreground italic uppercase">{method.name}</h3>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">{method.desc}</p>
 
                     </div>
                   </div>
@@ -235,15 +235,15 @@ export default function MethodSettings() {
                       setNewMethod({ name: method.name, icon: method.icon, color: method.color, desc: method.desc || "" });
                       setIsModalOpen(true);
                     }}
-                    className="w-11 h-11 shrink-0 rounded-xl bg-[#fffdf5] hover:bg-[#f5eedf]/70 transition-all group/btn cursor-pointer"
+                    className="w-11 h-11 shrink-0 rounded-md bg-card hover:bg-secondary/70 transition-all group/btn cursor-pointer"
                   >
-                    <Pencil className="w-4 h-4 text-[#7f715d] group-hover/btn:text-[#b97423]" />
+                    <Pencil className="w-4 h-4 text-muted-foreground group-hover/btn:text-highlight-ink" />
                   </button>
                   <button aria-label={t("delete")}
                     onClick={() => handleDeleteMethod(method._id)}
-                    className="w-11 h-11 shrink-0 rounded-xl bg-[#fffdf5] hover:bg-rose-50 transition-all group/btn cursor-pointer"
+                    className="w-11 h-11 shrink-0 rounded-md bg-card hover:bg-rose-50 transition-all group/btn cursor-pointer"
                   >
-                    <Trash2 className="w-4 h-4 text-[#7f715d] group-hover/btn:text-rose-500" />
+                    <Trash2 className="w-4 h-4 text-muted-foreground group-hover/btn:text-rose-500" />
                   </button>
                 </div>
               </motion.div>
@@ -265,25 +265,25 @@ export default function MethodSettings() {
                 setEditingMethod(null);
                 setNewMethod({ name: "", icon: "💳", color: "#6366f1", desc: "" });
               }}
-              className="absolute inset-0 bg-[#292722]/20 backdrop-blur-md"
+              className="absolute inset-0 bg-foreground/20 backdrop-blur-md"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="max-h-[85dvh] relative w-full max-w-lg bg-[#fffdf5] rounded-none shadow-[3px_4px_0_#e7dece,0_8px_24px_rgba(78,62,36,0.06)] overflow-y-auto"
+              className="max-h-[85dvh] relative w-full max-w-lg bg-card rounded-md shadow-[3px_4px_0_var(--paper-edge),0_8px_24px_rgba(78,62,36,0.06)] overflow-y-auto"
             >
               <div className="p-4 sm:p-8">
                 <div className="flex flex-wrap gap-4 items-center justify-between mb-8">
-                  <h2 className="text-xl font-black text-[#292722] italic uppercase tracking-tighter">
+                  <h2 className="text-xl font-black text-foreground italic uppercase tracking-tighter">
                     {editingMethod ? t("ui_edit_method") : t("ui_add_method")}
                   </h2>
                   <button aria-label={t("close")} onClick={() => {
                     setIsModalOpen(false);
                     setEditingMethod(null);
                     setNewMethod({ name: "", icon: "💳", color: "#6366f1", desc: "" });
-                  }} className="w-11 h-11 shrink-0 rounded-none bg-[#fffdf5] flex items-center justify-center hover:bg-[#fffdf5] transition-colors cursor-pointer">
-                    <X className="w-5 h-5 text-[#7f715d]" />
+                  }} className="w-11 h-11 shrink-0 rounded-md bg-card flex items-center justify-center hover:bg-card transition-colors cursor-pointer">
+                    <X className="w-5 h-5 text-muted-foreground" />
                   </button>
                 </div>
 
@@ -291,8 +291,8 @@ export default function MethodSettings() {
                   {/* ICON PICKER */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between ml-1">
-                      <label className="text-[10px] font-black text-[#7f715d] uppercase tracking-widest">{t("ui_select_icon")}</label>
-                      <div className="rounded-none ring-2 ring-[#d9cebb] w-14 h-14 flex items-center justify-center text-[2rem] bg-[#fffdf5]">{newMethod.icon}</div>
+                      <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{t("ui_select_icon")}</label>
+                      <div className="rounded-md ring-2 ring-border w-14 h-14 flex items-center justify-center text-[2rem] bg-card">{newMethod.icon}</div>
                     </div>
 
                     <EmojiPicker.Root
@@ -302,25 +302,25 @@ export default function MethodSettings() {
                       className="flex flex-col gap-4"
                     >
                       <div className="relative">
-                        <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7f715d]" />
+                        <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <EmojiPicker.Search
                           placeholder={t("ui_search_emojis")}
-                          className="w-full pl-11 pr-6 py-3 rounded-xl bg-[#f5eedf]/70 focus:outline-none focus:ring-2 focus:ring-[#b97423]/20 focus:bg-[#fffdf5] transition-all text-xs font-bold text-[#292722]"
+                          className="w-full pl-11 pr-6 py-3 rounded-md bg-secondary/70 focus:outline-none focus:ring-2 focus:ring-highlight-ink/20 focus:bg-card transition-all text-xs font-bold text-foreground"
                         />
                       </div>
 
-                      <EmojiPicker.Viewport className="w-full h-48 pr-2 custom-scrollbar bg-[#fffdf5]/50 rounded-xl p-2">
+                      <EmojiPicker.Viewport className="w-full h-48 pr-2 custom-scrollbar bg-card/50 rounded-md p-2">
                         <EmojiPicker.List
                           components={{
                             CategoryHeader: ({ category, ...props }) => (
-                              <div {...props} className="text-[9px] font-black text-[#7f715d] uppercase py-4 px-2 bg-[#fffdf5]/80 backdrop-blur-sm sticky top-0 z-10 -mx-2">
+                              <div {...props} className="text-[9px] font-black text-muted-foreground uppercase py-4 px-2 bg-card/80 backdrop-blur-sm sticky top-0 z-10 -mx-2">
                                 {category.label}
                               </div>
                             ),
                             Emoji: ({ emoji, ...props }) => (
                               <button
                                 {...props}
-                                className={`my-2 w-8 h-8 sm:w-10 sm:h-10 aspect-square rounded-none flex items-center justify-center text-2xl transition-all hover:bg-[#fffdf5] ${newMethod.icon === emoji.emoji ? "bg-[#fffdf5] ring-2 ring-[#b97423]/20 scale-110" : "hover:scale-120"}`}
+                                className={`my-2 w-8 h-8 sm:w-10 sm:h-10 aspect-square rounded-md flex items-center justify-center text-2xl transition-all hover:bg-card ${newMethod.icon === emoji.emoji ? "bg-card ring-2 ring-highlight-ink/20 scale-110" : "hover:scale-120"}`}
                               >
                                 {emoji.emoji}
                               </button>
@@ -337,34 +337,34 @@ export default function MethodSettings() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[#7f715d] uppercase tracking-widest ml-1">{t("ui_method_name")}</label>
+                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">{t("ui_method_name")}</label>
                     <input
                       type="text"
                       placeholder={t("ui_e_g_k_bank_credit")}
                       value={newMethod.name}
                       onChange={(e) => setNewMethod({ ...newMethod, name: e.target.value })}
-                      className="w-full px-6 py-4 rounded-xl bg-[#f5eedf]/70 focus:outline-none focus:ring-2 focus:ring-[#b97423]/20 focus:bg-[#fffdf5] transition-all text-sm font-bold text-[#292722]"
+                      className="w-full px-6 py-4 rounded-md bg-secondary/70 focus:outline-none focus:ring-2 focus:ring-highlight-ink/20 focus:bg-card transition-all text-sm font-bold text-foreground"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[#7f715d] uppercase tracking-widest ml-1">{t("ui_description")}</label>
+                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">{t("ui_description")}</label>
                     <input
                       type="text"
                       placeholder="•••• 4589"
                       value={newMethod.desc}
                       onChange={(e) => setNewMethod({ ...newMethod, desc: e.target.value })}
-                      className="w-full px-6 py-4 rounded-xl bg-[#f5eedf]/70 focus:outline-none focus:ring-2 focus:ring-[#b97423]/20 focus:bg-[#fffdf5] transition-all text-sm font-bold text-[#292722]"
+                      className="w-full px-6 py-4 rounded-md bg-secondary/70 focus:outline-none focus:ring-2 focus:ring-highlight-ink/20 focus:bg-card transition-all text-sm font-bold text-foreground"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[#7f715d] uppercase tracking-widest ml-1">{t("ui_color_theme")}</label>
+                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">{t("ui_color_theme")}</label>
                     <input
                       type="color"
                       value={newMethod.color}
                       onChange={(e) => setNewMethod({ ...newMethod, color: e.target.value })}
-                      className="w-full h-[54px] p-2 rounded-xl bg-[#f5eedf]/70 cursor-pointer"
+                      className="w-full h-[54px] p-2 rounded-md bg-secondary/70 cursor-pointer"
                     />
                   </div>
                 </div>
@@ -377,14 +377,14 @@ export default function MethodSettings() {
                       setEditingMethod(null);
                       setNewMethod({ name: "", icon: "💳", color: "#6366f1", desc: "" });
                     }}
-                    className="py-4 rounded-xl bg-[#f5eedf]/70 text-xs font-black text-[#7f715d] uppercase tracking-widest hover:bg-[#f5eedf]/70 transition-all cursor-pointer"
+                    className="py-4 rounded-md bg-secondary/70 text-xs font-black text-muted-foreground uppercase tracking-widest hover:bg-secondary/70 transition-all cursor-pointer"
                   >
                     {t("cancel")}
                   </button>
                   <button
                     disabled={saving}
                     onClick={handleSaveMethod}
-                    className="py-4 rounded-xl bg-[#e9a342] text-[#372b1c] text-xs font-black uppercase tracking-widest hover:bg-[#403b32] transition-all shadow-none shadow-black/10 cursor-pointer"
+                    className="py-4 rounded-md bg-highlight text-highlight-foreground text-xs font-black uppercase tracking-widest hover:bg-foreground transition-all shadow-none shadow-black/10 cursor-pointer"
                   >
                     {saving ? (language === "th" ? "กำลังบันทึก…" : "Saving…") : editingMethod ? t("ui_update_method") : t("ui_save_method")}
                   </button>

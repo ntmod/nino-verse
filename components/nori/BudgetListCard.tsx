@@ -60,7 +60,7 @@ export default function BudgetListCard({
 }: BudgetListCardProps) {
   const { t } = useLanguage();
   return (
-    <div data-paper-surface="" className="p-4 bg-[#fffdf7] rounded-2xl shadow-[0_2px_8px_rgba(78,62,36,0.03)] border border-[#e1d7c5]/80 text-left min-h-[100px] flex flex-col justify-center">
+    <div data-paper-surface="" className="p-4 bg-card rounded-md shadow-[0_2px_8px_rgba(78,62,36,0.03)] border border-border/80 text-left min-h-[100px] flex flex-col justify-center">
       <AnimatePresence mode="wait">
         {isLoading ? (
           <motion.div
@@ -71,10 +71,10 @@ export default function BudgetListCard({
             transition={{ duration: 0.2 }}
             className="space-y-4"
           >
-            <div className="h-3 bg-[#e1d7c5] rounded-md w-24 mb-4 animate-pulse" />
+            <div className="h-3 bg-border rounded-md w-24 mb-4 animate-pulse" />
             <div className="space-y-2 animate-pulse">
-              <div className="h-4 bg-[#eee5d6] rounded-md w-full" />
-              <div className="h-4 bg-[#eee5d6] rounded-md w-2/3" />
+              <div className="h-4 bg-muted rounded-md w-full" />
+              <div className="h-4 bg-muted rounded-md w-2/3" />
             </div>
           </motion.div>
         ) : (
@@ -85,34 +85,34 @@ export default function BudgetListCard({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
           >
-            <h3 className="text-[10px] font-black text-[#7f715d] uppercase tracking-[0.2em] mb-4 select-none">{t("category_budgets")}</h3>
+            <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4 select-none">{t("category_budgets")}</h3>
 
             {budgets.length === 0 ? (
               <div className="py-6 flex flex-col items-center justify-center text-center space-y-2 font-mono">
-                <ClipboardList className="w-6 h-6 text-[#b6a68e]" />
-                <p className="text-[10px] font-bold text-[#7f715d] uppercase tracking-wider">{t("ui_no_active_budgets")}</p>
+                <ClipboardList className="w-6 h-6 text-muted-foreground" />
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t("ui_no_active_budgets")}</p>
               </div>
             ) : (
-              <div className="flex flex-col gap-4 text-xs text-[#403b32]">
+              <div className="flex flex-col gap-4 text-xs text-foreground">
                 {budgets.map((budget) => {
                   const isOver = budget.spent > budget.limit;
                   
                   return (
                     <div 
                       key={budget._id}
-                      className="space-y-2.5 border-b border-dashed border-[#e1d7c5] pb-4 last:border-none last:pb-0"
+                      className="space-y-2.5 border-b border-dashed border-border pb-4 last:border-none last:pb-0"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex min-w-0 items-center gap-2">
                           <span className="text-sm shrink-0">{budget.icon}</span>
-                          <span className="break-words font-medium text-[#635744]">{budget.category}</span>
+                          <span className="break-words font-medium text-ink-soft">{budget.category}</span>
                         </div>
                         <div className="flex items-center gap-1.5 font-bold">
-                          <span className={isOver ? "text-[#b0523b]" : "text-[#7f715d]"}>
+                          <span className={isOver ? "text-destructive" : "text-muted-foreground"}>
                             <AnimatedNumber value={budget.spent} decimals={2} />
                           </span>
-                          <span className="text-[#b6a68e]">/</span>
-                          <span className="text-[#292722]">
+                          <span className="text-muted-foreground">/</span>
+                          <span className="text-foreground">
                             <AnimatedNumber value={budget.limit} decimals={2} /> {currency}
                           </span>
                         </div>

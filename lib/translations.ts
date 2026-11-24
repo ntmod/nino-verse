@@ -3,7 +3,7 @@ export type Language = "en" | "th";
 export const translations = {
   en: {
     cycle_receipt_title: "Your spending story",
-    cycle_receipt_open: "Print cycle summary",
+    cycle_receipt_open: "View cycle summary",
     cycle_complete: "Completed cycle",
     cycle_upcoming: "This cycle has not started",
     cycle_to_date: "Summary through today",

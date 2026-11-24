@@ -80,7 +80,7 @@ export default function FixedCostCard({
   const currentItems = items.slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1) * ITEMS_PER_PAGE);
 
   return (
-    <div data-paper-surface="" className="relative bg-[#fffdf7] rounded-2xl shadow-[0_2px_8px_rgba(78,62,36,0.03)] border border-[#e1d7c5]/80 min-h-[380px] flex flex-col justify-between overflow-hidden">
+    <div data-paper-surface="" className="relative bg-card rounded-md shadow-[0_2px_8px_rgba(78,62,36,0.03)] border border-border/80 min-h-[380px] flex flex-col justify-between overflow-hidden">
       <AnimatePresence mode="wait">
         {isLoading ? (
           <motion.div
@@ -93,19 +93,19 @@ export default function FixedCostCard({
           >
             <div>
               <div className="flex items-center justify-between mb-6 animate-pulse">
-                <div className="h-3 bg-[#e1d7c5] rounded-md w-24" />
+                <div className="h-3 bg-border rounded-md w-24" />
               </div>
               <div className="space-y-4">
                 {[...Array(5)].map((_, i) => (
-                  <div key={i} className="flex items-center justify-between py-2.5 border-b border-dashed border-[#e1d7c5] last:border-none animate-pulse">
+                  <div key={i} className="flex items-center justify-between py-2.5 border-b border-dashed border-border last:border-none animate-pulse">
                     <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 bg-[#e1d7c5] rounded-md shrink-0" />
+                      <div className="w-6 h-6 bg-border rounded-md shrink-0" />
                       <div className="space-y-2">
-                        <div className="h-3.5 bg-[#e1d7c5] rounded-md w-24 md:w-32" />
-                        <div className="h-2.5 bg-[#eee5d6] rounded-md w-16" />
+                        <div className="h-3.5 bg-border rounded-md w-24 md:w-32" />
+                        <div className="h-2.5 bg-muted rounded-md w-16" />
                       </div>
                     </div>
-                    <div className="h-3.5 bg-[#e1d7c5] rounded-md w-16" />
+                    <div className="h-3.5 bg-border rounded-md w-16" />
                   </div>
                 ))}
               </div>
@@ -125,19 +125,19 @@ export default function FixedCostCard({
               {/* Card Header */}
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-[10px] font-black text-[#7f715d] uppercase tracking-[0.2em] select-none">{t("fixed_costs")}</h3>
+                  <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] select-none">{t("fixed_costs")}</h3>
                 </div>
                 <div className="flex items-center gap-3">
                   {onReset && items.some(item => item.isPaid) && (
                     <button 
                       onClick={onReset}
-                      className="flex items-center gap-1 text-[9px] font-black text-[#7f715d] hover:text-[#b0523b] uppercase tracking-widest cursor-pointer transition-colors"
+                      className="flex items-center gap-1 text-[9px] font-black text-muted-foreground hover:text-destructive uppercase tracking-widest cursor-pointer transition-colors"
                     >
                       <RotateCcw className="w-3 h-3" /> {t("reset")}
                     </button>
                   )}
                   <Link href="/settings/fixed-cost">
-                    <button className="flex items-center gap-1 text-[9px] font-black text-[#292722] hover:text-[#7f715d] uppercase tracking-widest cursor-pointer transition-colors">
+                    <button className="flex items-center gap-1 text-[9px] font-black text-foreground hover:text-muted-foreground uppercase tracking-widest cursor-pointer transition-colors">
                       {t("view_all")} <ArrowRight className="w-3 h-3" />
                     </button>
                   </Link>
@@ -146,12 +146,12 @@ export default function FixedCostCard({
 
               {items.length === 0 ? (
                 <div className="py-12 flex flex-col items-center justify-center text-center space-y-4 font-mono">
-                  <div className="w-16 h-16 rounded-xl bg-[#fffdf7] border border-[#d9cebb] flex items-center justify-center">
-                    <Home className="w-8 h-8 text-[#b6a68e]" />
+                  <div className="w-16 h-16 rounded-md bg-card border border-border flex items-center justify-center">
+                    <Home className="w-8 h-8 text-muted-foreground" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[10px] font-bold text-[#292722] uppercase tracking-wider">{t("ui_no_fixed_costs")}</p>
-                    <p className="text-[10px] text-[#7f715d]">{t("ui_regular_subscriptions_and_bills_will_appear_here")}</p>
+                    <p className="text-[10px] font-bold text-foreground uppercase tracking-wider">{t("ui_no_fixed_costs")}</p>
+                    <p className="text-[10px] text-muted-foreground">{t("ui_regular_subscriptions_and_bills_will_appear_here")}</p>
                   </div>
                 </div>
               ) : (
@@ -181,7 +181,7 @@ export default function FixedCostCard({
                                   });
                                 }
                               }}
-                              className={`flex items-center justify-between py-2.5 border-b-2 border-dashed border-[#e1d7c5] last:border-none group ${
+                              className={`flex items-center justify-between py-2.5 border-b-2 border-dashed border-border last:border-none group ${
                                 !item.isPaid ? "cursor-pointer" : "opacity-50 select-none"
                               }`}
                             >
@@ -189,19 +189,19 @@ export default function FixedCostCard({
                                 {/* Floating Emoji Symbol */}
                                 <span className="text-lg select-none shrink-0">{item.icon || "🧾"}</span>
                                 <div className="text-left">
-                                  <span className={`text-sm font-bold tracking-tight ${item.isPaid ? "text-[#7f715d] line-through" : "text-[#403b32]"}`}>
+                                  <span className={`text-sm font-bold tracking-tight ${item.isPaid ? "text-muted-foreground line-through" : "text-foreground"}`}>
                                     {item.name}
                                   </span>
                                   <p className="text-[9px] font-mono font-bold mt-0.5 tracking-wider uppercase leading-none">
                                     {item.isPaid ? (
-                                      <span className="text-[#416b54]">{t("ui_paid")}</span>
+                                      <span className="text-primary">{t("ui_paid")}</span>
                                     ) : (
-                                      <span className="text-[#b0523b]">{t("ui_pending")}</span>
+                                      <span className="text-destructive">{t("ui_pending")}</span>
                                     )}
                                   </p>
                                 </div>
                               </div>
-                              <div className={`text-xs font-black italic font-mono ${item.isPaid ? "text-[#7f715d]" : "text-[#292722]"}`}>
+                              <div className={`text-xs font-black italic font-mono ${item.isPaid ? "text-muted-foreground" : "text-foreground"}`}>
                                 {currency} <AnimatedNumber value={item.amount} decimals={2} />
                               </div>
                             </div>
@@ -213,21 +213,21 @@ export default function FixedCostCard({
 
                   {/* Brutalist Pagination Row */}
                   {totalPages > 1 && (
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-dashed border-[#e1d7c5]">
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-dashed border-border">
                       <button 
                         onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
                         disabled={currentPage === 0}
-                        className="w-7 h-7 flex items-center justify-center rounded-md border border-[#d9cebb] text-[#292722] hover:bg-[#f5eedf] disabled:opacity-30 disabled:hover:bg-[#fffdf7] disabled:hover:text-[#292722] transition-colors cursor-pointer"
+                        className="w-7 h-7 flex items-center justify-center rounded-md border border-border text-foreground hover:bg-secondary disabled:opacity-30 disabled:hover:bg-card disabled:hover:text-foreground transition-colors cursor-pointer"
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </button>
-                      <span className="text-[9px] font-mono font-black text-[#7f715d] uppercase tracking-widest">
+                      <span className="text-[9px] font-mono font-black text-muted-foreground uppercase tracking-widest">
                         {t("ui_page")} {currentPage + 1} {t("ui_of")} {totalPages}
                       </span>
                       <button 
                         onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
                         disabled={currentPage === totalPages - 1}
-                        className="w-7 h-7 flex items-center justify-center rounded-md border border-[#d9cebb] text-[#292722] hover:bg-[#f5eedf] disabled:opacity-30 disabled:hover:bg-[#fffdf7] disabled:hover:text-[#292722] transition-colors cursor-pointer"
+                        className="w-7 h-7 flex items-center justify-center rounded-md border border-border text-foreground hover:bg-secondary disabled:opacity-30 disabled:hover:bg-card disabled:hover:text-foreground transition-colors cursor-pointer"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </button>
@@ -238,11 +238,11 @@ export default function FixedCostCard({
             </div>
 
             {/* Dark Status Bottom Bar */}
-            <div className="border-t border-dashed border-[#d9cebb] bg-[#f5eedf] text-[#292722] p-3 px-6 flex flex-wrap gap-2 items-center justify-between text-[10px] font-mono select-none">
-              <span className="text-[#7f715d] font-bold">
+            <div className="border-t border-dashed border-border bg-secondary text-foreground p-3 px-6 flex flex-wrap gap-2 items-center justify-between text-[10px] font-mono select-none">
+              <span className="text-muted-foreground font-bold">
                 {t("paid").toUpperCase()}: {paidItems}/{items.length}
               </span>
-              <span className="text-[#292722] font-bold uppercase text-[9px]">
+              <span className="text-foreground font-bold uppercase text-[9px]">
                 {t("total_fixed").toUpperCase()}: <AnimatedNumber value={total} decimals={0} /> {currency}
               </span>
             </div>

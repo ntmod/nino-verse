@@ -1,12 +1,13 @@
 'use client'
 
+import { RippleButton } from "@/components/ui/ripple-button";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, useReducedMotion, useAnimationControls } from "framer-motion";
 import WalletOverview from "@/components/nori/WalletOverview";
 import CycleReceipt from "@/components/nori/CycleReceipt";
-import { ArrowRight, ChevronLeft, ChevronRight, Plus, ReceiptText } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import TotalSpentCard from "@/components/nori/TotalSpentCard";
 import { getGardenSaveFeedback } from "@/lib/cycle-garden.mjs";
 import CycleGardenCard from "@/components/nori/CycleGardenCard";
@@ -37,6 +38,13 @@ import { isFixedCostPaid } from "@/lib/fixed-cost-status";
 import { budgetProgress } from "@/lib/budget-progress.mjs";
 import styles from "./dashboard.module.css";
 
+const dashboardViews = [
+  { id: "overview", th: "ภาพรวม", en: "Overview" },
+  { id: "spending", th: "รายจ่าย", en: "Spending" },
+  { id: "records", th: "บันทึก", en: "Records" },
+  { id: "garden", th: "สวน Nori", en: "Nori’s garden" },
+] as const;
+
 export default function Noripage() {
   const { data: account } = authClient.useSession();
   const resetKey = account?.user.id ? `fixedCostsResetDate:${account.user.id}` : null;
@@ -60,6 +68,7 @@ export default function Noripage() {
   const [budgets, setBudgets] = useState<any[]>([]);
   const [fixedCosts, setFixedCosts] = useState<any[]>([]);
   const [lastResetTime, setLastResetTime] = useState<number | null>(null);
+  const [view, setView] = useState<(typeof dashboardViews)[number]["id"]>("overview");
   const [showCycleReceipt, setShowCycleReceipt] = useState(false);
   const [cycleOffset, setCycleOffset] = useState(0);
   const [isCycleChanging, setIsCycleChanging] = useState(false);
@@ -478,22 +487,26 @@ export default function Noripage() {
   };
   const renderCard = (name: keyof typeof cards) => (
     <div data-dashboard-card={name} className={styles.card}>
-      {cardErrors[name].some(error => loadErrors.includes(error)) ? <p role="status" className="border border-[#ddd4c4] bg-[#fffdf7] p-6 text-sm">{th ? 'ส่วนนี้โหลดไม่สำเร็จ กดลองอีกครั้งด้านบนได้เลย' : 'This section could not load. Use Retry above.'}</p> : cards[name]}
+      {cardErrors[name].some(error => loadErrors.includes(error)) ? <p role="status" className="border border-border bg-card p-6 text-sm">{th ? 'ส่วนนี้โหลดไม่สำเร็จ กดลองอีกครั้งด้านบนได้เลย' : 'This section could not load. Use Retry above.'}</p> : cards[name]}
     </div>
   );
 
   return (
-    <main className={styles.canvas}>
+    <main className={`notebook-page notebook-page--app ${styles.canvas}`}>
       <div className={styles.content}>
-        {loadErrors.length > 0 && <p role="alert" className="mb-4 border border-[#ddd4c4] bg-[#fffdf7] p-4 text-sm">{th ? 'ข้อมูลบางส่วนโหลดไม่สำเร็จ' : 'Some sections could not load'} ({loadErrors.join(', ')}) <button type="button" className="min-h-11 px-3 underline" onClick={() => setLoadRetry(value => value + 1)}>{th ? 'ลองอีกครั้ง' : 'Retry'}</button></p>}
-          <header className={styles.cover}>
+        {loadErrors.length > 0 && <p role="alert" className="mb-4 border border-border bg-card p-4 text-sm">{th ? 'ข้อมูลบางส่วนโหลดไม่สำเร็จ' : 'Some sections could not load'} ({loadErrors.join(', ')}) <button type="button" className="min-h-11 px-3 underline" onClick={() => setLoadRetry(value => value + 1)}>{th ? 'ลองอีกครั้ง' : 'Retry'}</button></p>}
+        <header className={styles.cover}>
           <div className={styles.coverRow}>
-            <div><p className={styles.eyebrow}>NoriNote / Your spending journal</p><h1 className={styles.title}>{th ? "ภาพรวมการใช้เงิน" : "Your spending journal"}</h1><p className={styles.subtitle}>{th ? "เปิดดูบันทึกของรอบนี้ ทีละวัน ทีละหมวด" : "A clearer view of your cycle, one day and category at a time."}</p></div>
+            <h1 className="notebook-title">{th ? "สมุดรายจ่าย" : "Spending journal"}</h1>
             <div className={styles.actions}>
-              <Link href="/home" className={styles.noteButton}><Plus aria-hidden="true" size={15}/>{th ? "จดรายการใหม่" : "Quick note"}</Link>
-              <button type="button" disabled={isLoading || averageLoading || loadErrors.length > 0 || !staticDataLoaded || !transactionsLoaded} onClick={() => { prepareUISound(); setShowCycleReceipt(true); }} className={styles.printButton}><ReceiptText aria-hidden="true" size={15}/>{t("cycle_receipt_open")}</button>
+              <Link href="/home" className={styles.noteButton}><Plus aria-hidden="true" size={15}/>{th ? "จดรายการใหม่" : "Add expense"}</Link>
+              <button type="button" disabled={isLoading || averageLoading || loadErrors.length > 0 || !staticDataLoaded || !transactionsLoaded} onClick={() => { prepareUISound(); setShowCycleReceipt(true); }} className={styles.summaryButton}>{t("cycle_receipt_open")}</button>
             </div>
           </div>
+          <NoriHeader key={cycleOffset} total={totalSpent} count={expenseCount} previousTotal={prevTotalSpent}
+            topCategory={categoryBreakdown[0]} bills={fixedCostsWithStatus.length}
+            paidBills={fixedCostsWithStatus.filter(bill => bill.isPaid).length}
+            loading={isLoading} ready={staticDataLoaded && transactionsLoaded}/>
         </header>
 
         {cyclesError && <p role="alert" className="mb-4 text-sm">{th ? 'โหลดรอบไม่สำเร็จ' : 'Could not load cycles.'} <button type="button" onClick={retryCycles} className="min-h-11 px-3 underline">{th ? 'ลองอีกครั้ง' : 'Retry'}</button></p>}
@@ -504,40 +517,47 @@ export default function Noripage() {
             <button type="button" disabled={isCycleChanging || !cycles || (savedTimeline && cycleIndex >= cycles.currentIndex)} aria-label={t("next_cycle")} onClick={() => changeCycle(1)} className={styles.iconButton}><ChevronRight aria-hidden="true" size={17}/></button>
             {cycleOffset !== 0 && <button type="button" disabled={isCycleChanging} onClick={() => { setGardenFeedback(null); setCycleOffset(0); }} className={styles.currentButton}>{th ? "รอบปัจจุบัน" : "Current cycle"}</button>}
           </div>
-          {cycles && <div className="flex flex-wrap gap-2">{manual ? <>{cycleOffset === 0 && <button type="button" onClick={() => setCycleEditor('start')} className="min-h-11 border border-[#ddd4c4] bg-[#eaf0e1] px-3 text-xs text-[#4d654b]">{th ? 'เริ่มรอบใหม่' : 'Start new cycle'}</button>}<button type="button" onClick={() => setCycleEditor('edit')} className="min-h-11 px-3 text-xs text-[#88714a] underline">{th ? 'แก้ไขรอบนี้' : 'Edit cycle'}</button></> : <Link href="/settings/cycle" className="inline-flex min-h-11 items-center text-xs text-[#88714a] underline">{th ? 'ตั้งค่ารอบ' : 'Cycle settings'}</Link>}</div>}
+          {cycles && <div className="flex flex-wrap gap-2">{manual ? <>{cycleOffset === 0 && <button type="button" onClick={() => setCycleEditor('start')} className="min-h-11 border border-border bg-accent px-3 text-xs text-primary">{th ? 'เริ่มรอบใหม่' : 'Start new cycle'}</button>}<button type="button" onClick={() => setCycleEditor('edit')} className="min-h-11 px-3 text-xs text-muted-foreground underline">{th ? 'แก้ไขรอบนี้' : 'Edit cycle'}</button></> : <Link href="/settings/cycle" className="inline-flex min-h-11 items-center text-xs text-muted-foreground underline">{th ? 'ตั้งค่ารอบ' : 'Cycle settings'}</Link>}</div>}
           <Link href="/note" className={styles.recordLink}>{transactionsLoaded ? expenseCount : "—"} {th ? "รายการรายจ่ายในรอบนี้" : "expense records this cycle"}<ArrowRight aria-hidden="true" size={12}/></Link>
+        </div>
+
+        <div role="group" aria-label={th ? "มุมมองสมุดรายจ่าย" : "Journal views"} className={styles.views}>
+          {dashboardViews.map(({ id, th: thai, en }) => (
+            <RippleButton key={id} type="button" duration="360ms" rippleColor="rgb(255 253 245 / 24%)"
+              aria-pressed={view === id} aria-controls={`journal-${id}`}
+              onClick={() => setView(id)} className={styles.viewButton}>
+              {th ? thai : en}
+            </RippleButton>
+          ))}
         </div>
 
         <div aria-busy={isCycleChanging} className={`relative isolate -m-2 p-2 ${isCycleChanging ? "overflow-hidden" : "overflow-visible"}`}>
           <motion.div animate={cycleAnimation}>
-            <section aria-labelledby="cycle-overview" className={styles.section}>
-              <div className={styles.sectionHeader}><div className={styles.sectionHeading}><span aria-hidden="true" className={styles.sectionNumber}>01</span><div><h2 id="cycle-overview" className={styles.sectionTitle}>{th ? "รอบนี้ ใช้ไปเท่าไหร่แล้ว" : "Your cycle at a glance"}</h2><p className={styles.sectionHint}>{th ? "ยอดรวม แนวโน้มสะสม และวันที่มีการใช้เงิน" : "Total spending, its running trend, and each day along the way"}</p></div></div></div>
+            <div id="journal-overview" hidden={view !== "overview"} className={styles.view}>
               <WalletOverview key={`${billingCycle.startDate.toISOString()}:${billingCycle.endDate.toISOString()}`} startDate={billingCycle.startDate.toISOString()} endDate={billingCycle.endDate.toISOString()} refresh={refreshTrigger + loadRetry} />
               <div className={styles.columns}>{renderCard("TotalSpentCard")}{renderCard("SpendingHeatmapCard")}</div>
-            </section>
+            </div>
 
-            <section aria-labelledby="category-plans" className={styles.section}>
-              <div className={styles.sectionHeader}><div className={styles.sectionHeading}><span aria-hidden="true" className={styles.sectionNumber}>02</span><div><h2 id="category-plans" className={styles.sectionTitle}>{th ? "เงินไปกับอะไร และเหลืองบแค่ไหน" : "Where it went, and room in the budget"}</h2><p className={styles.sectionHint}>{th ? "รายจ่ายแยกหมวด คู่กับวงเงินที่ตั้งไว้" : "Spending by category, alongside your category limits"}</p></div></div><Link href="/settings/budget" className={styles.sectionLink}>{th ? "จัดการงบ" : "Manage budgets"}<ArrowRight aria-hidden="true" size={12}/></Link></div>
+            <div id="journal-spending" hidden={view !== "spending"} className={styles.view}>
+              <div className={styles.viewActions}>
+                <Link href="/settings/budget" className={styles.sectionLink}>{th ? "จัดการงบ" : "Manage budgets"}<ArrowRight aria-hidden="true" size={14}/></Link>
+              </div>
               <div className={styles.columns}>{renderCard("ExpensePieChart")}{renderCard("BudgetListCard")}</div>
-            </section>
-
-            <section aria-labelledby="everyday-spending" className={styles.section}>
-              <div className={styles.sectionHeader}><div className={styles.sectionHeading}><span aria-hidden="true" className={styles.sectionNumber}>03</span><div><h2 id="everyday-spending" className={styles.sectionTitle}>{th ? "เฉลี่ยต่อวัน และจ่ายผ่านช่องทางไหน" : "Daily averages and payment methods"}</h2><p className={styles.sectionHint}>{th ? "ค่าเฉลี่ยรายหมวด และยอดใช้จ่ายผ่านแต่ละวิธีชำระเงิน" : "Category averages and cycle spending by payment method"}</p></div></div></div>
               <div className={styles.columns}>{renderCard("MetricsCard")}{renderCard("PaymentMethodsCard")}</div>
-            </section>
+            </div>
 
-            <section aria-labelledby="records-and-commitments" className={styles.section}>
-              <div className={styles.sectionHeader}><div className={styles.sectionHeading}><span aria-hidden="true" className={styles.sectionNumber}>04</span><div><h2 id="records-and-commitments" className={styles.sectionTitle}>{th ? "รายการที่จด และเรื่องประจำที่ต้องดูแล" : "Recent notes and regular commitments"}</h2><p className={styles.sectionHint}>{th ? "เปิดรายการล่าสุด หรือจดค่าใช้จ่ายประจำต่อได้เลย" : "Revisit a recent record or note a regular payment"}</p></div></div><Link href="/note" className={styles.sectionLink}>{th ? "ดูบันทึกทั้งหมด" : "View all notes"}<ArrowRight aria-hidden="true" size={12}/></Link></div>
+            <div id="journal-records" hidden={view !== "records"} className={styles.view}>
+              <div className={styles.viewActions}>
+                <Link href="/note" className={styles.sectionLink}>{th ? "ดูบันทึกทั้งหมด" : "View all notes"}<ArrowRight aria-hidden="true" size={14}/></Link>
+              </div>
               <div className={styles.columns}>{renderCard("RecentTransactionsCard")}{renderCard("FixedCostCard")}</div>
-            </section>
+            </div>
 
-            <section aria-labelledby="garden-corner" className={styles.section}>
-              <div className={styles.sectionHeader}><div className={styles.sectionHeading}><span aria-hidden="true" className={styles.sectionNumber}>05</span><div><h2 id="garden-corner" className={styles.sectionTitle}>{th ? "สวนเล็ก ๆ ข้างสมุด" : "A garden beside your notes"}</h2><p className={styles.sectionHint}>{th ? "โตจากวันที่กลับมาจด ไม่ได้โตตามยอดเงิน" : "Grown from recorded days, never from spending more"}</p></div></div></div>
-              <div className={styles.columns}>{renderCard("CycleGardenCard")}<aside className={styles.noriNote}><p className={styles.noriLabel}>A little note from Nori</p><NoriHeader key={cycleOffset} total={totalSpent} count={expenseCount} previousTotal={prevTotalSpent} topCategory={categoryBreakdown[0]} bills={fixedCostsWithStatus.length} paidBills={fixedCostsWithStatus.filter(bill => bill.isPaid).length} loading={isLoading} ready={staticDataLoaded && transactionsLoaded}/></aside></div>
-            </section>
+            <div id="journal-garden" hidden={view !== "garden"} className={`${styles.view} ${styles.garden}`}>
+              {renderCard("CycleGardenCard")}
+            </div>
           </motion.div>
         </div>
-        <footer className={styles.footer}><span>NoriNote / Spending journal</span><span>{billingCycleStr}</span></footer>
         {showCycleReceipt && <CycleReceipt cycle={billingCycle} previousTotal={prevTotalSpent} transactions={currentPeriodTransactions.map(tx => ({ ...tx, category: categories.find(category => category._id === tx.category || category.name === tx.category)?.name || tx.category }))} onClose={() => setShowCycleReceipt(false)}/>}
       </div>
       <FloatingActionButton onSuccess={handleExpenseAdded}/>

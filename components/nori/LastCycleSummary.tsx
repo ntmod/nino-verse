@@ -29,9 +29,9 @@ export default function LastCycleSummary({ state, categories }: { state: CycleSt
     } catch { setError(true); }
     finally { lock.current = false; setLoading(false); }
   };
-  return <div className="mb-4 border border-dashed border-[#d9cebb] bg-[#fffdf7] px-4 py-2 text-xs">
+  return <div className="mb-4 border border-dashed border-border bg-card px-4 py-2 text-xs">
     <button type="button" disabled={loading} onClick={() => void open()} className="min-h-11 text-left font-bold text-[#647958]">{loading ? (th ? 'กำลังสรุปรอบ…' : 'Preparing summary…') : (th ? 'รอบที่แล้วจบแล้ว · เปิดใบสรุปรอบ' : 'Last cycle is complete · View summary')}</button>
-    {error && <p role="alert" className="pb-2 text-[#b0523b]">{th ? 'โหลดไม่ได้ กดอีกครั้งเพื่อลองใหม่' : 'Could not load. Press again to retry.'}</p>}
+    {error && <p role="alert" className="pb-2 text-destructive">{th ? 'โหลดไม่ได้ กดอีกครั้งเพื่อลองใหม่' : 'Could not load. Press again to retry.'}</p>}
     {receipt && <CycleReceipt {...receipt} transactions={receipt.transactions.map(tx => ({ ...tx, category: categories.find(category => category._id === tx.category || category.name === tx.category)?.name ?? tx.category }))} onClose={() => setReceipt(null)} />}
   </div>;
 }

@@ -48,7 +48,7 @@ function FlowerBush({ variant, selected, depth, x, feedback }: { variant: number
     </g>
     <g className="garden-bloom">
     {variant === 3 ? <path d="M11 15 L18 20 L24 12 L30 20 L37 15 Q38 36 24 36 Q10 36 11 15" fill={PETALS[variant]} stroke="#bf788f" strokeWidth="1.5" /> : <>
-      {[0, 60, 120, 180, 240, 300].map(angle => <ellipse key={angle} cx="24" cy="15" rx="6.5" ry="10" transform={`rotate(${angle} 24 25)`} fill={PETALS[variant]} stroke="#fffdf5" strokeWidth="1.5" />)}
+      {[0, 60, 120, 180, 240, 300].map(angle => <ellipse key={angle} cx="24" cy="15" rx="6.5" ry="10" transform={`rotate(${angle} 24 25)`} fill={PETALS[variant]} stroke="var(--card)" strokeWidth="1.5" />)}
       <circle cx="24" cy="25" r="6" fill="#f4d887" stroke="#b89a54" strokeWidth="1" />
     </>}
     </g>
@@ -85,15 +85,15 @@ export default function CycleGardenCard({ transactions, cycle, isLoading, ready,
   const selected = days.find(day => day.date === selectedDate);
   const dateLabel = (date: string) => new Date(`${date}T00:00:00Z`).toLocaleDateString(th ? 'th-TH' : 'en-US', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 
-  return <section data-paper-surface="" className="min-w-0 border border-[#e1d7c5] bg-[#fffdf7] p-4 text-[#635744] rounded-2xl shadow-[0_2px_8px_rgba(78,62,36,0.03)] sm:p-6">
+  return <section data-paper-surface="" className="min-w-0 border border-border bg-card p-4 text-ink-soft rounded-md shadow-[0_2px_8px_rgba(78,62,36,0.03)] sm:p-6">
     <div className="flex flex-wrap items-center justify-between gap-2">
-      <h2 className="flex items-center gap-2 font-mono text-[10px] font-black uppercase tracking-wider text-[#7f715d]"><Sprout aria-hidden="true" className="h-4 w-4" />{th ? 'สวนของรอบนี้' : 'Your cycle garden'}</h2>
-      <span className="text-[10px] text-[#93846b]">{atmosphere === 'day' ? (th ? 'แสงกลางวัน ☀️' : 'Daylight ☀️') : atmosphere === 'evening' ? (th ? 'ยามเย็น 🌅' : 'Evening 🌅') : (th ? 'ราตรีในสวน 🌙' : 'Garden at night 🌙')}</span>
+      <h2 className="flex items-center gap-2 font-mono text-[10px] font-black uppercase tracking-wider text-muted-foreground"><Sprout aria-hidden="true" className="h-4 w-4" />{th ? 'สวนของรอบนี้' : 'Your cycle garden'}</h2>
+      <span className="text-[10px] text-muted-foreground">{atmosphere === 'day' ? (th ? 'แสงกลางวัน ☀️' : 'Daylight ☀️') : atmosphere === 'evening' ? (th ? 'ยามเย็น 🌅' : 'Evening 🌅') : (th ? 'ราตรีในสวน 🌙' : 'Garden at night 🌙')}</span>
 
     </div>
-    <p className="mt-2 text-xs text-[#93846b]">{th ? 'สวนเล็ก ๆ ข้างสมุด · แตะดอกไม้ดูวันที่เราเคยจด' : 'A little garden beside your ledger · Tap a flower to revisit your days'}</p>
-    {isLoading ? <div className="mt-4 h-72 animate-pulse rounded-2xl bg-[#edf0df]" /> : !ready ? <p className="py-8 text-xs">{th ? 'ยังเปิดสวนไม่ได้ ลองโหลดหน้าอีกครั้งนะ' : 'Could not open your garden. Please reload.'}</p> : <>
-      <div tabIndex={0} role="region" aria-label={th ? 'สวนแนวนอน ปัดหรือเลื่อนเพื่อชมสวน' : 'Wide garden. Scroll to explore'} className="mt-4 overflow-x-auto rounded-2xl border border-[#dce3cd] focus-visible:outline-2 focus-visible:outline-[#b97423]">
+    <p className="mt-2 text-xs text-muted-foreground">{th ? 'สวนเล็ก ๆ ข้างสมุด · แตะดอกไม้ดูวันที่เราเคยจด' : 'A little garden beside your ledger · Tap a flower to revisit your days'}</p>
+    {isLoading ? <div className="mt-4 h-72 animate-pulse rounded-md bg-[#edf0df]" /> : !ready ? <p className="py-8 text-xs">{th ? 'ยังเปิดสวนไม่ได้ ลองโหลดหน้าอีกครั้งนะ' : 'Could not open your garden. Please reload.'}</p> : <>
+      <div tabIndex={0} role="region" aria-label={th ? 'สวนแนวนอน ปัดหรือเลื่อนเพื่อชมสวน' : 'Wide garden. Scroll to explore'} className="mt-4 overflow-x-auto rounded-md border border-[#dce3cd] focus-visible:outline-2 focus-visible:outline-highlight-ink">
       <div data-atmosphere={atmosphere} className="relative h-[400px] min-w-[860px] overflow-clip bg-[#edf1df]">
         <svg aria-hidden="true" viewBox="0 0 1000 400" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
           <rect width="1000" height="400" fill={colors.sky} />
@@ -115,7 +115,7 @@ export default function CycleGardenCard({ transactions, cycle, isLoading, ready,
           aria-label={`${dateLabel(day.date)} · ${day.records.length} ${th ? 'รายการ' : 'transactions'}`}
           onClick={() => { setSelectedDate(selectedDate === day.date ? null : day.date); playUISound('click'); }}
           style={{ left: `${day.x}%`, top: `${day.y}%` }}
-          className="absolute -ml-[22px] -mt-[22px] h-11 w-11 rounded-full group focus-visible:outline-2 focus-visible:outline-[#7f715d]">
+          className="absolute -ml-[22px] -mt-[22px] h-11 w-11 rounded-full group focus-visible:outline-2 focus-visible:outline-muted-foreground">
           <span aria-hidden="true" className="absolute inset-0 z-[200] rounded-full" />
           <span aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 block -translate-x-1/2 -translate-y-1/2 transition-transform group-hover:-translate-y-[calc(50%+4px)] motion-reduce:transition-none" style={{ width: day.width, height: day.height, opacity: 0.78 + day.depth * 0.22, zIndex: 20 + Math.round(day.depth * 100) }}><FlowerBush variant={day.flower} selected={selectedDate === day.date} depth={day.depth} x={day.x} feedback={feedback?.date === day.date ? feedback : null} /></span>
         </button>)}
@@ -128,13 +128,13 @@ export default function CycleGardenCard({ transactions, cycle, isLoading, ready,
           <g fill={colors.leaves}><ellipse cx="42" cy="370" rx="13" ry="33" transform="rotate(-25 42 370)" /><ellipse cx="113" cy="383" rx="14" ry="28" transform="rotate(28 113 383)" /><ellipse cx="885" cy="377" rx="15" ry="34" transform="rotate(-30 885 377)" /><ellipse cx="957" cy="361" rx="13" ry="37" transform="rotate(30 957 361)" /></g>
           <g fill="#e6b49c"><circle cx="63" cy="370" r="7" /><circle cx="934" cy="370" r="9" /></g>
         </svg>
-        <span className="absolute bottom-3 left-1/2 z-[150] -translate-x-1/2 rounded-full bg-[#fffdf7]/80 px-3 py-1 font-mono text-[9px] text-[#6f8057]">{dateLabel(days[0].date)} — {dateLabel(days[days.length - 1].date)}</span>
+        <span className="absolute bottom-3 left-1/2 z-[150] -translate-x-1/2 rounded-full bg-card/80 px-3 py-1 font-mono text-[9px] text-[#6f8057]">{dateLabel(days[0].date)} — {dateLabel(days[days.length - 1].date)}</span>
       </div>
       </div>
-      <p className="mt-3 text-[10px] text-[#93846b]">{planted === 0 ? (th ? 'สวนยังเงียบอยู่ จดวันไหนก็ปลูกต้นแรกได้เลย 🌱' : 'A quiet garden. Your first recorded day will plant a seed 🌱') : (th ? 'สวนโตจากวันที่บันทึก ไม่ได้โตตามยอดเงิน' : 'Grown from recorded days, never from how much you spend')}</p>
-      {selected && <div className="mt-4 border-t border-dashed border-[#d9cebb] pt-3">
+      <p className="mt-3 text-[10px] text-muted-foreground">{planted === 0 ? (th ? 'สวนยังเงียบอยู่ จดวันไหนก็ปลูกต้นแรกได้เลย 🌱' : 'A quiet garden. Your first recorded day will plant a seed 🌱') : (th ? 'สวนโตจากวันที่บันทึก ไม่ได้โตตามยอดเงิน' : 'Grown from recorded days, never from how much you spend')}</p>
+      {selected && <div className="mt-4 border-t border-dashed border-border pt-3">
         <div className="flex items-center justify-between"><h3 className="text-xs font-bold">{dateLabel(selected.date)} · {selected.records.length} {th ? 'รายการ' : 'transactions'}</h3><button type="button" aria-label={th ? 'ปิดรายละเอียดวัน' : 'Close day details'} onClick={() => setSelectedDate(null)} className="flex h-11 w-11 items-center justify-center"><X className="h-3.5 w-3.5" /></button></div>
-        <ul className="divide-y divide-[#e1d7c5]">{(selected.records as Transaction[]).map(transaction => <li key={transaction._id}><button type="button" onClick={() => onEdit(transaction)} className="flex min-h-11 w-full items-center justify-between gap-3 py-2 text-left text-xs hover:text-[#b97423]"><span className="min-w-0 break-words">{transaction.name}</span><span className="shrink-0 font-mono">{new Intl.NumberFormat(th ? 'th-TH' : 'en-US', { style: 'currency', currency: 'THB', currencyDisplay: 'narrowSymbol' }).format(transaction.amount)}</span></button></li>)}</ul>
+        <ul className="divide-y divide-border">{(selected.records as Transaction[]).map(transaction => <li key={transaction._id}><button type="button" onClick={() => onEdit(transaction)} className="flex min-h-11 w-full items-center justify-between gap-3 py-2 text-left text-xs hover:text-highlight-ink"><span className="min-w-0 break-words">{transaction.name}</span><span className="shrink-0 font-mono">{new Intl.NumberFormat(th ? 'th-TH' : 'en-US', { style: 'currency', currency: 'THB', currencyDisplay: 'narrowSymbol' }).format(transaction.amount)}</span></button></li>)}</ul>
       </div>}
     </>}
   </section>;

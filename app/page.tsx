@@ -43,12 +43,12 @@ export default function Home() {
   useEffect(() => () => window.clearTimeout(timerRef.current), []);
 
   return (
-    <main className="relative flex min-h-svh w-full flex-col items-center justify-between overflow-hidden bg-[#f5f0e5] px-6 py-8 font-mono text-[#292722] sm:px-10 sm:py-10">
+    <main className="notebook-page relative flex min-h-svh w-full flex-col items-center justify-between overflow-hidden px-6 py-8 font-mono text-foreground sm:px-10 sm:py-10">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-15" style={{ backgroundImage: "radial-gradient(#b7a78a 0.6px, transparent 0.6px)", backgroundSize: "6px 6px" }} />
       <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 z-20 w-3 border-r border-[#b9a98b]/50 sm:w-5" style={{ background: "linear-gradient(90deg, #c5b596, #eee4d1 45%, #d3c4a9 70%, transparent)" }} />
       {!reducedMotion && !coverOpened && (
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-30" style={{ perspective: 1600 }}>
-          <motion.div className="absolute inset-0 bg-[#292722]"
+          <motion.div className="absolute inset-0 bg-foreground"
             initial={{ opacity: 0.2 }} animate={{ opacity: 0 }}
             transition={{ delay: 0.2, duration: 0.75 }} />
           <motion.div className="absolute inset-0 flex flex-col items-center justify-center gap-8 border-y-4 border-r-4 border-[#d2bc91] bg-[#e9dcc0] px-8 text-[#665035] shadow-[12px_0_40px_rgba(41,39,34,0.25)]"
@@ -57,17 +57,17 @@ export default function Home() {
             transition={{ delay: 0.18, duration: 0.85, ease: [0.65, 0, 0.25, 1] }}
             onAnimationComplete={() => setCoverOpened(true)}
           >
-            <div className="absolute inset-5 rounded-r-xl border border-[#b59d73]/70 sm:inset-8" />
+            <div className="absolute inset-5 rounded-r-md border border-[#b59d73]/70 sm:inset-8" />
             <p className="text-[10px] uppercase tracking-[0.3em]">{th ? "สมุดของโนริ" : "Nori’s little ledger"}</p>
             <p className="font-sans text-[clamp(3rem,10vw,6.5rem)] font-black italic tracking-tighter">NoriNote.</p>
-            <div style={{ borderRadius: "50%" }} className="flex h-36 w-36 -rotate-12 items-center justify-center rounded-full border-[6px] border-[#416b54]/60 text-[#416b54]/70 sm:h-48 sm:w-48">
+            <div style={{ borderRadius: "50%" }} className="flex h-36 w-36 -rotate-12 items-center justify-center rounded-full border-[6px] border-primary/60 text-primary/70 sm:h-48 sm:w-48">
               <PawPrint className="h-20 w-20 sm:h-28 sm:w-28" strokeWidth={1.5} />
             </div>
             <p className="text-xs">{th ? "เก็บเรื่องราวของทุกบาท" : "Every little expense, remembered."}</p>
           </motion.div>
         </div>
       )}
-      <svg aria-hidden="true" className="pointer-events-none absolute inset-3 h-[calc(100%-24px)] w-[calc(100%-24px)] text-[#d9cebb] sm:inset-5 sm:h-[calc(100%-40px)] sm:w-[calc(100%-40px)]" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
+      <svg aria-hidden="true" className="pointer-events-none absolute inset-3 h-[calc(100%-24px)] w-[calc(100%-24px)] text-border sm:inset-5 sm:h-[calc(100%-40px)] sm:w-[calc(100%-40px)]" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
         <motion.path d="M0.2 0.2H99.8V99.8H0.2Z" stroke="currentColor" strokeWidth="0.12"
           initial={reducedMotion ? false : { pathLength: 0 }} animate={{ pathLength: 1 }}
           transition={{ duration: reducedMotion ? 0 : 0.7, ease: "easeInOut" }} />
@@ -79,20 +79,20 @@ export default function Home() {
             initial={reducedMotion ? false : { y: "100%", rotate: -3 }}
             animate={{ y: 0, rotate: 0 }}
             transition={{ duration: reducedMotion ? 0 : 0.55, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-[#fffdf5] text-[#292722] shadow-[0_-20px_80px_rgba(41,39,34,0.15)]"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-card text-foreground shadow-[0_-20px_80px_rgba(41,39,34,0.15)]"
           >
             <div role="status" className="space-y-4 px-6 text-center">
               <Sparkles aria-hidden="true" className="mx-auto h-6 w-6 text-[#dc8b28]" />
               <h2 className="text-xl font-bold">{th ? "เปิดสมุดของคุณ…" : "Opening your ledger…"}</h2>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-[#93846b]">{th ? "เรื่องราวเล็ก ๆ ในทุกวัน" : "A little story, every day."}</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{th ? "เรื่องราวเล็ก ๆ ในทุกวัน" : "A little story, every day."}</p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <header className="relative z-10 flex w-full max-w-5xl items-center justify-between border-b border-dashed border-[#cbbda5] pb-4 text-[9px] uppercase tracking-[0.15em] sm:text-[10px]">
+      <header className="relative z-10 flex w-full max-w-5xl items-center justify-between border-b border-dashed border-border-strong pb-4 text-[9px] uppercase tracking-[0.15em] sm:text-[10px]">
         <span className="flex items-center gap-2"><span aria-hidden="true" className="h-1.5 w-1.5 rounded-[50%] bg-[#c98330]" />{th ? "สมุดรายรับรายจ่าย" : "Personal ledger"}</span>
-        <div className="flex items-center gap-2"><span className="text-[#93846b]">{th ? "จดได้ทุกวัน" : "Est. everyday"}</span><SoundToggle /></div>
+        <div className="flex items-center gap-2"><span className="text-muted-foreground">{th ? "จดได้ทุกวัน" : "Est. everyday"}</span><SoundToggle /></div>
       </header>
 
       <section className="relative flex w-full max-w-5xl flex-1 flex-col items-center justify-center py-20 sm:py-28">
@@ -110,31 +110,31 @@ export default function Home() {
             initial={reducedMotion ? false : { opacity: 0, y: -65, scale: 1.3, rotate: rotate * 2 }}
             animate={{ opacity: 1, y: 0, scale: 1, rotate }}
             transition={{ delay: reducedMotion ? 0 : 0.78 + index * 0.055, duration: reducedMotion ? 0 : 0.28, ease: [0.22, 1, 0.36, 1] }}
-            className={`pointer-events-none absolute flex items-center justify-center border-[3px] border-[#fffdf5] ${size} ${position}`}
+            className={`pointer-events-none absolute flex items-center justify-center border-[3px] border-card ${size} ${position}`}
             style={{ background: color, color: ink, borderRadius: radius, boxShadow: "2px 4px 0 #d9cebb, 0 5px 12px rgba(78,62,36,0.08)" }}
           >
             <Icon style={{ width: "52%", height: "52%" }} strokeWidth={1.7} />
           </motion.div>
         ))}
         <motion.div aria-hidden="true" initial={reducedMotion ? false : { opacity: 0, scale: 1.4, rotate: -25, y: -80 }} animate={{ opacity: 1, scale: 1, rotate: -12, y: 0 }} transition={{ delay: reducedMotion ? 0 : 0.72, duration: reducedMotion ? 0 : 0.3, ease: [0.22, 1, 0.36, 1] }} className="pointer-events-none absolute left-0 top-10 sm:left-8 sm:top-24">
-          <div className="flex h-12 w-12 items-center justify-center rounded-[50%] border-2 border-[#d8983c] bg-[#edbe67] text-xl font-bold text-[#855b25] shadow-[3px_4px_0_#d8a348] sm:h-16 sm:w-16 sm:text-2xl">฿</div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-[50%] border-2 border-[#d8983c] bg-highlight text-xl font-bold text-highlight-ink shadow-[3px_4px_0_#d8a348] sm:h-16 sm:w-16 sm:text-2xl">฿</div>
         </motion.div>
-        <motion.div aria-hidden="true" initial={reducedMotion ? false : { opacity: 0, scale: 1.2, rotate: 24, y: -90 }} animate={{ opacity: 1, scale: 1, rotate: 12, y: 0 }} transition={{ delay: reducedMotion ? 0 : 0.85, duration: reducedMotion ? 0 : 0.3, ease: [0.22, 1, 0.36, 1] }} className="pointer-events-none absolute bottom-14 right-2 hidden w-36 bg-[#fffdf5] p-4 text-[8px] text-[#93846b] shadow-[3px_7px_20px_rgba(78,62,36,0.1)] sm:block sm:right-8">
-          <p className="border-b border-dashed border-[#d9cebb] pb-2 text-center font-bold text-[#292722]">{th ? "ความสุขเล็ก ๆ" : "LITTLE JOYS"}</p>
+        <motion.div aria-hidden="true" initial={reducedMotion ? false : { opacity: 0, scale: 1.2, rotate: 24, y: -90 }} animate={{ opacity: 1, scale: 1, rotate: 12, y: 0 }} transition={{ delay: reducedMotion ? 0 : 0.85, duration: reducedMotion ? 0 : 0.3, ease: [0.22, 1, 0.36, 1] }} className="pointer-events-none absolute bottom-14 right-2 hidden w-36 bg-card p-4 text-[8px] text-muted-foreground shadow-[3px_7px_20px_rgba(78,62,36,0.1)] sm:block sm:right-8">
+          <p className="border-b border-dashed border-border pb-2 text-center font-bold text-foreground">{th ? "ความสุขเล็ก ๆ" : "LITTLE JOYS"}</p>
           <div className="mt-3 flex justify-between"><span>{th ? "กาแฟ" : "Coffee"}</span><span>85.00</span></div>
           <div className="mt-2 flex justify-between"><span>{th ? "หนังสือดี ๆ" : "A good book"}</span><span>240.00</span></div>
-          <p className="mt-3 border-t border-dashed border-[#d9cebb] pt-2 text-center">{th ? "ตัวอย่าง · ไม่ใช่ข้อมูลจริง" : "SAMPLE · NOT REAL DATA"}</p>
+          <p className="mt-3 border-t border-dashed border-border pt-2 text-center">{th ? "ตัวอย่าง · ไม่ใช่ข้อมูลจริง" : "SAMPLE · NOT REAL DATA"}</p>
         </motion.div>
 
         <motion.div initial={reducedMotion ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : 0.35 }} className="relative z-10 text-center">
-          <p className="mb-5 text-[9px] uppercase tracking-[0.3em] text-[#93846b]">{th ? "เรื่องราวการใช้เงินในแต่ละวัน" : "Your everyday money stories"}</p>
-          <h1 className="font-sans text-[clamp(3rem,10vw,6.5rem)] font-black italic leading-none tracking-tighter">NoriNote<span className="text-[#d58a2b]">.</span></h1>
+          <p className="mb-5 text-[9px] uppercase tracking-[0.3em] text-muted-foreground">{th ? "เรื่องราวการใช้เงินในแต่ละวัน" : "Your everyday money stories"}</p>
+          <h1 className="notebook-title notebook-title--cover">NoriNote<span className="text-highlight">.</span></h1>
           <svg aria-hidden="true" viewBox="0 0 300 14" className="mx-auto mt-2 h-3 w-3/4 max-w-[300px] overflow-visible" fill="none">
-            <motion.path d="M4 9Q130 0 296 6" stroke="#e9a342" strokeWidth="4" strokeLinecap="round"
+            <motion.path d="M4 9Q130 0 296 6" stroke="var(--highlight)" strokeWidth="4" strokeLinecap="round"
               initial={reducedMotion ? false : { pathLength: 0 }} animate={{ pathLength: 1 }}
               transition={{ delay: reducedMotion ? 0 : 0.25, duration: reducedMotion ? 0 : 0.4, ease: "easeOut" }} />
           </svg>
-          <p className="mt-6 text-sm text-[#7f715d] sm:text-base">{th ? "เก็บเรื่องราวของทุกบาท" : "A little note for every little expense."}</p>
+          <p className="mt-6 text-sm text-muted-foreground sm:text-base">{th ? "เก็บเรื่องราวของทุกบาท" : "A little note for every little expense."}</p>
         </motion.div>
 
         <motion.div initial={false} animate={{ y: reducedMotion ? 0 : [0, -3, 0] }} transition={{ duration: reducedMotion ? 0 : 0.25, delay: reducedMotion ? 0 : 1.1 }} className="relative z-10 mt-10 w-full max-w-[260px] text-center sm:mt-12">
@@ -146,17 +146,17 @@ export default function Home() {
             disabled={isTransitioning}
             whileHover={reducedMotion ? undefined : { y: -3 }}
             whileTap={reducedMotion ? undefined : { y: 3 }}
-            className="flex w-full items-center justify-center gap-3 whitespace-nowrap border border-[#b97423] bg-[#e9a342] px-6 py-4 text-sm font-bold text-[#372b1c] shadow-[0_5px_0_#ba7b2c] transition-colors hover:bg-[#f0b35a] focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[#b97423] disabled:pointer-events-none"
+            className="flex w-full items-center justify-center gap-3 whitespace-nowrap border border-highlight-ink bg-highlight px-6 py-4 text-sm font-bold text-highlight-foreground shadow-[0_5px_0_var(--highlight-ink)] transition-colors hover:bg-highlight-hover focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-highlight-ink disabled:pointer-events-none"
           >
             <span aria-hidden="true" className="text-xs">▶</span>
             {th ? "เริ่มจด" : "Start your ledger"}
             <ArrowRight aria-hidden="true" className="h-4 w-4" />
           </motion.button>
-          <motion.p animate={reducedMotion ? { opacity: 0.65 } : { opacity: [0.45, 0.9, 0.45] }} transition={{ duration: 2.8, repeat: reducedMotion ? 0 : Infinity }} className="mt-7 text-[10px] uppercase tracking-[0.25em] text-[#7f715d]">{th ? "กด Enter เพื่อเริ่ม" : "Press Enter to start"}</motion.p>
+          <motion.p animate={reducedMotion ? { opacity: 0.65 } : { opacity: [0.45, 0.9, 0.45] }} transition={{ duration: 2.8, repeat: reducedMotion ? 0 : Infinity }} className="mt-7 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">{th ? "กด Enter เพื่อเริ่ม" : "Press Enter to start"}</motion.p>
         </motion.div>
       </section>
 
-      <footer className="relative z-10 flex w-full max-w-5xl items-center justify-between border-t border-dashed border-[#cbbda5] pt-4 text-[8px] uppercase tracking-[0.15em] text-[#93846b] sm:text-[9px]">
+      <footer className="relative z-10 flex w-full max-w-5xl items-center justify-between border-t border-dashed border-border-strong pt-4 text-[8px] uppercase tracking-[0.15em] text-muted-foreground sm:text-[9px]">
         <span>{th ? "จดนิดหน่อย ใช้ชีวิตชัดขึ้น" : "Small notes. Clearer days."}</span>
         <span aria-hidden="true" className="hidden sm:inline">{th ? "เพื่อทุกวันของคุณ" : "Made for your everyday"}</span>
       </footer>

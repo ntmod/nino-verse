@@ -29,19 +29,19 @@ export default function NoriHeader({ total, count, previousTotal, topCategory, b
         aria-label={th ? 'แตะ Nori เพื่อฟังข้อความถัดไป' : 'Tap Nori for the next message'}
         whileHover={reducedMotion ? undefined : { y: -3 }}
         whileTap={reducedMotion ? undefined : { scale: 0.92, rotate: -5 }}
-        className="h-20 w-20 shrink-0 cursor-pointer rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b97423] disabled:cursor-default"
+        className="h-20 w-20 shrink-0 cursor-pointer rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-highlight-ink disabled:cursor-default"
       >
         <Image src={`/animations/nori/${ready && !loading ? hint.asset : 'cat-idle'}.webp`} alt="" width={80} height={80} unoptimized />
       </motion.button>
       <div className="min-w-0 flex-1">
-        <p className="font-heading text-xs font-bold tracking-wide text-[#5b7151]">{th ? "Nori อยู่เป็นเพื่อน" : "A note from Nori"}</p>
-        <div className="relative mt-2 rounded-xl border border-[#d9cebb] bg-[#f5eedf]/60 px-3 py-2.5">
-          <span aria-hidden="true" className="absolute -left-1 top-4 h-2 w-2 rotate-45 border-b border-l border-[#d9cebb] bg-[#f5eedf]" />
+        <p className="font-heading text-xs font-bold tracking-wide text-accent-foreground">{th ? "Nori อยู่เป็นเพื่อน" : "A note from Nori"}</p>
+        <div className="relative mt-2 rounded-md border border-border bg-secondary/60 px-3 py-2.5">
+          <span aria-hidden="true" className="absolute -left-1 top-4 h-2 w-2 rotate-45 border-b border-l border-border bg-secondary" />
           <AnimatePresence mode="wait" initial={false}>
-            <motion.p key={text} initial={{ opacity: reducedMotion ? 1 : 0, y: reducedMotion ? 0 : 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: reducedMotion ? 1 : 0 }} transition={{ duration: reducedMotion ? 0 : 0.15 }} aria-live="polite" className="break-words text-xs leading-relaxed text-[#635744]">{text}</motion.p>
+            <motion.p key={text} initial={{ opacity: reducedMotion ? 1 : 0, y: reducedMotion ? 0 : 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: reducedMotion ? 1 : 0 }} transition={{ duration: reducedMotion ? 0 : 0.15 }} aria-live="polite" className="break-words text-xs leading-relaxed text-ink-soft">{text}</motion.p>
           </AnimatePresence>
         </div>
-        {ready && !loading && <p className="mt-2 font-mono text-[9px] text-[#93846b]">{th ? 'แตะ Nori เพื่อคุยต่อ' : 'Tap Nori for another thought'} · {index % hints.length + 1}/{hints.length}</p>}
+        {ready && !loading && <p className="mt-2 font-mono text-[9px] text-muted-foreground">{th ? 'แตะ Nori เพื่อคุยต่อ' : 'Tap Nori for another thought'} · {index % hints.length + 1}/{hints.length}</p>}
       </div>
     </div>
   );
